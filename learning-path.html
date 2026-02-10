@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learning Path - LearningPath AI</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <!-- Custom CSS -->
+    <style>
+        :root {
+            --primary-color: #6366f1;
+            --secondary-color: #8b5cf6;
+            --accent-color: #ec4899;
+            --dark-bg: #0f172a;
+            --light-bg: #f8fafc;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem 0;
+        }
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-link {
+            font-weight: 500;
+            color: #334155 !important;
+            margin: 0 0.5rem;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--primary-color) !important;
+        }
+
+        .page-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            text-align: center;
+            color: white;
+            margin-bottom: 3rem;
+        }
+
+        .page-title {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+        }
+
+        .page-subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .card {
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            margin-bottom: 2rem;
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-radius: 20px 20px 0 0 !important;
+            padding: 1.5rem;
+            border: none;
+        }
+
+        .card-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .card-body {
+            padding: 2rem;
+        }
+
+        .skill-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--primary-color);
+            transition: all 0.3s ease;
+        }
+
+        .skill-card:hover {
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            transform: translateX(5px);
+        }
+
+        .skill-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--dark-bg);
+            margin-bottom: 0.5rem;
+        }
+
+        .skill-description {
+            color: #64748b;
+            margin-bottom: 1rem;
+        }
+
+        .course-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+
+        .course-card:hover {
+            border-color: var(--primary-color);
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.15);
+        }
+
+        .course-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+
+        .course-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--dark-bg);
+            margin-bottom: 0.5rem;
+        }
+
+        .course-provider {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        .course-meta {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #64748b;
+        }
+
+        .meta-item i {
+            color: var(--primary-color);
+        }
+
+        .level-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .level-beginner {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .level-intermediate {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .level-advanced {
+            background: #e0e7ff;
+            color: #3730a3;
+        }
+
+        .duration-badge {
+            background: #d1fae5;
+            color: #065f46;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .progress-section {
+            margin-top: 2rem;
+        }
+
+        .progress-card {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .progress-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin: 0.5rem 0;
+        }
+
+        .progress-label {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #64748b;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .btn-generate {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            padding: 1rem 2.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-generate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .page-title {
+                font-size: 2rem;
+            }
+
+            .course-header {
+                flex-direction: column;
+            }
+
+            .course-meta {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-light">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <i class="bi bi-graph-up-arrow"></i> LearningPath AI
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="profile.html">Profile</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="assessment.html">Assessment</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="learning-path.html">Learning Path</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="dashboard.html">Dashboard</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container page-container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1 class="page-title">
+                <i class="bi bi-diagram-3"></i> Your Personalized Learning Path
+            </h1>
+            <p class="page-subtitle">AI-generated recommendations tailored to your profile and assessment</p>
+        </div>
+
+        <!-- Generate Path Button -->
+        <div class="text-center mb-4">
+            <button class="btn btn-generate" id="generateBtn">
+                <i class="bi bi-magic"></i> Generate Learning Path
+            </button>
+        </div>
+
+        <!-- Learning Path Content -->
+        <div id="learningPathContent" style="display: none;">
+            <!-- Recommended Skills Section -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="bi bi-star"></i> Recommended Skills to Develop
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <div id="recommendedSkills">
+                        <!-- Skills will be dynamically added here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Suggested Courses Section -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="bi bi-book"></i> Suggested Courses
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <div id="suggestedCourses">
+                        <!-- Courses will be dynamically added here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Learning Progress Summary -->
+            <div class="row progress-section">
+                <div class="col-md-4 mb-3">
+                    <div class="progress-card">
+                        <div class="progress-label">Total Courses</div>
+                        <div class="progress-value" id="totalCourses">0</div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="progress-card">
+                        <div class="progress-label">Total Duration</div>
+                        <div class="progress-value" id="totalDuration">0h</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="progress-card">
+                        <div class="progress-label">Skills to Master</div>
+                        <div class="progress-value" id="totalSkills">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div class="card" id="emptyState">
+            <div class="card-body">
+                <div class="empty-state">
+                    <i class="bi bi-compass"></i>
+                    <h4>Ready to Start Your Learning Journey?</h4>
+                    <p>Click the button above to generate your personalized learning path based on your profile and assessment.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JavaScript -->
+    <script>
+        // Dummy recommendation data
+        const dummyRecommendations = {
+            skills: [
+                {
+                    name: "JavaScript Fundamentals",
+                    description: "Master core JavaScript concepts including variables, functions, objects, and ES6+ features",
+                    level: "Beginner",
+                    priority: "High"
+                },
+                {
+                    name: "React.js Development",
+                    description: "Learn to build modern user interfaces with React, hooks, and component architecture",
+                    level: "Intermediate",
+                    priority: "High"
+                },
+                {
+                    name: "Node.js Backend Development",
+                    description: "Develop server-side applications using Node.js, Express, and RESTful APIs",
+                    level: "Intermediate",
+                    priority: "Medium"
+                },
+                {
+                    name: "Database Design & SQL",
+                    description: "Understand relational databases, SQL queries, and database optimization",
+                    level: "Beginner",
+                    priority: "Medium"
+                },
+                {
+                    name: "Git Version Control",
+                    description: "Master Git workflows, branching strategies, and collaborative development",
+                    level: "Beginner",
+                    priority: "High"
+                },
+                {
+                    name: "API Integration",
+                    description: "Learn to integrate third-party APIs and build your own RESTful services",
+                    level: "Advanced",
+                    priority: "Medium"
+                }
+            ],
+            courses: [
+                {
+                    title: "Complete JavaScript Course 2024",
+                    provider: "Udemy",
+                    level: "Beginner",
+                    duration: "40 hours",
+                    rating: 4.7,
+                    students: "125,000+",
+                    description: "From zero to hero: Learn JavaScript from scratch with hands-on projects"
+                },
+                {
+                    title: "React - The Complete Guide",
+                    provider: "Coursera",
+                    level: "Intermediate",
+                    duration: "50 hours",
+                    rating: 4.8,
+                    students: "200,000+",
+                    description: "Master React with hooks, Redux, routing, and modern React patterns"
+                },
+                {
+                    title: "Node.js, Express, MongoDB & More",
+                    provider: "Udemy",
+                    level: "Intermediate",
+                    duration: "45 hours",
+                    rating: 4.6,
+                    students: "150,000+",
+                    description: "Build full-stack web applications with Node.js and modern backend technologies"
+                },
+                {
+                    title: "SQL for Data Science",
+                    provider: "edX",
+                    level: "Beginner",
+                    duration: "30 hours",
+                    rating: 4.5,
+                    students: "80,000+",
+                    description: "Learn SQL fundamentals and database management for data analysis"
+                },
+                {
+                    title: "Git & GitHub Masterclass",
+                    provider: "Pluralsight",
+                    level: "Beginner",
+                    duration: "15 hours",
+                    rating: 4.7,
+                    students: "95,000+",
+                    description: "Complete guide to version control with Git and collaborative workflows"
+                },
+                {
+                    title: "RESTful API Design & Development",
+                    provider: "Coursera",
+                    level: "Advanced",
+                    duration: "35 hours",
+                    rating: 4.6,
+                    students: "60,000+",
+                    description: "Design and build scalable REST APIs with best practices and security"
+                }
+            ]
+        };
+
+        // Get elements
+        const generateBtn = document.getElementById('generateBtn');
+        const learningPathContent = document.getElementById('learningPathContent');
+        const emptyState = document.getElementById('emptyState');
+        const recommendedSkillsContainer = document.getElementById('recommendedSkills');
+        const suggestedCoursesContainer = document.getElementById('suggestedCourses');
+
+        // Load user data from localStorage
+        function loadUserData() {
+            const profile = localStorage.getItem('learnerProfile');
+            const assessment = localStorage.getItem('assessmentData');
+            
+            if (profile) {
+                console.log('Profile:', JSON.parse(profile));
+            }
+            if (assessment) {
+                console.log('Assessment:', JSON.parse(assessment));
+            }
+        }
+
+        // Render recommended skills
+        function renderSkills() {
+            recommendedSkillsContainer.innerHTML = '';
+            
+            dummyRecommendations.skills.forEach((skill, index) => {
+                const skillCard = document.createElement('div');
+                skillCard.className = 'skill-card';
+                
+                const levelClass = `level-${skill.level.toLowerCase()}`;
+                
+                skillCard.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="flex-grow-1">
+                            <div class="skill-name">
+                                ${index + 1}. ${skill.name}
+                            </div>
+                            <div class="skill-description">
+                                ${skill.description}
+                            </div>
+                            <div class="d-flex gap-2">
+                                <span class="level-badge ${levelClass}">
+                                    <i class="bi bi-bar-chart"></i> ${skill.level}
+                                </span>
+                                <span class="badge bg-${skill.priority === 'High' ? 'danger' : skill.priority === 'Medium' ? 'warning' : 'info'}">
+                                    ${skill.priority} Priority
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                recommendedSkillsContainer.appendChild(skillCard);
+            });
+        }
+
+        // Render suggested courses
+        function renderCourses() {
+            suggestedCoursesContainer.innerHTML = '';
+            
+            dummyRecommendations.courses.forEach((course, index) => {
+                const courseCard = document.createElement('div');
+                courseCard.className = 'course-card';
+                
+                const levelClass = `level-${course.level.toLowerCase()}`;
+                
+                courseCard.innerHTML = `
+                    <div class="course-header">
+                        <div class="flex-grow-1">
+                            <div class="course-title">
+                                ${index + 1}. ${course.title}
+                            </div>
+                            <div class="course-provider">
+                                <i class="bi bi-building"></i> ${course.provider}
+                            </div>
+                        </div>
+                        <span class="level-badge ${levelClass}">
+                            ${course.level}
+                        </span>
+                    </div>
+                    <p class="text-muted mb-3">${course.description}</p>
+                    <div class="course-meta">
+                        <div class="meta-item">
+                            <i class="bi bi-clock"></i>
+                            <span class="duration-badge">${course.duration}</span>
+                        </div>
+                        <div class="meta-item">
+                            <i class="bi bi-star-fill" style="color: #fbbf24;"></i>
+                            <span>${course.rating} Rating</span>
+                        </div>
+                        <div class="meta-item">
+                            <i class="bi bi-people"></i>
+                            <span>${course.students} Students</span>
+                        </div>
+                    </div>
+                `;
+                
+                suggestedCoursesContainer.appendChild(courseCard);
+            });
+        }
+
+        // Calculate and update summary statistics
+        function updateSummary() {
+            const totalCourses = dummyRecommendations.courses.length;
+            const totalSkills = dummyRecommendations.skills.length;
+            
+            // Calculate total duration (extract hours from duration strings)
+            let totalHours = 0;
+            dummyRecommendations.courses.forEach(course => {
+                const hours = parseInt(course.duration.match(/\d+/)[0]);
+                totalHours += hours;
+            });
+            
+            document.getElementById('totalCourses').textContent = totalCourses;
+            document.getElementById('totalDuration').textContent = `${totalHours}h`;
+            document.getElementById('totalSkills').textContent = totalSkills;
+        }
+
+        // Generate learning path
+        function generateLearningPath() {
+            // Load user data
+            loadUserData();
+            
+            // Render skills and courses
+            renderSkills();
+            renderCourses();
+            
+            // Update summary
+            updateSummary();
+            
+            // Show content and hide empty state
+            learningPathContent.style.display = 'block';
+            emptyState.style.display = 'none';
+            
+            // Scroll to content
+            learningPathContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            
+            // Store learning path data
+            const learningPathData = {
+                generatedAt: new Date().toISOString(),
+                skills: dummyRecommendations.skills,
+                courses: dummyRecommendations.courses,
+                totalCourses: dummyRecommendations.courses.length,
+                totalSkills: dummyRecommendations.skills.length
+            };
+            
+            localStorage.setItem('learningPath', JSON.stringify(learningPathData));
+            console.log('Learning Path Generated:', learningPathData);
+        }
+
+        // Check if learning path already exists
+        function checkExistingPath() {
+            const existingPath = localStorage.getItem('learningPath');
+            if (existingPath) {
+                const pathData = JSON.parse(existingPath);
+                generateBtn.textContent = 'Regenerate Learning Path';
+                
+                // Optionally auto-load existing path
+                // generateLearningPath();
+            }
+        }
+
+        // Event listeners
+        generateBtn.addEventListener('click', generateLearningPath);
+
+        // Initialize
+        checkExistingPath();
+    </script>
+</body>
+</html>
+

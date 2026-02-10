@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learner Profile - LearningPath AI</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <!-- Custom CSS -->
+    <style>
+        :root {
+            --primary-color: #6366f1;
+            --secondary-color: #8b5cf6;
+            --accent-color: #ec4899;
+            --dark-bg: #0f172a;
+            --light-bg: #f8fafc;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem 0;
+        }
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-link {
+            font-weight: 500;
+            color: #334155 !important;
+            margin: 0 0.5rem;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--primary-color) !important;
+        }
+
+        .form-container {
+            background: white;
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .form-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--dark-bg);
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+
+        .form-subtitle {
+            text-align: center;
+            color: #64748b;
+            margin-bottom: 2.5rem;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--dark-bg);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control,
+        .form-select {
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(99, 102, 241, 0.25);
+        }
+
+        .form-control.is-invalid,
+        .form-select.is-invalid {
+            border-color: #dc3545;
+        }
+
+        .form-control.is-valid,
+        .form-select.is-valid {
+            border-color: #198754;
+        }
+
+        .invalid-feedback {
+            display: block;
+            font-size: 0.875rem;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 0.875rem 2.5rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 50px;
+            border: none;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+        }
+
+        .form-section {
+            margin-bottom: 2rem;
+        }
+
+        .section-divider {
+            border-top: 2px solid #e2e8f0;
+            margin: 2rem 0;
+        }
+
+        .success-message {
+            display: none;
+            background: #d1e7dd;
+            color: #0f5132;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-top: 1rem;
+            border: 1px solid #badbcc;
+        }
+
+        .form-icon {
+            color: var(--primary-color);
+            margin-right: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .form-container {
+                padding: 2rem 1.5rem;
+            }
+
+            .form-title {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-light">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <i class="bi bi-graph-up-arrow"></i> LearningPath AI
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="profile.html">Profile</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="assessment.html">Assessment</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="learning-path.html">Learning Path</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="dashboard.html">Dashboard</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Form Container -->
+    <div class="container">
+        <div class="form-container">
+            <h1 class="form-title">
+                <i class="bi bi-person-badge form-icon"></i>Learner Profile
+            </h1>
+            <p class="form-subtitle">Tell us about yourself to get personalized learning recommendations</p>
+
+            <form id="learnerProfileForm" novalidate>
+                <!-- Personal Information Section -->
+                <div class="form-section">
+                    <h5 class="mb-3" style="color: var(--primary-color);">
+                        <i class="bi bi-person"></i> Personal Information
+                    </h5>
+
+                    <!-- Full Name -->
+                    <div class="mb-3">
+                        <label for="fullName" class="form-label">
+                            <i class="bi bi-person form-icon"></i>Full Name
+                        </label>
+                        <input type="text" class="form-control" id="fullName" name="fullName" required>
+                        <div class="invalid-feedback">
+                            Please provide your full name.
+                        </div>
+                    </div>
+
+                    <!-- Age -->
+                    <div class="mb-3">
+                        <label for="age" class="form-label">
+                            <i class="bi bi-calendar form-icon"></i>Age
+                        </label>
+                        <input type="number" class="form-control" id="age" name="age" min="13" max="100" required>
+                        <div class="invalid-feedback">
+                            Please provide a valid age (13-100).
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-divider"></div>
+
+                <!-- Educational Background Section -->
+                <div class="form-section">
+                    <h5 class="mb-3" style="color: var(--primary-color);">
+                        <i class="bi bi-mortarboard"></i> Educational Background
+                    </h5>
+
+                    <!-- Education Level -->
+                    <div class="mb-3">
+                        <label for="educationLevel" class="form-label">
+                            <i class="bi bi-book form-icon"></i>Education Level
+                        </label>
+                        <select class="form-select" id="educationLevel" name="educationLevel" required>
+                            <option value="">Select your education level</option>
+                            <option value="high-school">High School</option>
+                            <option value="diploma">Diploma</option>
+                            <option value="bachelor">Bachelor's Degree</option>
+                            <option value="master">Master's Degree</option>
+                            <option value="phd">PhD</option>
+                            <option value="other">Other</option>
+                        </select>
+                        <div class="invalid-feedback">
+                            Please select your education level.
+                        </div>
+                    </div>
+
+                    <!-- Current Domain -->
+                    <div class="mb-3">
+                        <label for="currentDomain" class="form-label">
+                            <i class="bi bi-briefcase form-icon"></i>Current Domain
+                        </label>
+                        <select class="form-select" id="currentDomain" name="currentDomain" required>
+                            <option value="">Select your current domain</option>
+                            <option value="computer-science">Computer Science</option>
+                            <option value="data-science">Data Science</option>
+                            <option value="web-development">Web Development</option>
+                            <option value="mobile-development">Mobile Development</option>
+                            <option value="cybersecurity">Cybersecurity</option>
+                            <option value="ai-ml">Artificial Intelligence & Machine Learning</option>
+                            <option value="business">Business & Management</option>
+                            <option value="design">Design</option>
+                            <option value="marketing">Marketing</option>
+                            <option value="other">Other</option>
+                        </select>
+                        <div class="invalid-feedback">
+                            Please select your current domain.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-divider"></div>
+
+                <!-- Career & Learning Preferences Section -->
+                <div class="form-section">
+                    <h5 class="mb-3" style="color: var(--primary-color);">
+                        <i class="bi bi-bullseye"></i> Career & Learning Preferences
+                    </h5>
+
+                    <!-- Career Goal -->
+                    <div class="mb-3">
+                        <label for="careerGoal" class="form-label">
+                            <i class="bi bi-flag form-icon"></i>Career Goal
+                        </label>
+                        <textarea class="form-control" id="careerGoal" name="careerGoal" rows="3" 
+                                  placeholder="Describe your career goals and aspirations..." required></textarea>
+                        <div class="invalid-feedback">
+                            Please describe your career goal.
+                        </div>
+                    </div>
+
+                    <!-- Experience Level -->
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="bi bi-bar-chart form-icon"></i>Experience Level
+                        </label>
+                        <div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="experienceLevel" 
+                                       id="beginner" value="beginner" required>
+                                <label class="form-check-label" for="beginner">Beginner</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="experienceLevel" 
+                                       id="intermediate" value="intermediate" required>
+                                <label class="form-check-label" for="intermediate">Intermediate</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="experienceLevel" 
+                                       id="advanced" value="advanced" required>
+                                <label class="form-check-label" for="advanced">Advanced</label>
+                            </div>
+                        </div>
+                        <div class="invalid-feedback d-block">
+                            Please select your experience level.
+                        </div>
+                    </div>
+
+                    <!-- Preferred Learning Style -->
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="bi bi-play-circle form-icon"></i>Preferred Learning Style
+                        </label>
+                        <div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="learningStyle" 
+                                       id="video" value="video" required>
+                                <label class="form-check-label" for="video">
+                                    <i class="bi bi-play-btn"></i> Video
+                                </label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="learningStyle" 
+                                       id="text" value="text" required>
+                                <label class="form-check-label" for="text">
+                                    <i class="bi bi-file-text"></i> Text
+                                </label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="learningStyle" 
+                                       id="practice" value="practice" required>
+                                <label class="form-check-label" for="practice">
+                                    <i class="bi bi-code-slash"></i> Practice
+                                </label>
+                            </div>
+                        </div>
+                        <div class="invalid-feedback d-block">
+                            Please select your preferred learning style.
+                        </div>
+                    </div>
+
+                    <!-- Weekly Study Hours -->
+                    <div class="mb-3">
+                        <label for="weeklyStudyHours" class="form-label">
+                            <i class="bi bi-clock form-icon"></i>Weekly Study Hours
+                        </label>
+                        <input type="number" class="form-control" id="weeklyStudyHours" name="weeklyStudyHours" 
+                               min="1" max="168" placeholder="e.g., 10" required>
+                        <small class="form-text text-muted">Enter the number of hours you can dedicate to learning per week</small>
+                        <div class="invalid-feedback">
+                            Please enter a valid number of weekly study hours (1-168).
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="btn btn-submit">
+                    <i class="bi bi-check-circle"></i> Submit Profile
+                </button>
+
+                <!-- Success Message -->
+                <div class="success-message" id="successMessage">
+                    <i class="bi bi-check-circle-fill"></i> Profile submitted successfully! Your data has been saved.
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JavaScript -->
+    <script>
+        // Store form data in JavaScript object
+        let learnerProfileData = {};
+
+        // Get form element
+        const form = document.getElementById('learnerProfileForm');
+
+        // Bootstrap validation
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            // Check if form is valid
+            if (form.checkValidity()) {
+                // Collect form data
+                const formData = new FormData(form);
+                
+                // Store data in JavaScript object
+                learnerProfileData = {
+                    fullName: formData.get('fullName'),
+                    age: parseInt(formData.get('age')),
+                    educationLevel: formData.get('educationLevel'),
+                    currentDomain: formData.get('currentDomain'),
+                    careerGoal: formData.get('careerGoal'),
+                    experienceLevel: formData.get('experienceLevel'),
+                    learningStyle: formData.get('learningStyle'),
+                    weeklyStudyHours: parseInt(formData.get('weeklyStudyHours')),
+                    submittedAt: new Date().toISOString()
+                };
+
+                // Log the data object (you can also send it to a server or store it elsewhere)
+                console.log('Learner Profile Data:', learnerProfileData);
+                
+                // Display success message
+                const successMessage = document.getElementById('successMessage');
+                successMessage.style.display = 'block';
+                
+                // Scroll to success message
+                successMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+                // Reset form after 3 seconds (optional)
+                setTimeout(() => {
+                    form.reset();
+                    form.classList.remove('was-validated');
+                    successMessage.style.display = 'none';
+                }, 5000);
+
+                // You can also store in localStorage for persistence
+                localStorage.setItem('learnerProfile', JSON.stringify(learnerProfileData));
+                
+            } else {
+                // Form is invalid, show validation errors
+                form.classList.add('was-validated');
+            }
+        }, false);
+
+        // Real-time validation for radio buttons
+        const radioGroups = document.querySelectorAll('input[type="radio"]');
+        radioGroups.forEach(radio => {
+            radio.addEventListener('change', function() {
+                const groupName = this.name;
+                const group = document.querySelectorAll(`input[name="${groupName}"]`);
+                let isValid = false;
+                
+                group.forEach(r => {
+                    if (r.checked) {
+                        isValid = true;
+                    }
+                });
+
+                // Remove invalid class from all in group
+                group.forEach(r => {
+                    r.classList.remove('is-invalid');
+                });
+
+                // Add valid class if checked
+                if (isValid) {
+                    group.forEach(r => {
+                        if (r.checked) {
+                            r.classList.add('is-valid');
+                        }
+                    });
+                }
+            });
+        });
+
+        // Load saved profile data if exists (optional feature)
+        window.addEventListener('DOMContentLoaded', function() {
+            const savedProfile = localStorage.getItem('learnerProfile');
+            if (savedProfile) {
+                const profile = JSON.parse(savedProfile);
+                console.log('Loaded saved profile:', profile);
+                // Optionally populate form with saved data
+                // document.getElementById('fullName').value = profile.fullName || '';
+                // ... etc
+            }
+        });
+    </script>
+</body>
+</html>
+

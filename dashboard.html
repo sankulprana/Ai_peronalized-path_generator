@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - LearningPath AI</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <!-- Chart.js for charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <!-- Custom CSS -->
+    <style>
+        :root {
+            --primary-color: #6366f1;
+            --secondary-color: #8b5cf6;
+            --accent-color: #ec4899;
+            --dark-bg: #0f172a;
+            --light-bg: #f8fafc;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem 0;
+        }
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-link {
+            font-weight: 500;
+            color: #334155 !important;
+            margin: 0 0.5rem;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--primary-color) !important;
+        }
+
+        .page-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            text-align: center;
+            color: white;
+            margin-bottom: 3rem;
+        }
+
+        .page-title {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+        }
+
+        .page-subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .card {
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            margin-bottom: 2rem;
+            background: white;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-radius: 20px 20px 0 0 !important;
+            padding: 1.5rem;
+            border: none;
+        }
+
+        .card-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .card-body {
+            padding: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+            height: 100%;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin: 0 auto 1rem;
+            color: white;
+        }
+
+        .stat-icon.primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        }
+
+        .stat-icon.success {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+
+        .stat-icon.warning {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+        }
+
+        .stat-icon.info {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--dark-bg);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #64748b;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .skill-progress-item {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .skill-progress-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .skill-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .skill-name {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--dark-bg);
+        }
+
+        .skill-percentage {
+            font-weight: 700;
+            color: var(--primary-color);
+            font-size: 1.1rem;
+        }
+
+        .progress {
+            height: 12px;
+            border-radius: 10px;
+            background: #e2e8f0;
+            overflow: visible;
+        }
+
+        .progress-bar {
+            border-radius: 10px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            transition: width 1s ease;
+            position: relative;
+        }
+
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            background: white;
+            border: 3px solid var(--primary-color);
+            border-radius: 50%;
+        }
+
+        .course-item {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--primary-color);
+            transition: all 0.3s ease;
+        }
+
+        .course-item:hover {
+            background: #f1f5f9;
+            transform: translateX(5px);
+        }
+
+        .course-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 0.75rem;
+        }
+
+        .course-title {
+            font-weight: 700;
+            color: var(--dark-bg);
+            margin-bottom: 0.25rem;
+        }
+
+        .course-provider {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        .course-progress {
+            margin-top: 0.75rem;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-top: 1rem;
+        }
+
+        .summary-section {
+            background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+            border-radius: 15px;
+            padding: 2rem;
+            margin-top: 1rem;
+        }
+
+        .summary-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--dark-bg);
+            margin-bottom: 1.5rem;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: white;
+            border-radius: 10px;
+            margin-bottom: 0.75rem;
+        }
+
+        .summary-label {
+            font-weight: 600;
+            color: #64748b;
+        }
+
+        .summary-value {
+            font-weight: 700;
+            color: var(--dark-bg);
+            font-size: 1.1rem;
+        }
+
+        .badge-custom {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .badge-completed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-in-progress {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .badge-not-started {
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+
+        @media (max-width: 768px) {
+            .page-title {
+                font-size: 2rem;
+            }
+
+            .chart-container {
+                height: 250px;
+            }
+
+            .skill-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-light">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <i class="bi bi-graph-up-arrow"></i> LearningPath AI
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="profile.html">Profile</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="assessment.html">Assessment</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="learning-path.html">Learning Path</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="dashboard.html">Dashboard</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container page-container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1 class="page-title">
+                <i class="bi bi-speedometer2"></i> Learning Dashboard
+            </h1>
+            <p class="page-subtitle">Track your progress and monitor your learning journey</p>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="stat-card">
+                    <div class="stat-icon primary">
+                        <i class="bi bi-book"></i>
+                    </div>
+                    <div class="stat-value" id="totalCourses">0</div>
+                    <div class="stat-label">Total Courses</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="stat-card">
+                    <div class="stat-icon success">
+                        <i class="bi bi-check-circle"></i>
+                    </div>
+                    <div class="stat-value" id="completedCourses">0</div>
+                    <div class="stat-label">Completed</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="stat-card">
+                    <div class="stat-icon warning">
+                        <i class="bi bi-clock-history"></i>
+                    </div>
+                    <div class="stat-value" id="inProgressCourses">0</div>
+                    <div class="stat-label">In Progress</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="stat-card">
+                    <div class="stat-icon info">
+                        <i class="bi bi-graph-up"></i>
+                    </div>
+                    <div class="stat-value" id="overallProgress">0%</div>
+                    <div class="stat-label">Overall Progress</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Left Column -->
+            <div class="col-lg-8">
+                <!-- Skill Progress Section -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i class="bi bi-bar-chart"></i> Skill Progress
+                        </h2>
+                    </div>
+                    <div class="card-body">
+                        <div id="skillProgressContainer">
+                            <!-- Skill progress items will be dynamically added here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Course Progress Section -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i class="bi bi-list-check"></i> Course Completion
+                        </h2>
+                    </div>
+                    <div class="card-body">
+                        <div id="courseProgressContainer">
+                            <!-- Course items will be dynamically added here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="col-lg-4">
+                <!-- Progress Chart -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i class="bi bi-pie-chart"></i> Progress Overview
+                        </h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="progressChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Skills Distribution Chart -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i class="bi bi-diagram-3"></i> Skills Distribution
+                        </h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="skillsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Learning Summary -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i class="bi bi-clipboard-data"></i> Learning Summary
+                        </h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="summary-section">
+                            <div class="summary-item">
+                                <span class="summary-label">Total Skills</span>
+                                <span class="summary-value" id="summaryTotalSkills">0</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">Skills Mastered</span>
+                                <span class="summary-value" id="summaryMasteredSkills">0</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">Average Skill Level</span>
+                                <span class="summary-value" id="summaryAvgLevel">0</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">Hours Completed</span>
+                                <span class="summary-value" id="summaryHours">0h</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">Completion Rate</span>
+                                <span class="summary-value" id="summaryCompletion">0%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JavaScript -->
+    <script>
+        // Dummy progress data (in a real app, this would come from backend/localStorage)
+        let progressData = {
+            skills: [
+                { name: "JavaScript Fundamentals", progress: 75, level: "Intermediate" },
+                { name: "React.js Development", progress: 45, level: "Beginner" },
+                { name: "Node.js Backend Development", progress: 30, level: "Beginner" },
+                { name: "Database Design & SQL", progress: 60, level: "Intermediate" },
+                { name: "Git Version Control", progress: 90, level: "Advanced" },
+                { name: "API Integration", progress: 20, level: "Beginner" }
+            ],
+            courses: [
+                { title: "Complete JavaScript Course 2024", provider: "Udemy", progress: 75, status: "in-progress" },
+                { title: "React - The Complete Guide", provider: "Coursera", progress: 45, status: "in-progress" },
+                { title: "Node.js, Express, MongoDB & More", provider: "Udemy", progress: 30, status: "in-progress" },
+                { title: "SQL for Data Science", provider: "edX", progress: 60, status: "in-progress" },
+                { title: "Git & GitHub Masterclass", provider: "Pluralsight", progress: 100, status: "completed" },
+                { title: "RESTful API Design & Development", provider: "Coursera", progress: 20, status: "in-progress" }
+            ]
+        };
+
+        // Load data from localStorage if available
+        function loadProgressData() {
+            const savedProgress = localStorage.getItem('progressData');
+            if (savedProgress) {
+                progressData = JSON.parse(savedProgress);
+            } else {
+                // Try to load from learning path
+                const learningPath = localStorage.getItem('learningPath');
+                if (learningPath) {
+                    const pathData = JSON.parse(learningPath);
+                    // Initialize progress from learning path
+                    if (pathData.skills) {
+                        progressData.skills = pathData.skills.map(skill => ({
+                            name: skill.name,
+                            progress: Math.floor(Math.random() * 50) + 10, // Random progress for demo
+                            level: skill.level
+                        }));
+                    }
+                    if (pathData.courses) {
+                        progressData.courses = pathData.courses.map(course => ({
+                            title: course.title,
+                            provider: course.provider,
+                            progress: Math.floor(Math.random() * 60) + 10, // Random progress for demo
+                            status: Math.random() > 0.8 ? "completed" : "in-progress"
+                        }));
+                    }
+                }
+            }
+        }
+
+        // Calculate statistics
+        function calculateStatistics() {
+            const totalCourses = progressData.courses.length;
+            const completedCourses = progressData.courses.filter(c => c.progress === 100 || c.status === "completed").length;
+            const inProgressCourses = progressData.courses.filter(c => c.progress > 0 && c.progress < 100).length;
+            const overallProgress = totalCourses > 0 
+                ? Math.round(progressData.courses.reduce((sum, c) => sum + c.progress, 0) / totalCourses)
+                : 0;
+
+            document.getElementById('totalCourses').textContent = totalCourses;
+            document.getElementById('completedCourses').textContent = completedCourses;
+            document.getElementById('inProgressCourses').textContent = inProgressCourses;
+            document.getElementById('overallProgress').textContent = overallProgress + '%';
+
+            // Update summary
+            const totalSkills = progressData.skills.length;
+            const masteredSkills = progressData.skills.filter(s => s.progress >= 80).length;
+            const avgLevel = progressData.skills.length > 0
+                ? (progressData.skills.reduce((sum, s) => {
+                    const levelValue = s.level === "Beginner" ? 1 : s.level === "Intermediate" ? 2 : 3;
+                    return sum + levelValue;
+                }, 0) / totalSkills).toFixed(1)
+                : 0;
+            
+            // Calculate hours (assuming each course is ~40 hours on average)
+            const totalHours = Math.round(progressData.courses.reduce((sum, c) => sum + (c.progress / 100 * 40), 0));
+
+            document.getElementById('summaryTotalSkills').textContent = totalSkills;
+            document.getElementById('summaryMasteredSkills').textContent = masteredSkills;
+            document.getElementById('summaryAvgLevel').textContent = avgLevel;
+            document.getElementById('summaryHours').textContent = totalHours + 'h';
+            document.getElementById('summaryCompletion').textContent = overallProgress + '%';
+        }
+
+        // Render skill progress
+        function renderSkillProgress() {
+            const container = document.getElementById('skillProgressContainer');
+            container.innerHTML = '';
+
+            progressData.skills.forEach(skill => {
+                const skillItem = document.createElement('div');
+                skillItem.className = 'skill-progress-item';
+                
+                skillItem.innerHTML = `
+                    <div class="skill-header">
+                        <span class="skill-name">${skill.name}</span>
+                        <span class="skill-percentage">${skill.progress}%</span>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar" role="progressbar" 
+                             style="width: ${skill.progress}%" 
+                             aria-valuenow="${skill.progress}" 
+                             aria-valuemin="0" 
+                             aria-valuemax="100">
+                        </div>
+                    </div>
+                    <small class="text-muted mt-2 d-block">
+                        <i class="bi bi-bar-chart"></i> Level: ${skill.level}
+                    </small>
+                `;
+                
+                container.appendChild(skillItem);
+            });
+        }
+
+        // Render course progress
+        function renderCourseProgress() {
+            const container = document.getElementById('courseProgressContainer');
+            container.innerHTML = '';
+
+            progressData.courses.forEach(course => {
+                const courseItem = document.createElement('div');
+                courseItem.className = 'course-item';
+                
+                const statusBadge = course.progress === 100 
+                    ? '<span class="badge-custom badge-completed">Completed</span>'
+                    : course.progress > 0
+                    ? '<span class="badge-custom badge-in-progress">In Progress</span>'
+                    : '<span class="badge-custom badge-not-started">Not Started</span>';
+
+                courseItem.innerHTML = `
+                    <div class="course-header">
+                        <div class="flex-grow-1">
+                            <div class="course-title">${course.title}</div>
+                            <div class="course-provider">
+                                <i class="bi bi-building"></i> ${course.provider}
+                            </div>
+                        </div>
+                        ${statusBadge}
+                    </div>
+                    <div class="course-progress">
+                        <div class="d-flex justify-content-between mb-2">
+                            <small class="text-muted">Progress</small>
+                            <small class="text-muted fw-bold">${course.progress}%</small>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar" role="progressbar" 
+                                 style="width: ${course.progress}%" 
+                                 aria-valuenow="${course.progress}" 
+                                 aria-valuemin="0" 
+                                 aria-valuemax="100">
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(courseItem);
+            });
+        }
+
+        // Initialize charts
+        let progressChart, skillsChart;
+
+        function initializeCharts() {
+            // Progress Overview Chart (Doughnut)
+            const progressCtx = document.getElementById('progressChart').getContext('2d');
+            const completed = progressData.courses.filter(c => c.progress === 100).length;
+            const inProgress = progressData.courses.filter(c => c.progress > 0 && c.progress < 100).length;
+            const notStarted = progressData.courses.filter(c => c.progress === 0).length;
+
+            progressChart = new Chart(progressCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Completed', 'In Progress', 'Not Started'],
+                    datasets: [{
+                        data: [completed, inProgress, notStarted],
+                        backgroundColor: [
+                            '#10b981',
+                            '#3b82f6',
+                            '#e5e7eb'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Skills Distribution Chart (Bar)
+            const skillsCtx = document.getElementById('skillsChart').getContext('2d');
+            const skillLevels = {
+                'Beginner': progressData.skills.filter(s => s.level === 'Beginner').length,
+                'Intermediate': progressData.skills.filter(s => s.level === 'Intermediate').length,
+                'Advanced': progressData.skills.filter(s => s.level === 'Advanced').length
+            };
+
+            skillsChart = new Chart(skillsCtx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(skillLevels),
+                    datasets: [{
+                        label: 'Number of Skills',
+                        data: Object.values(skillLevels),
+                        backgroundColor: [
+                            '#6366f1',
+                            '#8b5cf6',
+                            '#ec4899'
+                        ],
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Animate progress bars
+        function animateProgressBars() {
+            setTimeout(() => {
+                const progressBars = document.querySelectorAll('.progress-bar');
+                progressBars.forEach(bar => {
+                    const width = bar.style.width;
+                    bar.style.width = '0%';
+                    setTimeout(() => {
+                        bar.style.width = width;
+                    }, 100);
+                });
+            }, 100);
+        }
+
+        // Initialize dashboard
+        function initializeDashboard() {
+            loadProgressData();
+            calculateStatistics();
+            renderSkillProgress();
+            renderCourseProgress();
+            initializeCharts();
+            animateProgressBars();
+        }
+
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', initializeDashboard);
+    </script>
+</body>
+</html>
+
