@@ -403,103 +403,7 @@
     
     <!-- Custom JavaScript -->
     <script>
-        // Dummy recommendation data
-        const dummyRecommendations = {
-            skills: [
-                {
-                    name: "JavaScript Fundamentals",
-                    description: "Master core JavaScript concepts including variables, functions, objects, and ES6+ features",
-                    level: "Beginner",
-                    priority: "High"
-                },
-                {
-                    name: "React.js Development",
-                    description: "Learn to build modern user interfaces with React, hooks, and component architecture",
-                    level: "Intermediate",
-                    priority: "High"
-                },
-                {
-                    name: "Node.js Backend Development",
-                    description: "Develop server-side applications using Node.js, Express, and RESTful APIs",
-                    level: "Intermediate",
-                    priority: "Medium"
-                },
-                {
-                    name: "Database Design & SQL",
-                    description: "Understand relational databases, SQL queries, and database optimization",
-                    level: "Beginner",
-                    priority: "Medium"
-                },
-                {
-                    name: "Git Version Control",
-                    description: "Master Git workflows, branching strategies, and collaborative development",
-                    level: "Beginner",
-                    priority: "High"
-                },
-                {
-                    name: "API Integration",
-                    description: "Learn to integrate third-party APIs and build your own RESTful services",
-                    level: "Advanced",
-                    priority: "Medium"
-                }
-            ],
-            courses: [
-                {
-                    title: "Complete JavaScript Course 2024",
-                    provider: "Udemy",
-                    level: "Beginner",
-                    duration: "40 hours",
-                    rating: 4.7,
-                    students: "125,000+",
-                    description: "From zero to hero: Learn JavaScript from scratch with hands-on projects"
-                },
-                {
-                    title: "React - The Complete Guide",
-                    provider: "Coursera",
-                    level: "Intermediate",
-                    duration: "50 hours",
-                    rating: 4.8,
-                    students: "200,000+",
-                    description: "Master React with hooks, Redux, routing, and modern React patterns"
-                },
-                {
-                    title: "Node.js, Express, MongoDB & More",
-                    provider: "Udemy",
-                    level: "Intermediate",
-                    duration: "45 hours",
-                    rating: 4.6,
-                    students: "150,000+",
-                    description: "Build full-stack web applications with Node.js and modern backend technologies"
-                },
-                {
-                    title: "SQL for Data Science",
-                    provider: "edX",
-                    level: "Beginner",
-                    duration: "30 hours",
-                    rating: 4.5,
-                    students: "80,000+",
-                    description: "Learn SQL fundamentals and database management for data analysis"
-                },
-                {
-                    title: "Git & GitHub Masterclass",
-                    provider: "Pluralsight",
-                    level: "Beginner",
-                    duration: "15 hours",
-                    rating: 4.7,
-                    students: "95,000+",
-                    description: "Complete guide to version control with Git and collaborative workflows"
-                },
-                {
-                    title: "RESTful API Design & Development",
-                    provider: "Coursera",
-                    level: "Advanced",
-                    duration: "35 hours",
-                    rating: 4.6,
-                    students: "60,000+",
-                    description: "Design and build scalable REST APIs with best practices and security"
-                }
-            ]
-        };
+        const API_BASE = 'http://localhost:5000';
 
         // Get elements
         const generateBtn = document.getElementById('generateBtn');
@@ -508,28 +412,15 @@
         const recommendedSkillsContainer = document.getElementById('recommendedSkills');
         const suggestedCoursesContainer = document.getElementById('suggestedCourses');
 
-        // Load user data from localStorage
-        function loadUserData() {
-            const profile = localStorage.getItem('learnerProfile');
-            const assessment = localStorage.getItem('assessmentData');
-            
-            if (profile) {
-                console.log('Profile:', JSON.parse(profile));
-            }
-            if (assessment) {
-                console.log('Assessment:', JSON.parse(assessment));
-            }
-        }
-
-        // Render recommended skills
-        function renderSkills() {
+        // Render recommended skills from backend data
+        function renderSkills(skills) {
             recommendedSkillsContainer.innerHTML = '';
             
-            dummyRecommendations.skills.forEach((skill, index) => {
+            skills.forEach((skill, index) => {
                 const skillCard = document.createElement('div');
                 skillCard.className = 'skill-card';
                 
-                const levelClass = `level-${skill.level.toLowerCase()}`;
+                const levelClass = `level-${(skill.level || 'Beginner').toLowerCase()}`;
                 
                 skillCard.innerHTML = `
                     <div class="d-flex justify-content-between align-items-start">
@@ -538,15 +429,16 @@
                                 ${index + 1}. ${skill.name}
                             </div>
                             <div class="skill-description">
-                                ${skill.description}
+                                ${skill.description || ''}
                             </div>
                             <div class="d-flex gap-2">
                                 <span class="level-badge ${levelClass}">
-                                    <i class="bi bi-bar-chart"></i> ${skill.level}
+                                    <i class="bi bi-bar-chart"></i> ${skill.level || 'Beginner'}
                                 </span>
+                                ${skill.priority ? `
                                 <span class="badge bg-${skill.priority === 'High' ? 'danger' : skill.priority === 'Medium' ? 'warning' : 'info'}">
                                     ${skill.priority} Priority
-                                </span>
+                                </span>` : ''}
                             </div>
                         </div>
                     </div>
@@ -556,15 +448,15 @@
             });
         }
 
-        // Render suggested courses
-        function renderCourses() {
+        // Render suggested courses from backend data
+        function renderCourses(courses) {
             suggestedCoursesContainer.innerHTML = '';
             
-            dummyRecommendations.courses.forEach((course, index) => {
+            courses.forEach((course, index) => {
                 const courseCard = document.createElement('div');
                 courseCard.className = 'course-card';
                 
-                const levelClass = `level-${course.level.toLowerCase()}`;
+                const levelClass = `level-${String(course.level || 'Beginner').toLowerCase()}`;
                 
                 courseCard.innerHTML = `
                     <div class="course-header">
@@ -573,27 +465,29 @@
                                 ${index + 1}. ${course.title}
                             </div>
                             <div class="course-provider">
-                                <i class="bi bi-building"></i> ${course.provider}
+                                <i class="bi bi-building"></i> ${course.provider || 'Unknown'}
                             </div>
                         </div>
                         <span class="level-badge ${levelClass}">
-                            ${course.level}
+                            ${course.level || 'Beginner'}
                         </span>
                     </div>
-                    <p class="text-muted mb-3">${course.description}</p>
+                    <p class="text-muted mb-3">${course.description || ''}</p>
                     <div class="course-meta">
                         <div class="meta-item">
                             <i class="bi bi-clock"></i>
-                            <span class="duration-badge">${course.duration}</span>
+                            <span class="duration-badge">${course.duration || 'N/A'}</span>
                         </div>
+                        ${course.rating ? `
                         <div class="meta-item">
                             <i class="bi bi-star-fill" style="color: #fbbf24;"></i>
                             <span>${course.rating} Rating</span>
-                        </div>
+                        </div>` : ''}
+                        ${course.students ? `
                         <div class="meta-item">
                             <i class="bi bi-people"></i>
                             <span>${course.students} Students</span>
-                        </div>
+                        </div>` : ''}
                     </div>
                 `;
                 
@@ -601,16 +495,22 @@
             });
         }
 
-        // Calculate and update summary statistics
-        function updateSummary() {
-            const totalCourses = dummyRecommendations.courses.length;
-            const totalSkills = dummyRecommendations.skills.length;
+        // Calculate and update summary statistics from path data
+        function updateSummary(pathData) {
+            const courses = pathData.courses || [];
+            const skills = pathData.skills || [];
+
+            const totalCourses = courses.length;
+            const totalSkills = skills.length;
             
-            // Calculate total duration (extract hours from duration strings)
             let totalHours = 0;
-            dummyRecommendations.courses.forEach(course => {
-                const hours = parseInt(course.duration.match(/\d+/)[0]);
-                totalHours += hours;
+            courses.forEach(course => {
+                if (course.duration) {
+                    const match = String(course.duration).match(/\d+/);
+                    if (match) {
+                        totalHours += parseInt(match[0], 10);
+                    }
+                }
             });
             
             document.getElementById('totalCourses').textContent = totalCourses;
@@ -618,47 +518,76 @@
             document.getElementById('totalSkills').textContent = totalSkills;
         }
 
-        // Generate learning path
-        function generateLearningPath() {
-            // Load user data
-            loadUserData();
-            
-            // Render skills and courses
-            renderSkills();
-            renderCourses();
-            
-            // Update summary
-            updateSummary();
-            
-            // Show content and hide empty state
+        // Render a full learning path object
+        function renderLearningPath(pathData) {
+            if (!pathData) return;
+
+            renderSkills(pathData.skills || []);
+            renderCourses(pathData.courses || []);
+            updateSummary(pathData);
+
             learningPathContent.style.display = 'block';
             emptyState.style.display = 'none';
-            
-            // Scroll to content
+
             learningPathContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            
-            // Store learning path data
-            const learningPathData = {
-                generatedAt: new Date().toISOString(),
-                skills: dummyRecommendations.skills,
-                courses: dummyRecommendations.courses,
-                totalCourses: dummyRecommendations.courses.length,
-                totalSkills: dummyRecommendations.skills.length
-            };
-            
-            localStorage.setItem('learningPath', JSON.stringify(learningPathData));
-            console.log('Learning Path Generated:', learningPathData);
         }
 
-        // Check if learning path already exists
+        // Generate learning path via backend
+        async function generateLearningPath() {
+            const userId = localStorage.getItem('userId');
+            if (!userId) {
+                alert('No learner profile found. Please complete the Profile and Assessment first.');
+                window.location.href = 'profile.html';
+                return;
+            }
+
+            try {
+                generateBtn.disabled = true;
+                generateBtn.innerText = 'Generating...';
+
+                const response = await fetch(`${API_BASE}/generate-path`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ userId })
+                });
+
+                const result = await response.json();
+
+                if (!response.ok || !result.success) {
+                    console.error('Generate path error:', result);
+                    alert(result.error || 'Failed to generate learning path. Please try again.');
+                    generateBtn.disabled = false;
+                    generateBtn.innerHTML = '<i class="bi bi-magic"></i> Generate Learning Path';
+                    return;
+                }
+
+                const learningPath = result.learningPath;
+
+                // Cache for dashboard and future visits
+                localStorage.setItem('learningPath', JSON.stringify(learningPath));
+                console.log('Learning Path Generated (backend):', learningPath);
+
+                renderLearningPath(learningPath);
+
+                generateBtn.disabled = false;
+                generateBtn.textContent = 'Regenerate Learning Path';
+            } catch (error) {
+                console.error('Network error while generating learning path:', error);
+                alert('Unable to connect to the server. Please make sure the backend is running.');
+                generateBtn.disabled = false;
+                generateBtn.innerHTML = '<i class="bi bi-magic"></i> Generate Learning Path';
+            }
+        }
+
+        // Load existing path from localStorage if available
         function checkExistingPath() {
             const existingPath = localStorage.getItem('learningPath');
             if (existingPath) {
                 const pathData = JSON.parse(existingPath);
                 generateBtn.textContent = 'Regenerate Learning Path';
-                
-                // Optionally auto-load existing path
-                // generateLearningPath();
+                renderLearningPath(pathData);
             }
         }
 

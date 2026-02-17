@@ -1,0 +1,12 @@
+student_id,name,age,education_level,domain,experience_level
+1,John Doe,22,Bachelor's Degree,computer-science,intermediate
+2,Jane Smith,25,Master's Degree,data-science,advanced
+3,Bob Johnson,20,High School,web-development,beginner
+4,Alice Williams,28,Bachelor's Degree,mobile-development,intermediate
+5,Charlie Brown,24,Diploma,cybersecurity,beginner
+6,Diana Prince,26,Master's Degree,ai-ml,advanced
+7,Peter Parker,21,Bachelor's Degree,web-development,intermediate
+8,Clark Kent,30,PhD,business,advanced
+9,Bruce Wayne,27,Master's Degree,design,intermediate
+10,Tony Stark,35,Bachelor's Degree,marketing,advanced
+

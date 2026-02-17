@@ -409,6 +409,8 @@
     
     <!-- Custom JavaScript -->
     <script>
+        const API_BASE = 'http://localhost:5000';
+
         // Store skills in array
         let skills = [];
 
@@ -438,7 +440,6 @@
 
         // Add skill function
         function addSkill(name, level) {
-            // Check if skill already exists
             if (skills.some(skill => skill.name.toLowerCase() === name.toLowerCase())) {
                 alert('This skill has already been added!');
                 return;
@@ -455,7 +456,6 @@
             renderSkills();
             updateScore();
             
-            // Reset form
             skillForm.reset();
         }
 
@@ -505,7 +505,7 @@
             }
         }
 
-        // Calculate and update score
+        // Calculate and update score + cache locally
         function updateScore() {
             const totalSkills = skills.length;
             const totalScore = skills.reduce((sum, skill) => sum + skill.level, 0);
@@ -515,17 +515,16 @@
             document.getElementById('averageLevel').textContent = averageLevel;
             document.getElementById('totalScore').textContent = totalScore;
 
-            // Store assessment data
             const assessmentData = {
-            skills: skills,
-            totalSkills: totalSkills,
-            averageLevel: parseFloat(averageLevel),
-            totalScore: totalScore,
-            assessedAt: new Date().toISOString()
+                skills: skills,
+                totalSkills: totalSkills,
+                averageLevel: parseFloat(averageLevel),
+                totalScore: totalScore,
+                assessedAt: new Date().toISOString()
             };
 
             localStorage.setItem('assessmentData', JSON.stringify(assessmentData));
-            console.log('Assessment Data:', assessmentData);
+            console.log('Assessment Data (local cache):', assessmentData);
         }
 
         // Form submit handler
@@ -543,18 +542,52 @@
             addSkill(name, level);
         });
 
-        // Proceed button handler
-        proceedBtn.addEventListener('click', function() {
+        // Proceed button handler – now calls backend /assessment
+        proceedBtn.addEventListener('click', async function() {
             if (skills.length === 0) {
                 alert('Please add at least one skill before proceeding');
                 return;
             }
 
-            // Store assessment completion status
-            localStorage.setItem('assessmentCompleted', 'true');
-            
-            // Redirect to learning path page
-            window.location.href = 'learning-path.html';
+            const userId = localStorage.getItem('userId');
+            if (!userId) {
+                alert('No learner profile found. Please complete the Profile page first.');
+                window.location.href = 'profile.html';
+                return;
+            }
+
+            try {
+                const payload = {
+                    userId: userId,
+                    skills: skills.map(s => ({ name: s.name, level: s.level }))
+                };
+
+                const response = await fetch(`${API_BASE}/assessment`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+
+                if (!response.ok || !result.success) {
+                    console.error('Assessment error:', result);
+                    alert(result.error || 'Failed to submit assessment. Please try again.');
+                    return;
+                }
+
+                // Cache backend assessment result
+                localStorage.setItem('assessmentData', JSON.stringify(result.assessment));
+                localStorage.setItem('assessmentCompleted', 'true');
+
+                // Go to learning path generation
+                window.location.href = 'learning-path.html';
+            } catch (error) {
+                console.error('Network error while submitting assessment:', error);
+                alert('Unable to connect to the server. Please make sure the backend is running.');
+            }
         });
 
         // Initialize page

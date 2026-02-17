@@ -399,58 +399,73 @@
     
     <!-- Custom JavaScript -->
     <script>
+        const API_BASE = 'http://localhost:5000';
+
         // Store form data in JavaScript object
         let learnerProfileData = {};
 
         // Get form element
         const form = document.getElementById('learnerProfileForm');
 
-        // Bootstrap validation
-        form.addEventListener('submit', function(event) {
+        // Bootstrap validation + backend integration
+        form.addEventListener('submit', async function(event) {
             event.preventDefault();
             event.stopPropagation();
 
-            // Check if form is valid
-            if (form.checkValidity()) {
-                // Collect form data
-                const formData = new FormData(form);
-                
-                // Store data in JavaScript object
-                learnerProfileData = {
-                    fullName: formData.get('fullName'),
-                    age: parseInt(formData.get('age')),
-                    educationLevel: formData.get('educationLevel'),
-                    currentDomain: formData.get('currentDomain'),
-                    careerGoal: formData.get('careerGoal'),
-                    experienceLevel: formData.get('experienceLevel'),
-                    learningStyle: formData.get('learningStyle'),
-                    weeklyStudyHours: parseInt(formData.get('weeklyStudyHours')),
-                    submittedAt: new Date().toISOString()
-                };
+            if (!form.checkValidity()) {
+                form.classList.add('was-validated');
+                return;
+            }
 
-                // Log the data object (you can also send it to a server or store it elsewhere)
-                console.log('Learner Profile Data:', learnerProfileData);
-                
-                // Display success message
+            const formData = new FormData(form);
+
+            learnerProfileData = {
+                fullName: formData.get('fullName'),
+                age: parseInt(formData.get('age')),
+                educationLevel: formData.get('educationLevel'),
+                currentDomain: formData.get('currentDomain'),
+                careerGoal: formData.get('careerGoal'),
+                experienceLevel: formData.get('experienceLevel'),
+                learningStyle: formData.get('learningStyle'),
+                weeklyStudyHours: parseInt(formData.get('weeklyStudyHours')),
+                submittedAt: new Date().toISOString()
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(learnerProfileData)
+                });
+
+                const result = await response.json();
+
+                if (!response.ok || !result.success) {
+                    console.error('Register error:', result);
+                    alert(result.error || 'Failed to register profile. Please try again.');
+                    return;
+                }
+
+                // Save userId and profile for later pages
+                localStorage.setItem('userId', result.userId);
+                localStorage.setItem('learnerProfile', JSON.stringify(result.profile));
+
+                console.log('Learner Profile Registered:', result);
+
                 const successMessage = document.getElementById('successMessage');
                 successMessage.style.display = 'block';
-                
-                // Scroll to success message
                 successMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
-                // Reset form after 3 seconds (optional)
                 setTimeout(() => {
                     form.reset();
                     form.classList.remove('was-validated');
                     successMessage.style.display = 'none';
                 }, 5000);
-
-                // You can also store in localStorage for persistence
-                localStorage.setItem('learnerProfile', JSON.stringify(learnerProfileData));
-                
-            } else {
-                // Form is invalid, show validation errors
-                form.classList.add('was-validated');
+            } catch (error) {
+                console.error('Network error while registering profile:', error);
+                alert('Unable to connect to the server. Please make sure the backend is running.');
             }
         }, false);
 

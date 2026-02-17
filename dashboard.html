@@ -520,7 +520,9 @@
     
     <!-- Custom JavaScript -->
     <script>
-        // Dummy progress data (in a real app, this would come from backend/localStorage)
+        const API_BASE = 'http://localhost:5000';
+
+        // Default demo data (used as fallback if backend not reachable)
         let progressData = {
             skills: [
                 { name: "JavaScript Fundamentals", progress: 75, level: "Intermediate" },
@@ -539,36 +541,6 @@
                 { title: "RESTful API Design & Development", provider: "Coursera", progress: 20, status: "in-progress" }
             ]
         };
-
-        // Load data from localStorage if available
-        function loadProgressData() {
-            const savedProgress = localStorage.getItem('progressData');
-            if (savedProgress) {
-                progressData = JSON.parse(savedProgress);
-            } else {
-                // Try to load from learning path
-                const learningPath = localStorage.getItem('learningPath');
-                if (learningPath) {
-                    const pathData = JSON.parse(learningPath);
-                    // Initialize progress from learning path
-                    if (pathData.skills) {
-                        progressData.skills = pathData.skills.map(skill => ({
-                            name: skill.name,
-                            progress: Math.floor(Math.random() * 50) + 10, // Random progress for demo
-                            level: skill.level
-                        }));
-                    }
-                    if (pathData.courses) {
-                        progressData.courses = pathData.courses.map(course => ({
-                            title: course.title,
-                            provider: course.provider,
-                            progress: Math.floor(Math.random() * 60) + 10, // Random progress for demo
-                            status: Math.random() > 0.8 ? "completed" : "in-progress"
-                        }));
-                    }
-                }
-            }
-        }
 
         // Calculate statistics
         function calculateStatistics() {
@@ -778,10 +750,60 @@
             }, 100);
         }
 
+        // Load data from backend dashboard endpoint
+        async function loadDashboardFromBackend() {
+            const userId = localStorage.getItem('userId');
+            if (!userId) {
+                // No registered user – keep demo data
+                console.warn('No userId in localStorage. Using demo data on dashboard.');
+                return false;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/dashboard/${userId}`);
+                const result = await response.json();
+
+                if (!response.ok || !result.success) {
+                    console.error('Dashboard API error:', result);
+                    return false;
+                }
+
+                const dashboard = result.dashboard;
+
+                // Map backend data into progressData structure
+                progressData = {
+                    skills: dashboard.skills || [],
+                    courses: dashboard.courses || []
+                };
+
+                // Update top statistics directly from backend statistics/summary
+                document.getElementById('totalCourses').textContent = dashboard.statistics.totalCourses;
+                document.getElementById('completedCourses').textContent = dashboard.statistics.completedCourses;
+                document.getElementById('inProgressCourses').textContent = dashboard.statistics.inProgressCourses;
+                document.getElementById('overallProgress').textContent = dashboard.statistics.overallProgress + '%';
+
+                document.getElementById('summaryTotalSkills').textContent = dashboard.summary.totalSkills;
+                document.getElementById('summaryMasteredSkills').textContent = dashboard.summary.masteredSkills;
+                document.getElementById('summaryAvgLevel').textContent = dashboard.summary.averageSkillLevel;
+                document.getElementById('summaryHours').textContent = dashboard.summary.hoursCompleted + 'h';
+                document.getElementById('summaryCompletion').textContent = dashboard.summary.completionRate + '%';
+
+                return true;
+            } catch (error) {
+                console.error('Network error while loading dashboard data:', error);
+                return false;
+            }
+        }
+
         // Initialize dashboard
-        function initializeDashboard() {
-            loadProgressData();
-            calculateStatistics();
+        async function initializeDashboard() {
+            const loadedFromBackend = await loadDashboardFromBackend();
+
+            // If backend failed or no userId, stats will be computed from demo/local data
+            if (!loadedFromBackend) {
+                calculateStatistics();
+            }
+
             renderSkillProgress();
             renderCourseProgress();
             initializeCharts();
