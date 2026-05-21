@@ -1,116 +1,156 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Learner Profile - LearningPath AI</title>
-    
+    <title>Gmail Authentication - LearningPath AI</title>
+
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    
+
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    
+
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Google Identity Services (GIS) SDK -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
     <!-- Custom CSS -->
     <style>
         :root {
             --primary-color: #6366f1;
-            --secondary-color: #8b5cf6;
-            --accent-color: #ec4899;
-            --dark-bg: #0f172a;
-            --light-bg: #f8fafc;
+            --primary-light: #818cf8;
+            --secondary-color: #a855f7;
+            --dark-bg: #090d16;
+            --card-bg: rgba(255, 255, 255, 0.04);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --text-muted: #a3b3c9;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: radial-gradient(circle at 50% 0%, #1e1b4b 0%, var(--dark-bg) 70%);
+            color: #f8fafc;
             min-height: 100vh;
-            padding: 2rem 0;
+            padding: 0 0 4rem;
         }
 
         .navbar {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            margin-bottom: 2rem;
+            background: rgba(9, 13, 22, 0.7);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 0;
+            margin-bottom: 3rem;
         }
 
         .navbar-brand {
-            font-weight: 700;
-            font-size: 1.5rem;
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            font-weight: 800;
+            font-size: 1.6rem;
+            background: linear-gradient(135deg, var(--primary-light), var(--secondary-color));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            letter-spacing: -0.5px;
         }
 
         .nav-link {
-            font-weight: 500;
-            color: #334155 !important;
+            font-weight: 600;
+            color: #cbd5e1 !important;
             margin: 0 0.5rem;
-            transition: color 0.3s ease;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
         }
 
-        .nav-link:hover {
-            color: var(--primary-color) !important;
+        .nav-link:hover,
+        .nav-link.active {
+            color: var(--primary-light) !important;
         }
 
         .form-container {
-            background: white;
-            border-radius: 20px;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 24px;
             padding: 3rem;
+            border: 1px solid var(--border-color);
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             max-width: 800px;
             margin: 0 auto;
         }
 
-        .form-title {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: var(--dark-bg);
-            margin-bottom: 0.5rem;
+        .auth-card {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 3.5rem 2.5rem;
             text-align: center;
         }
 
+        .form-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 0.5rem;
+            letter-spacing: -1px;
+        }
+
         .form-subtitle {
-            text-align: center;
-            color: #64748b;
+            color: var(--text-muted);
             margin-bottom: 2.5rem;
         }
 
         .form-label {
             font-weight: 600;
-            color: var(--dark-bg);
+            color: #ffffff;
             margin-bottom: 0.5rem;
+            font-size: 0.95rem;
         }
 
         .form-control,
         .form-select {
-            border: 2px solid #e2e8f0;
-            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.03) !important;
+            border: 1px solid var(--border-color) !important;
+            color: white !important;
+            border-radius: 12px;
             padding: 0.75rem 1rem;
             transition: all 0.3s ease;
         }
 
         .form-control:focus,
         .form-select:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 0.25rem rgba(99, 102, 241, 0.25);
+            border-color: var(--primary-light) !important;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2) !important;
+            background: rgba(255, 255, 255, 0.05) !important;
+        }
+
+        .form-select option {
+            background-color: #0f172a !important;
+            color: #f8fafc !important;
+        }
+
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.45) !important;
         }
 
         .form-control.is-invalid,
         .form-select.is-invalid {
-            border-color: #dc3545;
+            border-color: #ef4444 !important;
         }
 
         .form-control.is-valid,
         .form-select.is-valid {
-            border-color: #198754;
+            border-color: #10b981 !important;
         }
 
         .invalid-feedback {
             display: block;
             font-size: 0.875rem;
+            color: #f87171;
         }
 
         .btn-submit {
@@ -119,40 +159,140 @@
             padding: 0.875rem 2.5rem;
             font-size: 1.1rem;
             font-weight: 600;
-            border-radius: 50px;
+            border-radius: 14px;
             border: none;
             transition: all 0.3s ease;
             width: 100%;
             margin-top: 1rem;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
         }
 
         .btn-submit:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.5);
+            color: white;
         }
 
         .form-section {
-            margin-bottom: 2rem;
+            margin-bottom: 2.5rem;
         }
 
         .section-divider {
-            border-top: 2px solid #e2e8f0;
-            margin: 2rem 0;
+            border-top: 1px solid var(--border-color);
+            margin: 2.5rem 0;
         }
 
         .success-message {
             display: none;
-            background: #d1e7dd;
-            color: #0f5132;
+            background: rgba(16, 185, 129, 0.15);
+            color: #34d399;
             padding: 1rem;
-            border-radius: 10px;
+            border-radius: 12px;
             margin-top: 1rem;
-            border: 1px solid #badbcc;
+            border: 1px solid rgba(16, 185, 129, 0.25);
         }
 
         .form-icon {
-            color: var(--primary-color);
+            color: var(--primary-light);
             margin-right: 0.5rem;
+        }
+
+        .text-muted {
+            color: var(--text-muted) !important;
+        }
+
+        /* Gmail Authentication specific styling */
+        .btn-demo-auth {
+            background: rgba(255, 255, 255, 0.05);
+            color: #ffffff;
+            border: 1px solid var(--border-color);
+            padding: 0.85rem 1.5rem;
+            border-radius: 14px;
+            font-weight: 600;
+            width: 100%;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-demo-auth:hover {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(168, 85, 247, 0.15));
+            border-color: var(--primary-light);
+            color: #ffffff;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(99, 102, 241, 0.25);
+        }
+
+        .divider-container {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 2rem 0;
+            color: var(--text-muted);
+        }
+
+        .divider-container::before,
+        .divider-container::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .divider-container::before {
+            margin-right: .75em;
+        }
+
+        .divider-container::after {
+            margin-left: .75em;
+        }
+
+        .profile-details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .detail-item-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.25rem;
+            transition: all 0.3s ease;
+        }
+
+        .detail-item-card:hover {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: var(--primary-light);
+            transform: translateY(-2px);
+        }
+
+        .detail-label {
+            font-size: 0.825rem;
+            color: var(--text-muted);
+            margin-bottom: 0.35rem;
+            text-transform: uppercase;
+            letter-spacing: 0.75px;
+            font-weight: 700;
+        }
+
+        .detail-value {
+            font-size: 1.15rem;
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        .action-button-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .action-button-group .btn {
+            flex: 1;
+            min-width: 160px;
         }
 
         @media (max-width: 768px) {
@@ -166,9 +306,10 @@
         }
     </style>
 </head>
+
 <body>
     <!-- Navigation Bar -->
-    <nav class="navbar navbar-expand-lg navbar-light">
+    <nav class="navbar navbar-expand-lg">
         <div class="container">
             <a class="navbar-brand" href="index.html">
                 <i class="bi bi-graph-up-arrow"></i> LearningPath AI
@@ -193,24 +334,74 @@
                     <li class="nav-item">
                         <a class="nav-link" href="dashboard.html">Dashboard</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="demo-hub.html">Demo Hub</a>
+                    </li>
                 </ul>
             </div>
         </div>
     </nav>
 
-    <!-- Form Container -->
+    <!-- Main Content Container -->
     <div class="container">
-        <div class="form-container">
-            <h1 class="form-title">
-                <i class="bi bi-person-badge form-icon"></i>Learner Profile
+        <!-- STATE 1: Logged Out (Gmail Auth Sign-in Card) -->
+        <div id="auth-section" class="form-container auth-card" style="display: none;">
+            <div class="mb-4">
+                <i class="bi bi-shield-lock-fill text-primary" style="font-size: 3.5rem;"></i>
+            </div>
+            <h1 class="form-title">Gmail Authentication</h1>
+            <p class="form-subtitle">Securely log in using your Gmail account to access your personalized learning
+                pathways</p>
+
+            <!-- Google Sign-In GIS SDK Button -->
+            <div class="d-flex justify-content-center mb-3">
+                <div id="g_id_onload"
+                    data-client_id="788960053307-bs9cg01f8853iffn9i9f6h7p73evmb71.apps.googleusercontent.com"
+                    data-context="signin" data-ux_mode="popup" data-callback="handleGoogleSignIn"
+                    data-auto_prompt="false">
+                </div>
+                <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="filled_blue"
+                    data-text="signin_with" data-size="large" data-logo_alignment="left">
+                </div>
+            </div>
+
+            <div class="divider-container">OR</div>
+
+            <!-- Demo Bypass Login Button -->
+            <button type="button" class="btn btn-demo-auth" onclick="simulateGoogleLogin()">
+                <i class="bi bi-google text-danger"></i> Continue with Demo Gmail
+            </button>
+            <small class="text-muted d-block mt-3">
+                <i class="bi bi-info-circle"></i> Google SDK will prompt credentials if running in configured domain.
+                Use "Demo Gmail" for instant local testing.
+            </small>
+        </div>
+
+        <!-- STATE 2: Onboarding Form (Newly Logged in / Needs Registration Details) -->
+        <div id="onboarding-section" class="form-container" style="display: none;">
+            <!-- User Gmail identity banner -->
+            <div class="d-flex align-items-center gap-3 mb-4 p-3 rounded"
+                style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color);">
+                <img id="onboarding-avatar" src="" class="rounded-circle border border-2 border-primary"
+                    style="width: 58px; height: 58px; object-fit: cover;">
+                <div>
+                    <h5 id="onboarding-name-title" class="m-0 text-white fw-bold"></h5>
+                    <span id="onboarding-email-subtitle" class="text-muted" style="font-size: 0.9rem;"></span>
+                </div>
+                <span class="badge bg-primary ms-auto"><i class="bi bi-google"></i> Authenticated</span>
+            </div>
+
+            <h1 class="form-title" id="onboarding-form-title">
+                <i class="bi bi-person-badge form-icon"></i>Learner Onboarding
             </h1>
-            <p class="form-subtitle">Tell us about yourself to get personalized learning recommendations</p>
+            <p class="form-subtitle" id="onboarding-form-subtitle">Complete your learning preferences to let AI generate
+                your pathway</p>
 
             <form id="learnerProfileForm" novalidate>
                 <!-- Personal Information Section -->
                 <div class="form-section">
                     <h5 class="mb-3" style="color: var(--primary-color);">
-                        <i class="bi bi-person"></i> Personal Information
+                        <i class="bi bi-person-circle"></i> Profile Identity
                     </h5>
 
                     <!-- Full Name -->
@@ -266,7 +457,7 @@
                     <!-- Current Domain -->
                     <div class="mb-3">
                         <label for="currentDomain" class="form-label">
-                            <i class="bi bi-briefcase form-icon"></i>Current Domain
+                            <i class="bi bi-briefcase form-icon"></i>Target / Current Domain
                         </label>
                         <select class="form-select" id="currentDomain" name="currentDomain" required>
                             <option value="">Select your current domain</option>
@@ -300,8 +491,8 @@
                         <label for="careerGoal" class="form-label">
                             <i class="bi bi-flag form-icon"></i>Career Goal
                         </label>
-                        <textarea class="form-control" id="careerGoal" name="careerGoal" rows="3" 
-                                  placeholder="Describe your career goals and aspirations..." required></textarea>
+                        <textarea class="form-control" id="careerGoal" name="careerGoal" rows="3"
+                            placeholder="Describe your career goals and aspirations..." required></textarea>
                         <div class="invalid-feedback">
                             Please describe your career goal.
                         </div>
@@ -314,18 +505,18 @@
                         </label>
                         <div>
                             <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="experienceLevel" 
-                                       id="beginner" value="beginner" required>
+                                <input class="form-check-input" type="radio" name="experienceLevel" id="beginner"
+                                    value="beginner" required>
                                 <label class="form-check-label" for="beginner">Beginner</label>
                             </div>
                             <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="experienceLevel" 
-                                       id="intermediate" value="intermediate" required>
+                                <input class="form-check-input" type="radio" name="experienceLevel" id="intermediate"
+                                    value="intermediate" required>
                                 <label class="form-check-label" for="intermediate">Intermediate</label>
                             </div>
                             <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="experienceLevel" 
-                                       id="advanced" value="advanced" required>
+                                <input class="form-check-input" type="radio" name="experienceLevel" id="advanced"
+                                    value="advanced" required>
                                 <label class="form-check-label" for="advanced">Advanced</label>
                             </div>
                         </div>
@@ -341,22 +532,22 @@
                         </label>
                         <div>
                             <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="learningStyle" 
-                                       id="video" value="video" required>
+                                <input class="form-check-input" type="radio" name="learningStyle" id="video"
+                                    value="video" required>
                                 <label class="form-check-label" for="video">
                                     <i class="bi bi-play-btn"></i> Video
                                 </label>
                             </div>
                             <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="learningStyle" 
-                                       id="text" value="text" required>
+                                <input class="form-check-input" type="radio" name="learningStyle" id="text" value="text"
+                                    required>
                                 <label class="form-check-label" for="text">
                                     <i class="bi bi-file-text"></i> Text
                                 </label>
                             </div>
                             <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="learningStyle" 
-                                       id="practice" value="practice" required>
+                                <input class="form-check-input" type="radio" name="learningStyle" id="practice"
+                                    value="practice" required>
                                 <label class="form-check-label" for="practice">
                                     <i class="bi bi-code-slash"></i> Practice
                                 </label>
@@ -372,9 +563,10 @@
                         <label for="weeklyStudyHours" class="form-label">
                             <i class="bi bi-clock form-icon"></i>Weekly Study Hours
                         </label>
-                        <input type="number" class="form-control" id="weeklyStudyHours" name="weeklyStudyHours" 
-                               min="1" max="168" placeholder="e.g., 10" required>
-                        <small class="form-text text-muted">Enter the number of hours you can dedicate to learning per week</small>
+                        <input type="number" class="form-control" id="weeklyStudyHours" name="weeklyStudyHours" min="1"
+                            max="168" placeholder="e.g., 10" required>
+                        <small class="form-text text-muted">Enter the number of hours you can dedicate to learning per
+                            week</small>
                         <div class="invalid-feedback">
                             Please enter a valid number of weekly study hours (1-168).
                         </div>
@@ -383,32 +575,316 @@
 
                 <!-- Submit Button -->
                 <button type="submit" class="btn btn-submit">
-                    <i class="bi bi-check-circle"></i> Submit Profile
+                    <i class="bi bi-check-circle"></i> Save Profile Preferences
+                </button>
+
+                <!-- Cancel Edit Button (Only visible if profile was already existing) -->
+                <button type="button" class="btn btn-outline-secondary w-100 mt-2" id="btn-cancel-onboarding"
+                    style="display: none;" onclick="checkAuthStatus()">
+                    Cancel Changes
                 </button>
 
                 <!-- Success Message -->
                 <div class="success-message" id="successMessage">
-                    <i class="bi bi-check-circle-fill"></i> Profile submitted successfully! Your data has been saved.
+                    <i class="bi bi-check-circle-fill"></i> Profile updated successfully! Loading dashboard...
                 </div>
             </form>
+        </div>
+
+        <!-- STATE 3: Logged In Settings View -->
+        <div id="settings-section" class="form-container" style="display: none;">
+            <div class="text-center mb-5">
+                <img id="settings-avatar" src="" class="rounded-circle border border-3 border-primary mb-3 shadow"
+                    style="width: 96px; height: 96px; object-fit: cover;">
+                <h2 id="settings-name" class="fw-extrabold m-0 text-white" style="font-family: 'Outfit', sans-serif;">
+                </h2>
+                <p id="settings-email" class="text-muted fs-6 mb-2"></p>
+                <span
+                    class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-2">
+                    <i class="bi bi-shield-check"></i> Gmail Verified Account
+                </span>
+            </div>
+
+            <h4 class="mb-4" style="color: var(--primary-color); font-family: 'Outfit', sans-serif;">
+                <i class="bi bi-sliders2-vertical"></i> Learning Preferences
+            </h4>
+
+            <div class="profile-details-grid">
+                <!-- Age -->
+                <div class="detail-item-card">
+                    <div class="detail-label">Age</div>
+                    <div class="detail-value" id="val-age">-</div>
+                </div>
+                <!-- Education -->
+                <div class="detail-item-card">
+                    <div class="detail-label">Education</div>
+                    <div class="detail-value" id="val-education">-</div>
+                </div>
+                <!-- Current Domain -->
+                <div class="detail-item-card">
+                    <div class="detail-label">Target Domain</div>
+                    <div class="detail-value" id="val-domain">-</div>
+                </div>
+                <!-- Experience Level -->
+                <div class="detail-item-card">
+                    <div class="detail-label">Experience Level</div>
+                    <div class="detail-value" id="val-experience">-</div>
+                </div>
+                <!-- Learning Style -->
+                <div class="detail-item-card">
+                    <div class="detail-label">Learning Style</div>
+                    <div class="detail-value" id="val-style">-</div>
+                </div>
+                <!-- Weekly Study Hours -->
+                <div class="detail-item-card">
+                    <div class="detail-label">Weekly Hours</div>
+                    <div class="detail-value" id="val-hours">-</div>
+                </div>
+            </div>
+
+            <!-- Career Goal Card -->
+            <div class="detail-item-card w-100 mb-4">
+                <div class="detail-label">Career Goal & Aspirations</div>
+                <div class="detail-value text-wrap" id="val-career"
+                    style="font-weight: 500; font-size: 1.05rem; line-height: 1.6;">-</div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-button-group">
+                <button class="btn btn-primary" onclick="startEditProfile()">
+                    <i class="bi bi-pencil-fill"></i> Edit Preferences
+                </button>
+                <a class="btn btn-outline-light" href="assessment.html">
+                    <i class="bi bi-journal-check"></i> Go to Assessment
+                </a>
+                <a class="btn btn-outline-light" href="dashboard.html">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+                <button class="btn btn-outline-danger" onclick="logoutUser()">
+                    <i class="bi bi-box-arrow-right"></i> Sign Out
+                </button>
+            </div>
         </div>
     </div>
 
     <!-- Bootstrap 5 JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <!-- Custom JavaScript -->
+
+    <!-- Custom JavaScript for Gmail Authentication & Onboarding States -->
     <script>
-        const API_BASE = 'http://localhost:5000';
+        const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:')
+            ? 'http://localhost:5000'
+            : window.location.origin;
 
-        // Store form data in JavaScript object
-        let learnerProfileData = {};
+        // Helper: show specific section and hide others
+        function showSection(sectionId) {
+            const sections = ['auth-section', 'onboarding-section', 'settings-section'];
+            sections.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.style.display = (id === sectionId) ? 'block' : 'none';
+                }
+            });
+        }
 
-        // Get form element
+        // Helper: format slug string to readable capital text
+        function formatValue(str) {
+            if (!str) return '-';
+            return str
+                .split('-')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(' ');
+        }
+
+        // JWT decoding utility
+        function decodeJwt(token) {
+            try {
+                const base64Url = token.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function (c) {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                }).join(''));
+                return JSON.parse(jsonPayload);
+            } catch (e) {
+                console.error("JWT decoding failed", e);
+                return null;
+            }
+        }
+
+        // 1. Google OAuth Callback Handler
+        function handleGoogleSignIn(response) {
+            console.log("Authenticated via Google Sign-In SDK");
+            const decoded = decodeJwt(response.credential);
+            if (decoded) {
+                const googleUser = {
+                    sub: decoded.sub,
+                    email: decoded.email,
+                    name: decoded.name,
+                    picture: decoded.picture
+                };
+
+                localStorage.setItem('userId', googleUser.email);
+                localStorage.setItem('googleUser', JSON.stringify(googleUser));
+
+                // Fetch profile or setup
+                checkAuthStatus();
+            } else {
+                alert("Google Authentication failed to parse.");
+            }
+        }
+
+        // 2. Simulate Gmail login (Developer Bypass)
+        function simulateGoogleLogin() {
+            const mockUser = {
+                sub: "google_demo_987654321",
+                email: "learner.demo@gmail.com",
+                name: "Demo Learner",
+                picture: "https://lh3.googleusercontent.com/a/ACg8ocI4s0vJ-3B_k6B56U2n5p_M0vL1W54A_sD75o-K_e8-Zg=s96-c"
+            };
+
+            localStorage.setItem('userId', mockUser.email);
+            localStorage.setItem('googleUser', JSON.stringify(mockUser));
+
+            // Check auth state immediately
+            checkAuthStatus();
+        }
+
+        // 3. Check Authentication & Profile State
+        async function checkAuthStatus() {
+            const userId = localStorage.getItem('userId');
+            const googleUserStr = localStorage.getItem('googleUser');
+
+            if (!userId || !googleUserStr) {
+                showSection('auth-section');
+                if (window.updateNavbarAuth) window.updateNavbarAuth();
+                return;
+            }
+
+            const googleUser = JSON.parse(googleUserStr);
+
+            try {
+                const response = await fetch(`${API_BASE}/profile/${userId}`);
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    localStorage.setItem('learnerProfile', JSON.stringify(result.profile));
+
+                    // If they just logged in from the auth card state, redirect to index.html
+                    const authSection = document.getElementById('auth-section');
+                    const isFromAuth = authSection && authSection.style.display === 'block';
+                    if (isFromAuth) {
+                        window.location.href = 'index.html';
+                        return;
+                    }
+
+                    showSettingsView(googleUser, result.profile);
+                } else {
+                    // Check if local cache has profile as fallback
+                    const localProfile = localStorage.getItem('learnerProfile');
+                    if (localProfile) {
+                        const authSection = document.getElementById('auth-section');
+                        const isFromAuth = authSection && authSection.style.display === 'block';
+                        if (isFromAuth) {
+                            window.location.href = 'index.html';
+                            return;
+                        }
+                        showSettingsView(googleUser, JSON.parse(localProfile));
+                    } else {
+                        showOnboardingForm(googleUser);
+                    }
+                }
+            } catch (e) {
+                console.warn("Backend unavailable. Fallback to localStorage.", e);
+                const localProfile = localStorage.getItem('learnerProfile');
+                if (localProfile) {
+                    const authSection = document.getElementById('auth-section');
+                    const isFromAuth = authSection && authSection.style.display === 'block';
+                    if (isFromAuth) {
+                        window.location.href = 'index.html';
+                        return;
+                    }
+                    showSettingsView(googleUser, JSON.parse(localProfile));
+                } else {
+                    showOnboardingForm(googleUser);
+                }
+            }
+
+            if (window.updateNavbarAuth) window.updateNavbarAuth();
+        }
+
+        // 4. Onboarding Setup UI Builder
+        function showOnboardingForm(googleUser) {
+            showSection('onboarding-section');
+
+            document.getElementById('onboarding-form-title').innerHTML = `<i class="bi bi-person-badge form-icon"></i>Learner Onboarding`;
+            document.getElementById('onboarding-form-subtitle').innerText = "Complete your learning preferences to let AI generate your pathway";
+
+            document.getElementById('onboarding-avatar').src = googleUser.picture || 'https://cdn-icons-png.flaticon.com/512/1144/1144760.png';
+            document.getElementById('onboarding-name-title').innerText = googleUser.name;
+            document.getElementById('onboarding-email-subtitle').innerText = googleUser.email;
+
+            document.getElementById('fullName').value = googleUser.name;
+            document.getElementById('fullName').disabled = true; // Lock identity name
+
+            // Show cancel button if profile already existed
+            const existingProfile = localStorage.getItem('learnerProfile');
+            document.getElementById('btn-cancel-onboarding').style.display = existingProfile ? 'block' : 'none';
+        }
+
+        // 5. Settings Card Setup Builder
+        function showSettingsView(googleUser, profile) {
+            showSection('settings-section');
+
+            document.getElementById('settings-avatar').src = googleUser.picture || 'https://cdn-icons-png.flaticon.com/512/1144/1144760.png';
+            document.getElementById('settings-name').innerText = googleUser.name;
+            document.getElementById('settings-email').innerText = googleUser.email;
+
+            document.getElementById('val-age').innerText = profile.age || '-';
+            document.getElementById('val-education').innerText = formatValue(profile.educationLevel);
+            document.getElementById('val-domain').innerText = formatValue(profile.currentDomain);
+            document.getElementById('val-experience').innerText = formatValue(profile.experienceLevel);
+            document.getElementById('val-style').innerText = formatValue(profile.learningStyle);
+            document.getElementById('val-hours').innerText = (profile.weeklyStudyHours || '-') + ' Hours';
+            document.getElementById('val-career').innerText = profile.careerGoal || 'No career goal specified';
+        }
+
+        // 6. Edit Preferences click handler
+        function startEditProfile() {
+            const googleUser = JSON.parse(localStorage.getItem('googleUser'));
+            const profile = JSON.parse(localStorage.getItem('learnerProfile')) || {};
+
+            showOnboardingForm(googleUser);
+
+            // Adjust title/subtitle for Editing Mode
+            document.getElementById('onboarding-form-title').innerHTML = `<i class="bi bi-pencil-square form-icon"></i>Edit Preferences`;
+            document.getElementById('onboarding-form-subtitle').innerText = "Modify your study goal or hourly commitments below";
+
+            // Fill details
+            document.getElementById('age').value = profile.age || '';
+            document.getElementById('educationLevel').value = profile.educationLevel || '';
+            document.getElementById('currentDomain').value = profile.currentDomain || '';
+            document.getElementById('careerGoal').value = profile.careerGoal || '';
+            document.getElementById('weeklyStudyHours').value = profile.weeklyStudyHours || '';
+
+            if (profile.experienceLevel) {
+                const radio = document.getElementById(profile.experienceLevel);
+                if (radio) radio.checked = true;
+            }
+            if (profile.learningStyle) {
+                const radio = document.getElementById(profile.learningStyle);
+                if (radio) radio.checked = true;
+            }
+
+            // Re-apply validation styling if loaded
+            document.querySelectorAll('input[type="radio"]').forEach(r => {
+                r.classList.remove('is-invalid', 'is-valid');
+                if (r.checked) r.classList.add('is-valid');
+            });
+        }
+
+        // 7. Onboarding Form Submission Handler
         const form = document.getElementById('learnerProfileForm');
-
-        // Bootstrap validation + backend integration
-        form.addEventListener('submit', async function(event) {
+        form.addEventListener('submit', async function (event) {
             event.preventDefault();
             event.stopPropagation();
 
@@ -418,9 +894,11 @@
             }
 
             const formData = new FormData(form);
+            const userId = localStorage.getItem('userId');
 
-            learnerProfileData = {
-                fullName: formData.get('fullName'),
+            const learnerProfileData = {
+                userId: userId,
+                fullName: document.getElementById('fullName').value, // Use input value (which is googleUser.name)
                 age: parseInt(formData.get('age')),
                 educationLevel: formData.get('educationLevel'),
                 currentDomain: formData.get('currentDomain'),
@@ -443,74 +921,84 @@
                 const result = await response.json();
 
                 if (!response.ok || !result.success) {
-                    console.error('Register error:', result);
-                    alert(result.error || 'Failed to register profile. Please try again.');
+                    alert(result.error || 'Failed to update preferences. Try again.');
                     return;
                 }
 
-                // Save userId and profile for later pages
-                localStorage.setItem('userId', result.userId);
+                // Save session profile cache
                 localStorage.setItem('learnerProfile', JSON.stringify(result.profile));
-
-                console.log('Learner Profile Registered:', result);
 
                 const successMessage = document.getElementById('successMessage');
                 successMessage.style.display = 'block';
                 successMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
                 setTimeout(() => {
+                    successMessage.style.display = 'none';
                     form.reset();
                     form.classList.remove('was-validated');
-                    successMessage.style.display = 'none';
-                }, 5000);
-            } catch (error) {
-                console.error('Network error while registering profile:', error);
-                alert('Unable to connect to the server. Please make sure the backend is running.');
-            }
-        }, false);
 
-        // Real-time validation for radio buttons
+                    // Route to Skill Assessment if new, otherwise show Profile view
+                    const isFirstOnboarding = !localStorage.getItem('hasCompletedOnboarding');
+                    if (isFirstOnboarding) {
+                        localStorage.setItem('hasCompletedOnboarding', 'true');
+                        window.location.href = 'assessment.html';
+                    } else {
+                        checkAuthStatus();
+                    }
+                }, 1500);
+
+            } catch (error) {
+                console.error('Network error during onboarding registration:', error);
+                // Fallback to storing in local storage in offline mode
+                localStorage.setItem('learnerProfile', JSON.stringify(learnerProfileData));
+                const successMessage = document.getElementById('successMessage');
+                successMessage.style.display = 'block';
+
+                setTimeout(() => {
+                    successMessage.style.display = 'none';
+                    window.location.href = 'assessment.html';
+                }, 1500);
+            }
+        });
+
+        // 8. Log out routine
+        function logoutUser() {
+            localStorage.removeItem('userId');
+            localStorage.removeItem('googleUser');
+            localStorage.removeItem('learnerProfile');
+            checkAuthStatus();
+        }
+
+        // Radio check state styling changes
         const radioGroups = document.querySelectorAll('input[type="radio"]');
         radioGroups.forEach(radio => {
-            radio.addEventListener('change', function() {
+            radio.addEventListener('change', function () {
                 const groupName = this.name;
                 const group = document.querySelectorAll(`input[name="${groupName}"]`);
                 let isValid = false;
-                
+
                 group.forEach(r => {
-                    if (r.checked) {
-                        isValid = true;
-                    }
+                    if (r.checked) isValid = true;
                 });
 
-                // Remove invalid class from all in group
                 group.forEach(r => {
-                    r.classList.remove('is-invalid');
+                    r.classList.remove('is-invalid', 'is-valid');
                 });
 
-                // Add valid class if checked
                 if (isValid) {
                     group.forEach(r => {
-                        if (r.checked) {
-                            r.classList.add('is-valid');
-                        }
+                        if (r.checked) r.classList.add('is-valid');
                     });
                 }
             });
         });
 
-        // Load saved profile data if exists (optional feature)
-        window.addEventListener('DOMContentLoaded', function() {
-            const savedProfile = localStorage.getItem('learnerProfile');
-            if (savedProfile) {
-                const profile = JSON.parse(savedProfile);
-                console.log('Loaded saved profile:', profile);
-                // Optionally populate form with saved data
-                // document.getElementById('fullName').value = profile.fullName || '';
-                // ... etc
-            }
-        });
+        // Initialize verification on load
+        window.addEventListener('DOMContentLoaded', checkAuthStatus);
     </script>
-</body>
-</html>
 
+    <!-- Floating AI Tutor Chatbot -->
+    <script src="copilot.js"></script>
+</body>
+
+</html>

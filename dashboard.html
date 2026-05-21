@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - LearningPath AI</title>
     
+    <!-- Redirect to login if not authenticated -->
+    <script>
+        if (!localStorage.getItem('userId')) {
+            window.location.href = 'profile.html';
+        }
+    </script>
+    
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     
@@ -14,48 +21,57 @@
     <!-- Chart.js for charts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
     <!-- Custom CSS -->
     <style>
         :root {
             --primary-color: #6366f1;
-            --secondary-color: #8b5cf6;
-            --accent-color: #ec4899;
-            --dark-bg: #0f172a;
-            --light-bg: #f8fafc;
+            --primary-light: #818cf8;
+            --secondary-color: #a855f7;
+            --dark-bg: #090d16;
+            --card-bg: rgba(255, 255, 255, 0.04);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --text-muted: #a3b3c9;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: radial-gradient(circle at 50% 0%, #1e1b4b 0%, var(--dark-bg) 70%);
+            color: #f8fafc;
             min-height: 100vh;
-            padding: 2rem 0;
+            padding: 0 0 4rem;
         }
 
         .navbar {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            margin-bottom: 2rem;
+            background: rgba(9, 13, 22, 0.7);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 0;
+            margin-bottom: 3rem;
         }
 
         .navbar-brand {
-            font-weight: 700;
-            font-size: 1.5rem;
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            font-weight: 800;
+            font-size: 1.6rem;
+            background: linear-gradient(135deg, var(--primary-light), var(--secondary-color));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            letter-spacing: -0.5px;
         }
 
         .nav-link {
-            font-weight: 500;
-            color: #334155 !important;
+            font-weight: 600;
+            color: #cbd5e1 !important;
             margin: 0 0.5rem;
-            transition: color 0.3s ease;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
         }
 
-        .nav-link:hover {
-            color: var(--primary-color) !important;
+        .nav-link:hover, .nav-link.active {
+            color: var(--primary-light) !important;
         }
 
         .page-container {
@@ -70,54 +86,64 @@
         }
 
         .page-title {
+            font-family: 'Outfit', sans-serif;
             font-size: 3rem;
             font-weight: 800;
             margin-bottom: 1rem;
+            letter-spacing: -1.5px;
+            background: linear-gradient(135deg, #ffffff 30%, #c7d2fe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .page-subtitle {
             font-size: 1.2rem;
-            opacity: 0.9;
+            color: var(--text-muted);
         }
 
         .card {
-            border: none;
-            border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 24px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
             margin-bottom: 2rem;
-            background: white;
+            overflow: hidden;
         }
 
         .card-header {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: white;
-            border-radius: 20px 20px 0 0 !important;
-            padding: 1.5rem;
-            border: none;
+            background: transparent;
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.5rem 2rem;
         }
 
         .card-title {
-            font-size: 1.75rem;
-            font-weight: 700;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #ffffff;
             margin: 0;
         }
 
         .card-body {
-            padding: 2rem;
+            padding: 2.5rem 2rem;
         }
 
         .stat-card {
-            background: white;
-            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 16px;
             padding: 1.5rem;
             text-align: center;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease;
+            border: 1px solid var(--border-color);
+            transition: transform 0.3s ease, border-color 0.3s ease;
             height: 100%;
         }
 
         .stat-card:hover {
             transform: translateY(-5px);
+            border-color: rgba(99, 102, 241, 0.25);
         }
 
         .stat-icon {
@@ -149,14 +175,15 @@
         }
 
         .stat-value {
+            font-family: 'Outfit', sans-serif;
             font-size: 2.5rem;
             font-weight: 800;
-            color: var(--dark-bg);
+            color: #ffffff;
             margin-bottom: 0.5rem;
         }
 
         .stat-label {
-            color: #64748b;
+            color: var(--text-muted);
             font-weight: 600;
             font-size: 1rem;
         }
@@ -164,7 +191,7 @@
         .skill-progress-item {
             margin-bottom: 1.5rem;
             padding-bottom: 1.5rem;
-            border-bottom: 1px solid #e2e8f0;
+            border-bottom: 1px solid var(--border-color);
         }
 
         .skill-progress-item:last-child {
@@ -183,19 +210,19 @@
         .skill-name {
             font-weight: 700;
             font-size: 1.1rem;
-            color: var(--dark-bg);
+            color: #ffffff;
         }
 
         .skill-percentage {
             font-weight: 700;
-            color: var(--primary-color);
+            color: var(--primary-light);
             font-size: 1.1rem;
         }
 
         .progress {
             height: 12px;
             border-radius: 10px;
-            background: #e2e8f0;
+            background: rgba(255, 255, 255, 0.08);
             overflow: visible;
         }
 
@@ -212,25 +239,28 @@
             right: 0;
             top: 50%;
             transform: translateY(-50%);
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             background: white;
-            border: 3px solid var(--primary-color);
+            border: 3px solid var(--primary-light);
             border-radius: 50%;
         }
 
         .course-item {
-            background: #f8fafc;
+            background: rgba(255, 255, 255, 0.02);
             border-radius: 12px;
             padding: 1.25rem;
             margin-bottom: 1rem;
-            border-left: 4px solid var(--primary-color);
+            border: 1px solid var(--border-color);
+            border-left: 4px solid var(--primary-light);
             transition: all 0.3s ease;
+            cursor: pointer;
         }
 
         .course-item:hover {
-            background: #f1f5f9;
+            background: rgba(255, 255, 255, 0.04);
             transform: translateX(5px);
+            border-color: rgba(99, 102, 241, 0.2);
         }
 
         .course-header {
@@ -242,13 +272,17 @@
 
         .course-title {
             font-weight: 700;
-            color: var(--dark-bg);
+            color: #ffffff;
             margin-bottom: 0.25rem;
         }
 
         .course-provider {
-            color: #64748b;
+            color: var(--text-muted);
             font-size: 0.9rem;
+        }
+
+        .text-muted {
+            color: var(--text-muted) !important;
         }
 
         .course-progress {
@@ -262,16 +296,18 @@
         }
 
         .summary-section {
-            background: linear-gradient(135deg, #f8fafc, #e2e8f0);
-            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
             padding: 2rem;
             margin-top: 1rem;
         }
 
         .summary-title {
+            font-family: 'Outfit', sans-serif;
             font-size: 1.5rem;
             font-weight: 700;
-            color: var(--dark-bg);
+            color: #ffffff;
             margin-bottom: 1.5rem;
         }
 
@@ -280,19 +316,20 @@
             justify-content: space-between;
             align-items: center;
             padding: 1rem;
-            background: white;
-            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
             margin-bottom: 0.75rem;
         }
 
         .summary-label {
             font-weight: 600;
-            color: #64748b;
+            color: var(--text-muted);
         }
 
         .summary-value {
             font-weight: 700;
-            color: var(--dark-bg);
+            color: #ffffff;
             font-size: 1.1rem;
         }
 
@@ -304,18 +341,18 @@
         }
 
         .badge-completed {
-            background: #d1fae5;
-            color: #065f46;
+            background: rgba(16, 185, 129, 0.15);
+            color: #34d399;
         }
 
         .badge-in-progress {
-            background: #dbeafe;
-            color: #1e40af;
+            background: rgba(59, 130, 246, 0.15);
+            color: #60a5fa;
         }
 
         .badge-not-started {
-            background: #f3f4f6;
-            color: #6b7280;
+            background: rgba(255, 255, 255, 0.08);
+            color: #cbd5e1;
         }
 
         @media (max-width: 768px) {
@@ -337,7 +374,7 @@
 </head>
 <body>
     <!-- Navigation Bar -->
-    <nav class="navbar navbar-expand-lg navbar-light">
+    <nav class="navbar navbar-expand-lg">
         <div class="container">
             <a class="navbar-brand" href="index.html">
                 <i class="bi bi-graph-up-arrow"></i> LearningPath AI
@@ -361,6 +398,9 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link active" href="dashboard.html">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="demo-hub.html">Demo Hub</a>
                     </li>
                 </ul>
             </div>
@@ -520,7 +560,27 @@
     
     <!-- Custom JavaScript -->
     <script>
-        const API_BASE = 'http://localhost:5000';
+        const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:')
+            ? 'http://localhost:5000'
+            : window.location.origin;
+
+        // Helper to construct search URL for a course based on its provider
+        function getCourseUrl(course) {
+            const title = course.title || '';
+            const provider = String(course.provider || '').toLowerCase();
+            
+            if (provider.includes('udemy')) {
+                return `https://www.udemy.com/courses/search/?q=${encodeURIComponent(title)}`;
+            } else if (provider.includes('coursera')) {
+                return `https://www.coursera.org/search?query=${encodeURIComponent(title)}`;
+            } else if (provider.includes('edx')) {
+                return `https://www.edx.org/search?q=${encodeURIComponent(title)}`;
+            } else if (provider.includes('pluralsight')) {
+                return `https://www.pluralsight.com/search?q=${encodeURIComponent(title)}`;
+            }
+            
+            return `https://www.google.com/search?q=${encodeURIComponent(title + ' ' + (course.provider || ''))}`;
+        }
 
         // Default demo data (used as fallback if backend not reachable)
         let progressData = {
@@ -616,6 +676,12 @@
                 const courseItem = document.createElement('div');
                 courseItem.className = 'course-item';
                 
+                // Add click handler to directly open the course on the provider's platform
+                const courseUrl = getCourseUrl(course);
+                courseItem.onclick = () => {
+                    window.open(courseUrl, '_blank');
+                };
+                
                 const statusBadge = course.progress === 100 
                     ? '<span class="badge-custom badge-completed">Completed</span>'
                     : course.progress > 0
@@ -670,8 +736,8 @@
                         data: [completed, inProgress, notStarted],
                         backgroundColor: [
                             '#10b981',
-                            '#3b82f6',
-                            '#e5e7eb'
+                            '#6366f1',
+                            'rgba(255, 255, 255, 0.08)'
                         ],
                         borderWidth: 0
                     }]
@@ -684,7 +750,9 @@
                             position: 'bottom',
                             labels: {
                                 padding: 15,
+                                color: '#cbd5e1',
                                 font: {
+                                    family: "'Plus Jakarta Sans', sans-serif",
                                     size: 12
                                 }
                             }
@@ -709,9 +777,9 @@
                         label: 'Number of Skills',
                         data: Object.values(skillLevels),
                         backgroundColor: [
-                            '#6366f1',
-                            '#8b5cf6',
-                            '#ec4899'
+                            'rgba(99, 102, 241, 0.85)',
+                            'rgba(168, 85, 247, 0.85)',
+                            'rgba(236, 72, 153, 0.85)'
                         ],
                         borderRadius: 8
                     }]
@@ -727,8 +795,27 @@
                     scales: {
                         y: {
                             beginAtZero: true,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.08)',
+                                drawBorder: false
+                            },
                             ticks: {
-                                stepSize: 1
+                                stepSize: 1,
+                                color: '#cbd5e1',
+                                font: {
+                                    family: "'Plus Jakarta Sans', sans-serif"
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#cbd5e1',
+                                font: {
+                                    family: "'Plus Jakarta Sans', sans-serif"
+                                }
                             }
                         }
                     }
@@ -813,6 +900,9 @@
         // Initialize on page load
         window.addEventListener('DOMContentLoaded', initializeDashboard);
     </script>
+    
+    <!-- Floating AI Tutor Chatbot -->
+    <script src="copilot.js"></script>
 </body>
 </html>
 

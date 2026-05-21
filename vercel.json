@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "rewrites": [
+    { "source": "/register", "destination": "/api/index.py" },
+    { "source": "/profile/:id", "destination": "/api/index.py" },
+    { "source": "/assessment", "destination": "/api/index.py" },
+    { "source": "/generate-path", "destination": "/api/index.py" },
+    { "source": "/dashboard/:id", "destination": "/api/index.py" },
+    { "source": "/update-progress", "destination": "/api/index.py" },
+    { "source": "/submit-feedback", "destination": "/api/index.py" },
+    { "source": "/feedbacks", "destination": "/api/index.py" },
+    { "source": "/analytics-data", "destination": "/api/index.py" },
+    { "source": "/chat", "destination": "/api/index.py" }
+  ]
+}

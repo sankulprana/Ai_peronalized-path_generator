@@ -1,0 +1,23 @@
+feedback_id,name,overall_rating,recommendation_rating,customization_rating,comments,requested_features,sentiment,date
+fb_1,Emily Carter,5,5,5,Absolutely loved the personalized web development roadmap! The recommended courses match my pace perfectly.,"Study Planner,AI Chatbot",Positive,2026-05-10T10:15:30
+fb_2,Liam Davies,4,4,5,The skill gap analysis showed me exactly what I was missing. It would be amazing if I could schedule these study hours directly in a calendar.,Study Planner,Positive,2026-05-11T14:22:11
+fb_3,Sophia Martinez,3,3,4,"Good recommendations, but some of the intermediate courses require more coding experience. I would love a Certificate of Completion to show on my resume.","Certifications,Job Matching",Neutral,2026-05-12T09:05:00
+fb_4,Noah Brooks,5,5,4,The UI looks stunning. Very smooth transitions and helpful links. An AI Chatbot or Study Buddy would make this the ultimate learning portal.,AI Chatbot,Positive,2026-05-13T16:40:45
+fb_5,Olivia Turner,4,5,3,I registered for Data Science and got highly relevant Coursera classes. Can you add direct job referrals or matching with tech companies?,Job Matching,Positive,2026-05-14T11:55:00
+fb_6,Aiden Vance,2,2,3,I felt a bit overwhelmed by the 40 hours of study required per week. I need a study planner to help me break it down.,Study Planner,Negative,2026-05-15T18:10:20
+fb_7,Isabella Chen,5,4,5,Best personalized path generator I've used. Very robust. Adding certification options would be a great BMC addition.,Certifications,Positive,2026-05-16T12:00:10
+fb_8,Lucas Grey,4,3,4,Nice layout. The courses seem high quality. Having a mentor connect feature would elevate it.,Mentors,Positive,2026-05-16T15:30:25
+fb_9,Mia Jenkins,3,4,3,It generated a web-dev path. I was hoping for more practice-based text resources. A chatbot would help me find those.,"AI Chatbot,Study Planner",Neutral,2026-05-17T08:45:15
+fb_10,Ethan Hunt,5,5,5,Brilliant project. Adding a premium model with professional certifications and direct job matches would make this a viable business.,"Certifications,Job Matching",Positive,2026-05-17T20:18:40
+fb_11,Charlotte Webb,4,4,4,Helped me structure my learning for the summer. It would be helpful to sync study hours directly with my Google calendar.,Study Planner,Positive,2026-05-18T10:05:00
+fb_12,Benjamin Cole,5,4,4,Simple and effective. Love the progress tracking! A chatbot assistant would make navigation even easier.,AI Chatbot,Positive,2026-05-18T14:32:00
+fb_13,Amelia Vance,3,3,3,"Okay experience, but I need more mock tests and practice codes. Certificates would be cool.",Certifications,Neutral,2026-05-19T09:12:30
+fb_14,Daniel Craig,4,5,4,Recommended courses match my goal perfectly. Job matches in my area would be extremely helpful.,Job Matching,Positive,2026-05-19T16:48:00
+fb_15,Harper Lee,5,5,5,The skill assessment was simple and the recommendations are exactly what I needed. I am following the path daily!,"Study Planner,Certifications",Positive,2026-05-20T11:20:15
+fb_16,Alexander Great,4,3,5,Good path. Can we get an interactive code editor or interactive chat to ask about specific syntax?,AI Chatbot,Positive,2026-05-20T17:02:40
+fb_17,Evelyn Stone,2,3,2,The suggested courses are too long. 50 hours of video is hard to manage. A study planner is critical for me.,Study Planner,Negative,2026-05-20T19:55:00
+fb_18,Sebastian Bach,4,4,4,Well integrated dashboard. Tracking my hours helps. Adding job matches for intermediate roles would be great.,Job Matching,Positive,2026-05-21T08:30:12
+fb_19,Zoe Saldana,5,5,4,Incredible customization! It really takes my educational background into account. Certifications + Job portals are logical next steps.,"Certifications,Job Matching",Positive,2026-05-21T10:14:50
+fb_20,William Shakespeare,4,4,5,A very useful helper in my self-taught learning journey. A virtual study buddy to ask questions would be an excellent feature.,AI Chatbot,Positive,2026-05-21T12:05:33
+fb_1779355843,Kartik,2,5,5,make it more user friendly,"Study Planner,AI Chatbot,Certifications",Negative,2026-05-21T15:00:43.117144
+fb_1779355991,sankulp,4,2,2,make it better,"Study Planner,AI Chatbot,Certifications",Positive,2026-05-21T15:03:11.049488

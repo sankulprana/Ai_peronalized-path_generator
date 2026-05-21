@@ -5,58 +5,77 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI-Powered Personalized Learning Path Generator</title>
     
+    <!-- Redirect to login if not authenticated -->
+    <script>
+        if (!localStorage.getItem('userId')) {
+            window.location.href = 'profile.html';
+        }
+    </script>
+    
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
     <!-- Custom CSS -->
     <style>
         :root {
             --primary-color: #6366f1;
-            --secondary-color: #8b5cf6;
+            --primary-light: #818cf8;
+            --secondary-color: #a855f7;
             --accent-color: #ec4899;
-            --dark-bg: #0f172a;
-            --light-bg: #f8fafc;
+            --dark-bg: #090d16;
+            --card-bg: rgba(255, 255, 255, 0.04);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --text-muted: #a3b3c9;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: radial-gradient(circle at 50% 0%, #1e1b4b 0%, var(--dark-bg) 70%);
+            color: #f8fafc;
             overflow-x: hidden;
         }
 
         /* Navigation Bar */
         .navbar {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            background: rgba(9, 13, 22, 0.7);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid var(--border-color);
             padding: 1rem 0;
+            transition: all 0.3s ease;
         }
 
         .navbar-brand {
-            font-weight: 700;
-            font-size: 1.5rem;
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            font-weight: 800;
+            font-size: 1.6rem;
+            background: linear-gradient(135deg, var(--primary-light), var(--secondary-color));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            letter-spacing: -0.5px;
         }
 
         .nav-link {
-            font-weight: 500;
-            color: #334155 !important;
+            font-weight: 600;
+            color: #cbd5e1 !important;
             margin: 0 0.5rem;
-            transition: color 0.3s ease;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
         }
 
-        .nav-link:hover {
-            color: var(--primary-color) !important;
+        .nav-link:hover, .nav-link.active {
+            color: var(--primary-light) !important;
+            transform: translateY(-1px);
         }
 
         /* Hero Section */
         .hero-section {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: transparent;
             min-height: 90vh;
             display: flex;
             align-items: center;
@@ -71,8 +90,8 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="grid" width="100" height="100" patternUnits="userSpaceOnUse"><path d="M 100 0 L 0 0 0 100" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
-            opacity: 0.3;
+            background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="grid" width="100" height="100" patternUnits="userSpaceOnUse"><path d="M 100 0 L 0 0 0 100" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            opacity: 0.5;
         }
 
         .hero-content {
@@ -82,103 +101,156 @@
         }
 
         .hero-title {
-            font-size: 3.5rem;
+            font-family: 'Outfit', sans-serif;
+            font-size: 3.8rem;
             font-weight: 800;
             margin-bottom: 1.5rem;
             line-height: 1.2;
+            letter-spacing: -1.5px;
+            background: linear-gradient(135deg, #ffffff 30%, #c7d2fe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .hero-description {
             font-size: 1.25rem;
-            margin-bottom: 2rem;
-            opacity: 0.95;
-            line-height: 1.6;
+            margin-bottom: 2.5rem;
+            color: #cbd5e1;
+            line-height: 1.7;
         }
 
         .btn-get-started {
-            background: white;
-            color: var(--primary-color);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
             padding: 1rem 2.5rem;
             font-size: 1.1rem;
             font-weight: 600;
-            border-radius: 50px;
+            border-radius: 14px;
             border: none;
             transition: all 0.3s ease;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
         }
 
         .btn-get-started:hover {
             transform: translateY(-3px);
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
-            background: #f0f0f0;
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.5);
+            color: white;
+        }
+
+        /* Survey CTA */
+        .survey-section {
+            padding: 4rem 1rem;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.02);
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .survey-heading {
+            color: #ffffff;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-survey {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            background: linear-gradient(135deg, var(--accent-color) 0%, var(--secondary-color) 100%);
+            color: #ffffff;
+            padding: 0.85rem 2.2rem;
+            border-radius: 14px;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(236, 72, 153, 0.3);
+        }
+
+        .btn-survey:hover {
+            background: linear-gradient(135deg, var(--accent-color) 0%, var(--secondary-color) 100%);
+            color: #ffffff;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(236, 72, 153, 0.5);
         }
 
         /* Features Section */
         .features-section {
-            padding: 5rem 0;
-            background: var(--light-bg);
+            padding: 6rem 0;
+            background: transparent;
         }
 
         .section-title {
-            font-size: 2.5rem;
-            font-weight: 700;
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.8rem;
+            font-weight: 800;
             text-align: center;
             margin-bottom: 1rem;
-            color: var(--dark-bg);
+            color: #ffffff;
+            letter-spacing: -1px;
         }
 
         .section-subtitle {
             text-align: center;
-            color: #64748b;
-            font-size: 1.1rem;
-            margin-bottom: 4rem;
+            color: #cbd5e1;
+            font-size: 1.15rem;
+            margin-bottom: 5rem;
         }
 
         .feature-card {
-            background: white;
-            border-radius: 20px;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 24px;
             padding: 2.5rem;
             height: 100%;
-            transition: all 0.3s ease;
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
         }
 
         .feature-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            transform: translateY(-8px);
+            border-color: rgba(99, 102, 241, 0.25);
+            box-shadow: 0 15px 40px rgba(99, 102, 241, 0.1);
         }
 
         .feature-icon {
-            width: 70px;
-            height: 70px;
-            border-radius: 15px;
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2rem;
+            font-size: 1.8rem;
             margin-bottom: 1.5rem;
             background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             color: white;
         }
 
         .feature-title {
+            font-family: 'Outfit', sans-serif;
             font-size: 1.5rem;
             font-weight: 700;
             margin-bottom: 1rem;
-            color: var(--dark-bg);
+            color: #ffffff;
         }
 
         .feature-description {
-            color: #64748b;
+            color: var(--text-muted);
             line-height: 1.7;
         }
 
         /* Footer */
         .footer {
-            background: var(--dark-bg);
-            color: white;
-            padding: 3rem 0 2rem;
+            background: #06080e;
+            color: #cbd5e1;
+            padding: 4rem 0 2rem;
+            border-top: 1px solid var(--border-color);
         }
 
         .footer-content {
@@ -186,8 +258,10 @@
         }
 
         .footer-title {
-            font-size: 1.5rem;
-            font-weight: 700;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: #ffffff;
             margin-bottom: 1rem;
         }
 
@@ -197,8 +271,8 @@
         }
 
         .footer-divider {
-            border-top: 1px solid #334155;
-            margin: 2rem 0 1rem;
+            border-top: 1px solid var(--border-color);
+            margin: 2.5rem 0 1.5rem;
         }
 
         .footer-copyright {
@@ -209,7 +283,7 @@
         /* Responsive */
         @media (max-width: 768px) {
             .hero-title {
-                font-size: 2.5rem;
+                font-size: 2.8rem;
             }
 
             .hero-description {
@@ -217,14 +291,23 @@
             }
 
             .section-title {
-                font-size: 2rem;
+                font-size: 2.2rem;
+            }
+
+            .survey-heading {
+                font-size: 1.25rem;
+            }
+
+            .btn-survey {
+                width: 100%;
+                max-width: 320px;
             }
         }
     </style>
 </head>
 <body>
     <!-- Navigation Bar -->
-    <nav class="navbar navbar-expand-lg navbar-light fixed-top">
+    <nav class="navbar navbar-expand-lg fixed-top">
         <div class="container">
             <a class="navbar-brand" href="#">
                 <i class="bi bi-graph-up-arrow"></i> LearningPath AI
@@ -249,6 +332,9 @@
                     <li class="nav-item">
                         <a class="nav-link" href="dashboard.html">Dashboard</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="demo-hub.html">Demo Hub</a>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -268,6 +354,21 @@
                     </a>
                 </div>
             </div>
+        </div>
+    </section>
+
+    <section class="survey-section">
+        <div class="container d-flex flex-column align-items-center">
+            <h2 class="survey-heading">Help us improve by taking this survey</h2>
+            <a
+                href="https://docs.google.com/forms/d/e/1FAIpQLSe0z6cgiqiKpTaY5P3Ety3RWMZ2Z9MXER2id9Ef83ytEoFezg/viewform"
+                class="btn-survey"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                <i class="bi bi-clipboard-check"></i>
+                Take Survey
+            </a>
         </div>
     </section>
 
@@ -364,6 +465,9 @@
             }
         });
     </script>
+    
+    <!-- Floating AI Tutor Chatbot -->
+    <script src="copilot.js"></script>
 </body>
 </html>
 
