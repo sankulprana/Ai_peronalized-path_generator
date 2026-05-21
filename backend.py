@@ -185,17 +185,8 @@ def recommend_courses(learner_profile, assessment_skills, skill_gaps):
 
 @app.route('/')
 def home():
-    """Home endpoint"""
-    return jsonify({
-        'message': 'AI-Powered Personalized Learning Path Generator API',
-        'version': '1.0.0',
-        'endpoints': {
-            'POST /register': 'Register learner profile',
-            'POST /assessment': 'Submit skill assessment',
-            'POST /generate-path': 'Generate personalized learning path',
-            'GET /dashboard/<user_id>': 'Get dashboard data'
-        }
-    })
+    """Home endpoint - serve index.html"""
+    return send_from_directory('.', 'index.html')
 
 @app.route('/register', methods=['POST'])
 def register_learner():

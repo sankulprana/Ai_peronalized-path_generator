@@ -1,15 +1,17 @@
-# Virtual Environment
+# Virtual environment
 venv/
 ENV/
 env/
-.venv/
+.env
 
 # Python caching
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
+*.py[cod]
+*$py.class
 
-# Operating System Files
+# Vercel configuration/cache
+.vercel/
+
+# OS files
 .DS_Store
 Thumbs.db

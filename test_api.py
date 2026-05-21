@@ -106,7 +106,10 @@ def main():
         print("\n0. Testing / endpoint...")
         response = requests.get(BASE_URL)
         print(f"Status: {response.status_code}")
-        print(f"Response: {json.dumps(response.json(), indent=2)}")
+        try:
+            print(f"Response: {json.dumps(response.json(), indent=2)}")
+        except Exception:
+            print(f"Response (non-JSON): {response.text[:200]}...")
         
         # Test registration
         user_id = test_register()
@@ -135,14 +138,14 @@ def main():
         test_dashboard(user_id)
         
         print("\n" + "=" * 50)
-        print("✅ All tests completed!")
+        print("SUCCESS: All tests completed!")
         print("=" * 50)
         
     except requests.exceptions.ConnectionError:
-        print("\n❌ Error: Could not connect to the server.")
-        print("Make sure Flask server is running: python app.py")
+        print("\nERROR: Could not connect to the server.")
+        print("Make sure Flask server is running: python backend.py")
     except Exception as e:
-        print(f"\n❌ Error: {e}")
+        print(f"\nERROR: {e}")
 
 if __name__ == "__main__":
     main()
