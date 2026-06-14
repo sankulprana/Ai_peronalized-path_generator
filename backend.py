@@ -183,10 +183,7 @@ def recommend_courses(learner_profile, assessment_skills, skill_gaps):
 
 # API Endpoints
 
-@app.route('/')
-def home():
-    """Home endpoint - serve index.html"""
-    return send_from_directory('.', 'index.html')
+# Served by the serve_react wildcard handler at the bottom
 
 @app.route('/register', methods=['POST'])
 def register_learner():
@@ -781,10 +778,16 @@ def chat():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/<path:filename>')
-def serve_static(filename):
-    """Serve static HTML, JS, CSS files from root directory"""
-    return send_from_directory('.', filename)
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def serve_react(path):
+    """Serve React built app static files from dist folder"""
+    if path != "":
+        normalized_path = os.path.normpath(os.path.join('dist', path))
+        if os.path.exists(normalized_path) and os.path.isfile(normalized_path):
+            dir_name, file_name = os.path.split(normalized_path)
+            return send_from_directory(dir_name, file_name)
+    return send_from_directory('dist', 'index.html')
 
 if __name__ == '__main__':
     # Create data directory if it doesn't exist

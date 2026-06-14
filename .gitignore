@@ -15,3 +15,10 @@ __pycache__/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Node dependencies and build files
+node_modules/
+dist/
+
+# Backup files
+index_backup.html
