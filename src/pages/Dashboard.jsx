@@ -12,6 +12,7 @@ function Dashboard() {
   const [totalCount, setTotalCount] = useState(0);
   const [progressPercentage, setProgressPercentage] = useState(0);
   const [learnerHours, setLearnerHours] = useState({ target: 10, completed: 0 });
+  const [achievements, setAchievements] = useState({ xp: 0, streak: 0, badges: [], last_active: null });
 
   // Refs for Chart.js
   const doughnutRef = useRef(null);
@@ -67,6 +68,18 @@ function Dashboard() {
           target: targetHours,
           completed: completedHoursSum
         });
+
+        // Fetch achievements
+        try {
+          const achRes = await fetch(`${API_BASE}/achievements/${userId}`);
+          const achData = await achRes.json();
+          if (achRes.ok && achData.success) {
+            setAchievements(achData.achievements);
+            localStorage.setItem('achievements', JSON.stringify(achData.achievements));
+          }
+        } catch (err) {
+          console.warn("Failed to fetch achievements:", err);
+        }
       } else {
         loadOfflineFallback();
       }
@@ -128,10 +141,34 @@ function Dashboard() {
       target: targetHours,
       completed: completedHoursSum
     });
+
+    const cachedAchievements = localStorage.getItem('achievements');
+    if (cachedAchievements) {
+      try {
+        setAchievements(JSON.parse(cachedAchievements));
+      } catch (e) {}
+    } else {
+      setAchievements({
+        xp: 150,
+        streak: 3,
+        badges: ['first_steps', 'streak_starter'],
+        last_active: new Date().toISOString().split('T')[0]
+      });
+    }
   };
 
   useEffect(() => {
     fetchDashboardData();
+  }, [userId]);
+
+  useEffect(() => {
+    const handleProgressChange = () => {
+      fetchDashboardData();
+    };
+    window.addEventListener('progress-change', handleProgressChange);
+    return () => {
+      window.removeEventListener('progress-change', handleProgressChange);
+    };
   }, [userId]);
 
   // Render/Update charts when courses or hours change
@@ -273,42 +310,95 @@ function Dashboard() {
           </div>
 
           {/* Progress Tracker Cards */}
-          <div className="row g-4 mb-5">
+          <div className="row g-4 mb-4">
+            {/* Row 1: Gamified Stats */}
             <div className="col-md-3 col-sm-6">
-              <div className="stat-card">
-                <div className="stat-icon primary">
-                  <i className="bi bi-book"></i>
+              <div className="stat-card" style={{ borderLeft: '4px solid #ef4444' }}>
+                <div className="stat-icon warning text-danger">
+                  <i className="bi bi-fire"></i>
                 </div>
-                <div className="stat-label">Total Courses</div>
-                <div className="stat-value">{totalCount}</div>
+                <div className="stat-label">Daily Streak</div>
+                <div className="stat-value">{achievements.streak} Days</div>
               </div>
             </div>
             <div className="col-md-3 col-sm-6">
-              <div className="stat-card">
-                <div className="stat-icon success">
-                  <i className="bi bi-check-circle"></i>
-                </div>
-                <div className="stat-label">Completed</div>
-                <div className="stat-value">{completedCount}</div>
-              </div>
-            </div>
-            <div className="col-md-3 col-sm-6">
-              <div className="stat-card">
+              <div className="stat-card" style={{ borderLeft: '4px solid #f59e0b' }}>
                 <div className="stat-icon warning">
-                  <i className="bi bi-percent"></i>
+                  <i className="bi bi-star-fill text-warning"></i>
                 </div>
-                <div className="stat-label">Overall Progress</div>
-                <div className="stat-value">{progressPercentage}%</div>
+                <div className="stat-label">Total Experience</div>
+                <div className="stat-value">{achievements.xp} XP</div>
+              </div>
+            </div>
+            <div className="col-md-3 col-sm-6">
+              <div className="stat-card" style={{ borderLeft: '4px solid #6366f1' }}>
+                <div className="stat-icon primary">
+                  <i className="bi bi-trophy-fill text-primary"></i>
+                </div>
+                <div className="stat-label">Learner Level</div>
+                <div className="stat-value">Lvl {Math.floor(achievements.xp / 100) + 1}</div>
+              </div>
+            </div>
+            <div className="col-md-3 col-sm-6">
+              <div className="stat-card" style={{ borderLeft: '4px solid #10b981' }}>
+                <div className="stat-icon success">
+                  <i className="bi bi-patch-check-fill text-emerald"></i>
+                </div>
+                <div className="stat-label">Badges Unlocked</div>
+                <div className="stat-value">{(achievements.badges || []).length} Earned</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="row g-4 mb-5">
+            {/* Row 2: Progress Stats */}
+            <div className="col-md-3 col-sm-6">
+              <div className="stat-card">
+                <div className="stat-label text-muted small">Total Courses</div>
+                <div className="stat-value text-white-50">{totalCount}</div>
               </div>
             </div>
             <div className="col-md-3 col-sm-6">
               <div className="stat-card">
-                <div className="stat-icon info">
-                  <i className="bi bi-clock-history"></i>
-                </div>
-                <div className="stat-label">Spent Hours</div>
-                <div className="stat-value">{learnerHours.completed}h</div>
+                <div className="stat-label text-muted small">Completed Courses</div>
+                <div className="stat-value text-white-50">{completedCount}</div>
               </div>
+            </div>
+            <div className="col-md-3 col-sm-6">
+              <div className="stat-card">
+                <div className="stat-label text-muted small">Overall Progress</div>
+                <div className="stat-value text-white-50">{progressPercentage}%</div>
+              </div>
+            </div>
+            <div className="col-md-3 col-sm-6">
+              <div className="stat-card">
+                <div className="stat-label text-muted small">Hours Completed</div>
+                <div className="stat-value text-white-50">{learnerHours.completed}h / {learnerHours.target}h</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Level Progress Bar */}
+          <div className="glass-card mb-5 text-start">
+            <div className="d-flex justify-content-between align-items-center mb-2">
+              <div className="fw-bold text-white">Level Progression</div>
+              <div className="text-muted small">
+                {achievements.xp % 100} / 100 XP to Level {Math.floor(achievements.xp / 100) + 2}
+              </div>
+            </div>
+            <div className="progress bg-dark bg-opacity-50" style={{ height: '10px', borderRadius: '5px' }}>
+              <div 
+                className="progress-bar bg-gradient" 
+                role="progressbar" 
+                style={{ 
+                  width: `${achievements.xp % 100}%`,
+                  borderRadius: '5px',
+                  background: 'linear-gradient(90deg, #6366f1 0%, #a855f7 100%)'
+                }}
+                aria-valuenow={achievements.xp % 100} 
+                aria-valuemin="0" 
+                aria-valuemax="100"
+              ></div>
             </div>
           </div>
 
@@ -334,6 +424,61 @@ function Dashboard() {
                   <canvas ref={barRef}></canvas>
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* Achievements & Badges Showcase */}
+          <div className="glass-card mb-5">
+            <h5 className="mb-4 text-white fw-bold text-start">
+              <i className="bi bi-trophy-fill text-warning me-2"></i>Achievements & Badges Showcase
+            </h5>
+            <div className="row row-cols-2 row-cols-md-6 g-3">
+              {Object.entries({
+                'first_steps': { name: 'First Steps', desc: 'Started path and earned XP', icon: 'bi-rocket-takeoff text-primary' },
+                'streak_starter': { name: 'Streak Starter', desc: 'Daily study streak', icon: 'bi-fire text-danger' },
+                'xp_champion': { name: 'XP Champion', desc: 'Accumulated 150+ XP', icon: 'bi-award text-warning' },
+                'quiz_master': { name: 'Quiz Master', desc: 'Completed milestone quiz', icon: 'bi-patch-check-fill text-success' },
+                'code_warrior': { name: 'Code Warrior', desc: 'Passed coding challenge', icon: 'bi-code-square text-info' },
+                'web_wizard': { name: 'Domain Wizard', desc: 'Completed all milestones', icon: 'bi-gem text-purple' }
+              }).map(([key, badge]) => {
+                const userBadges = achievements.badges || [];
+                const isUnlocked = userBadges.includes(key) || (key === 'web_wizard' && userBadges.some(b => b.endsWith('_wizard')));
+                
+                let displayBadge = badge;
+                if (key === 'web_wizard') {
+                  const wizardBadge = userBadges.find(b => b.endsWith('_wizard'));
+                  if (wizardBadge) {
+                    displayBadge = {
+                      name: wizardBadge.split('_')[0].toUpperCase() + ' Wizard',
+                      desc: `Completed all ${wizardBadge.split('_')[0]} milestones`,
+                      icon: 'bi-gem text-purple'
+                    };
+                  }
+                }
+
+                return (
+                  <div key={key} className="col">
+                    <div className="p-3 text-center rounded-3 h-100" style={{
+                      background: isUnlocked ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.01)',
+                      border: isUnlocked ? '1px solid rgba(99, 102, 241, 0.3)' : '1px solid rgba(255, 255, 255, 0.05)',
+                      opacity: isUnlocked ? 1 : 0.4,
+                      filter: isUnlocked ? 'none' : 'grayscale(100%)',
+                      transition: 'all 0.3s ease'
+                    }}>
+                      <div className="mb-2 position-relative d-inline-block">
+                        <i className={`bi ${displayBadge.icon}`} style={{ fontSize: '2rem' }}></i>
+                        {!isUnlocked && (
+                          <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-dark border border-secondary" style={{ fontSize: '0.65rem' }}>
+                            <i className="bi bi-lock-fill text-muted"></i>
+                          </span>
+                        )}
+                      </div>
+                      <div className="fw-bold text-white small">{displayBadge.name}</div>
+                      <div className="text-muted" style={{ fontSize: '10px', lineHeight: '1.2' }}>{displayBadge.desc}</div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
 

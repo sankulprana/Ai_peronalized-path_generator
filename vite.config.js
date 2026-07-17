@@ -6,6 +6,14 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
+      '/signup': {
+        target: 'http://127.0.0.1:5000',
+        changeOrigin: true
+      },
+      '/login': {
+        target: 'http://127.0.0.1:5000',
+        changeOrigin: true
+      },
       '/register': {
         target: 'http://127.0.0.1:5000',
         changeOrigin: true

@@ -4,15 +4,730 @@ import pandas as pd
 import os
 from datetime import datetime
 import json
+import hashlib
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for frontend integration
 
+def hash_password(password):
+    return hashlib.sha256(password.encode('utf-8')).hexdigest()
+
 # Data storage (in-memory for simplicity - use database in production)
+users = {
+    'learner.demo@gmail.com': {
+        'name': 'Demo Learner',
+        'email': 'learner.demo@gmail.com',
+        'password_hash': hash_password('password123')
+    }
+}
 learner_profiles = {}
 skill_assessments = {}
 learning_paths = {}
 progress_data = {}
+
+# User achievements tracking (XP, streak, last active date, badges)
+user_achievements = {}
+
+def get_user_achievements(user_id):
+    if user_id not in user_achievements:
+        user_achievements[user_id] = {
+            'xp': 50,
+            'streak': 1,
+            'last_active': datetime.now().strftime('%Y-%m-%d'),
+            'badges': ['first_steps']
+        }
+    return user_achievements[user_id]
+
+# Pre-defined domain roadmaps with resources, practice quizzes and challenges
+DOMAINS_ROADMAPS = {
+    'web-development': [
+        {
+            "id": "wd_1",
+            "phase": "Phase 1: Frontend Foundations",
+            "title": "HTML Semantic Layouts",
+            "description": "Learn semantic grids, custom media queries, and modern flexbox structures for search engine optimized layouts.",
+            "xpReward": 50,
+            "resources": {
+                "youtube": "https://www.youtube.com/watch?v=UB1O30zR-EE",
+                "youtubeTitle": "HTML & CSS Full Course for Beginners by freeCodeCamp",
+                "docs": "https://developer.mozilla.org/en-US/docs/Web/HTML",
+                "docsTitle": "MDN Web Docs: HTML basics",
+                "course": "HTML and CSS: Design and Build Websites"
+            },
+            "quiz": {
+                "questions": [
+                    {"question": "Which HTML5 element represents self-contained content?", "options": ["<article>", "<section>", "<div>", "<aside>"], "answer": 0},
+                    {"question": "What is the correct tag for site-wide navigation?", "options": ["<navigation>", "<nav>", "<menu>", "<ul>"], "answer": 1},
+                    {"question": "Which tag represents the dominant content of the body?", "options": ["<main>", "<primary>", "<section>", "<div>"], "answer": 0}
+                ]
+            },
+            "challenge": {
+                "title": "Create a Semantic Layout Header",
+                "description": "Complete the HTML header structure below. It must contain a <header> element with a <nav> containing an unordered list with three items: Home, About, and Contact.",
+                "placeholder": "<!-- Write your HTML structure here -->\n<header>\n  \n</header>",
+                "testCase": "code.includes('<header>') && code.includes('<nav>') && code.includes('<ul>') && code.includes('<li>') && code.includes('Home') && code.includes('About') && code.includes('Contact')"
+            }
+        },
+        {
+            "id": "wd_2",
+            "phase": "Phase 1: Frontend Foundations",
+            "title": "CSS Grid & Responsive Design",
+            "description": "Master flexible grids, CSS grid-template-areas, CSS variables, and fluid typography rules.",
+            "xpReward": 50,
+            "resources": {
+                "youtube": "https://www.youtube.com/watch?v=rg7Fvvl3taU",
+                "youtubeTitle": "CSS Grid Tutorial by Traversy Media",
+                "docs": "https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Grid_Layout",
+                "docsTitle": "MDN Web Docs: CSS Grid Layout",
+                "course": "CSS - The Complete Guide 2026"
+            },
+            "quiz": {
+                "questions": [
+                    {"question": "Which property defines a grid container?", "options": ["display: grid-layout", "display: table-grid", "display: grid", "grid-template: columns"], "answer": 2},
+                    {"question": "How do you make grid items span multiple tracks?", "options": ["grid-span", "grid-column / grid-row", "track-span", "grid-area-span"], "answer": 1},
+                    {"question": "Which unit represents a fraction of the free space in CSS Grid?", "options": ["fr", "flex", "%", "px"], "answer": 0}
+                ]
+            },
+            "challenge": {
+                "title": "Create a 3-Column Responsive Grid",
+                "description": "Write a CSS rule for a grid container that creates 3 equal columns of size 1fr using the repeat function.",
+                "placeholder": "/* Write your CSS rules here */\n.grid-container {\n  display: grid;\n  \n}",
+                "testCase": "code.includes('display:\\s*grid') && code.includes('grid-template-columns') && code.includes('repeat(3,\\s*1fr)')"
+            }
+        },
+        {
+            "id": "wd_3",
+            "phase": "Phase 2: Modern JS & Dynamic Logic",
+            "title": "JavaScript ES6+ & Promises",
+            "description": "Master arrow functions, array destructuring, fetch requests, and promise chains.",
+            "xpReward": 60,
+            "resources": {
+                "youtube": "https://www.youtube.com/watch?v=hdI2bqOjy3c",
+                "youtubeTitle": "JavaScript ES6+ Tutorial by Programming with Mosh",
+                "docs": "https://developer.mozilla.org/en-US/docs/Web/JavaScript",
+                "docsTitle": "MDN Web Docs: JavaScript Reference",
+                "course": "The Complete JavaScript Course: From Zero to Expert!"
+            },
+            "quiz": {
+                "questions": [
+                    {"question": "What is the output of `typeof []` in JavaScript?", "options": ["array", "list", "object", "undefined"], "answer": 2},
+                    {"question": "Which JS method returns a new array with all elements that pass a test?", "options": ["map()", "filter()", "find()", "reduce()"], "answer": 1},
+                    {"question": "Which keyword is used to handle asynchronous operations cleanly?", "options": ["wait", "async/await", "then", "defer"], "answer": 1}
+                ]
+            },
+            "challenge": {
+                "title": "Filter Even Numbers",
+                "description": "Write a JavaScript function `filterEvens(arr)` that filters an array of numbers and returns a new array with only the even numbers.",
+                "placeholder": "function filterEvens(arr) {\n  // Write your code here\n  \n}",
+                "testCase": "code.includes('filter') && code.includes('return')"
+            }
+        },
+        {
+            "id": "wd_4",
+            "phase": "Phase 3: Frontend Frameworks",
+            "title": "React Components & React Hooks",
+            "description": "Build modern functional components using useState, useEffect, and custom hooks.",
+            "xpReward": 70,
+            "resources": {
+                "youtube": "https://www.youtube.com/watch?v=w7ejDZ8SWv8",
+                "youtubeTitle": "React JS Full Course for Beginners by freeCodeCamp",
+                "docs": "https://react.dev",
+                "docsTitle": "React Official Documentation",
+                "course": "React - The Complete Guide (incl. Hooks, Router)"
+            },
+            "quiz": {
+                "questions": [
+                    {"question": "Which React hook runs side effects in functional components?", "options": ["useState", "useEffect", "useContext", "useReducer"], "answer": 1},
+                    {"question": "What must React components return?", "options": ["JSX", "HTML string", "JavaScript function", "Objects only"], "answer": 0},
+                    {"question": "How do you pass data from a parent component to a child?", "options": ["State", "Props", "Direct call", "API fetch"], "answer": 1}
+                ]
+            },
+            "challenge": {
+                "title": "Toggle Component Hook",
+                "description": "Complete the React code snippet to initialize a state variable `isOpen` to `false` using the `useState` hook.",
+                "placeholder": "import React, { useState } from 'react';\n\nfunction ToggleButton() {\n  // Initialize state here:\n  const [isOpen, setIsOpen] = useState(false);\n  \n  return <button onClick={() => setIsOpen(!isOpen)}>{isOpen ? 'Open' : 'Closed'}</button>;\n}",
+                "testCase": "code.includes('useState(false)') && code.includes('isOpen') && code.includes('setIsOpen')"
+            }
+        },
+        {
+            "id": "wd_5",
+            "phase": "Phase 4: Backend & APIs",
+            "title": "Node.js Express APIs & Databases",
+            "description": "Build HTTP servers in Express, wire up SQL queries, and design REST endpoints.",
+            "xpReward": 80,
+            "resources": {
+                "youtube": "https://www.youtube.com/watch?v=Oe421EPjeBE",
+                "youtubeTitle": "Node.js and Express Tutorial by freeCodeCamp",
+                "docs": "https://expressjs.com",
+                "docsTitle": "ExpressJS Official Website",
+                "course": "Node.js, Express & MongoDB Developer Bootcamp"
+            },
+            "quiz": {
+                "questions": [
+                    {"question": "Which method is used in Express to define a POST route?", "options": ["app.post()", "app.send()", "app.create()", "app.request()"], "answer": 0},
+                    {"question": "What is the purpose of middleware in Express?", "options": ["To compile JS", "To process requests before handlers run", "To connect frontend UI", "To format databases"], "answer": 1},
+                    {"question": "Which HTTP status code represents 'Internal Server Error'?", "options": ["200", "400", "404", "500"], "answer": 3}
+                ]
+            },
+            "challenge": {
+                "title": "Create an Express GET Route",
+                "description": "Write an Express GET route handler for the path '/api/status' that returns a JSON object: `{ 'status': 'OK' }`.",
+                "placeholder": "const express = require('express');\nconst app = express();\n\n// Write your GET route below:\n",
+                "testCase": "code.includes('get') && code.includes('/api/status') && code.includes('status') && code.includes('OK') && code.includes('json')"
+            }
+        }
+    ],
+    'data-science': [
+        {
+            "id": "ds_1",
+            "phase": "Phase 1: Fundamentals",
+            "title": "Python Basics & Slicing",
+            "description": "Learn syntax, list comprehensions, slicing, and clean coding paradigms in Python.",
+            "xpReward": 50,
+            "resources": {
+                "youtube": "https://www.youtube.com/watch?v=rfscVS0vtbw",
+                "youtubeTitle": "Python for Beginners by Programming with Mosh",
+                "docs": "https://docs.python.org/3/",
+                "docsTitle": "Python Official Documentation",
+                "course": "Python for Data Science (Udemy)"
+            },
+            "quiz": {
+                "questions": [
+                    {"question": "How do you select elements from index 2 to 5 (exclusive) in a Python list `x`?", "options": ["x[2:5]", "x[2-5]", "x[2 to 5]", "x[3:5]"], "answer": 0},
+                    {"question": "Which collection type is unordered, mutable, and key-value based?", "options": ["List", "Tuple", "Dictionary", "Set"], "answer": 2},
+                    {"question": "What does `def` represent in Python?", "options": ["Define variable", "Default", "Define function", "Define class"], "answer": 2}
+                ]
+            },
+            "challenge": {
+                "title": "List Comprehension Square",
+                "description": "Write a Python function `square_list(arr)` that returns a list of squares for each number in `arr` using list comprehension.",
+                "placeholder": "def square_list(arr):\n    # Write your list comprehension here\n    return ",
+                "testCase": "code.includes('for') && code.includes('in') && (code.includes('**2') || code.includes('* x') || code.includes('** 2'))"
+            }
+        },
+        {
+            "id": "ds_2",
+            "phase": "Phase 1: Fundamentals",
+            "title": "Numpy Array Calculations",
+            "description": "Master array math, broadcasting, boolean indexing, and matrix operations in Numpy.",
+            "xpReward": 50,
+            "resources": {
+                "youtube": "https://www.youtube.com/watch?v=QUT1VHiLgKQ",
+                "youtubeTitle": "NumPy Full Tutorial by freeCodeCamp",
+                "docs": "https://numpy.org/doc/stable/",
+                "docsTitle": "NumPy Reference Manual",
+                "course": "Data Science Boot Camp Numpy Basics"
+            },
+            "quiz": {
+                "questions": [
+                    {"question": "Which property returns the dimensions of a NumPy array?", "options": ["array.dims", "array.size", "array.shape", "array.length"], "answer": 2},
+                    {"question": "What is array broadcasting in NumPy?", "options": ["Streaming arrays on networks", "Performing operations on arrays of different shapes", "Reshaping arrays", "Concatenating arrays"], "answer": 1},
+                    {"question": "Which function is used to create an array of all zeros?", "options": ["np.empty()", "np.zeros()", "np.nulls()", "np.create_zeros()"], "answer": 1}
+                ]
+            },
+            "challenge": {
+                "title": "Array Matrix Multiplication",
+                "description": "Write a Python snippet to multiply two NumPy matrices `A` and `B` using the dot product method or `@` operator.",
+                "placeholder": "import numpy as np\n\ndef matrix_mult(A, B):\n    # Return matrix multiplication here\n    return ",
+                "testCase": "code.includes('@') || code.includes('dot') || code.includes('matmul')"
+            }
+        },
+        {
+            "id": "ds_3",
+            "phase": "Phase 2: Data wrangling",
+            "title": "Pandas DataFrames & Manipulation",
+            "description": "Learn cleaning datasets, merging tables, grouping metrics, and filtering rows.",
+            "xpReward": 60,
+            "resources": {
+                "youtube": "https://www.youtube.com/watch?v=VM7E89WECXo",
+                "youtubeTitle": "Pandas Tutorial by Corey Schafer",
+                "docs": "https://pandas.pydata.org/docs/",
+                "docsTitle": "Pandas Documentation",
+                "course": "Python for Data Analysis & Visualization"
+            },
+            "quiz": {
+                "questions": [
+                    {"question": "Which Pandas function is used to load a CSV file into a DataFrame?", "options": ["pd.load_csv()", "pd.read_csv()", "pd.open_csv()", "pd.csv_to_df()"], "answer": 1},
+                    {"question": "How do you drop columns with missing data in Pandas?", "options": ["df.drop_na()", "df.dropna(axis=1)", "df.remove_missing()", "df.dropna(axis=0)"], "answer": 1},
+                    {"question": "Which function groupings allow aggregate calculations in Pandas?", "options": ["df.groupby()", "df.aggregate()", "df.sum_by()", "df.group()"], "answer": 0}
+                ]
+            },
+            "challenge": {
+                "title": "Filter DataFrame Rows",
+                "description": "Write a snippet to filter rows in a DataFrame `df` where the column 'Age' is greater than 30.",
+                "placeholder": "import pandas as pd\n\ndef filter_age(df):\n    # Return filtered DataFrame\n    return ",
+                "testCase": "code.includes('df') && code.includes('Age') && code.includes('>') && code.includes('30')"
+            }
+        },
+        {
+            "id": "ds_4",
+            "phase": "Phase 3: Database query",
+            "title": "SQL Database Queries & Joins",
+            "description": "Master SQL aggregations, inner joins, subqueries, and table grouping.",
+            "xpReward": 70,
+            "resources": {
+                "youtube": "https://www.youtube.com/watch?v=HXV3zeQKqGY",
+                "youtubeTitle": "SQL Full Course for Beginners by freeCodeCamp",
+                "docs": "https://www.postgresql.org/docs/",
+                "docsTitle": "PostgreSQL Official Documentation",
+                "course": "SQL & Databases for Business Analysts"
+            },
+            "quiz": {
+                "questions": [
+                    {"question": "Which SQL join returns all rows when there is a match in either table?", "options": ["INNER JOIN", "LEFT JOIN", "RIGHT JOIN", "FULL OUTER JOIN"], "answer": 3},
+                    {"question": "How do you filter results returned by a GROUP BY clause in SQL?", "options": ["WHERE", "HAVING", "FILTER", "LIMIT"], "answer": 1},
+                    {"question": "Which aggregate function returns the total number of records?", "options": ["SUM()", "COUNT()", "TOTAL()", "MAX()"], "answer": 1}
+                ]
+            },
+            "challenge": {
+                "title": "Write an INNER JOIN Query",
+                "description": "Complete the SQL query to join the `orders` and `customers` tables on `customer_id`.",
+                "placeholder": "SELECT orders.id, customers.name\nFROM orders\n-- Add INNER JOIN statement below:\n",
+                "testCase": "code.lower().includes('inner join') && code.lower().includes('on') && code.lower().includes('customer_id')"
+            }
+        },
+        {
+            "id": "ds_5",
+            "phase": "Phase 4: Exploration",
+            "title": "Matplotlib & Seaborn Plots",
+            "description": "Draw scatter charts, boxplots, histograms, and heatmaps for statistical review.",
+            "xpReward": 80,
+            "resources": {
+                "youtube": "https://www.youtube.com/watch?v=DAQNHzOcO5A",
+                "youtubeTitle": "Matplotlib & Seaborn Tutorial by freeCodeCamp",
+                "docs": "https://matplotlib.org/stable/users/index.html",
+                "docsTitle": "Matplotlib User Guide",
+                "course": "Data Visualization Masterclass in Python"
+            },
+            "quiz": {
+                "questions": [
+                    {"question": "Which plot is best for illustrating correlations between two continuous variables?", "options": ["Histogram", "Bar Chart", "Scatter Plot", "Pie Chart"], "answer": 2},
+                    {"question": "What is the primary benefit of Seaborn over Matplotlib?", "options": ["Higher speed", "Simpler syntax for statistical plotting and themes", "Interactive 3D rendering", "Ability to run on web browsers natively"], "answer": 1},
+                    {"question": "Which command displays the generated plot on screen in Matplotlib?", "options": ["plt.display()", "plt.show()", "plt.plot()", "plt.render()"], "answer": 1}
+                ]
+            },
+            "challenge": {
+                "title": "Draw a Scatter Plot",
+                "description": "Complete the Python code to draw a scatter plot of `x` vs `y` using Matplotlib.",
+                "placeholder": "import matplotlib.pyplot as plt\n\ndef draw_scatter(x, y):\n    # Write scatter plot code here\n    \n    plt.show()",
+                "testCase": "code.includes('scatter') && code.includes('plt.')"
+            }
+        }
+    ],
+    'ai-ml': [
+        {
+            "id": "ai_1",
+            "phase": "Phase 1: Math Foundations",
+            "title": "Python & Linear Algebra",
+            "description": "Learn vectors, matrices, dot products, and basic linear algebraic calculations in Python.",
+            "xpReward": 50,
+            "resources": {
+                "youtube": "https://www.youtube.com/watch?v=fNk_zzaMoEs",
+                "youtubeTitle": "Linear Algebra for Machine Learning by 3Blue1Brown",
+                "docs": "https://numpy.org/doc/stable/reference/routines.linalg.html",
+                "docsTitle": "NumPy Linear Algebra Reference",
+                "course": "Mathematics for Machine Learning: Linear Algebra"
+            },
+            "quiz": {
+                "questions": [
+                    {"question": "What is a matrix in linear algebra?", "options": ["A 1D array of elements", "A 2D grid of numbers", "A scalar value", "A programming loop"], "answer": 1},
+                    {"question": "What does the dot product of two perpendicular vectors equal?", "options": ["1", "-1", "0", "Infinity"], "answer": 2},
+                    {"question": "Which NumPy function is used to transpose a matrix `A`?", "options": ["np.transpose(A) or A.T", "np.invert(A)", "A.reshape()", "A.reverse()"], "answer": 0}
+                ]
+            },
+            "challenge": {
+                "title": "Compute Matrix Transpose",
+                "description": "Write a Python snippet using NumPy that takes a matrix `M` and returns its transpose.",
+                "placeholder": "import numpy as np\n\ndef get_transpose(M):\n    # Return the transpose of M\n    return ",
+                "testCase": "code.includes('.T') || code.includes('transpose')"
+            }
+        },
+        {
+            "id": "ai_2",
+            "phase": "Phase 2: Supervised Learning",
+            "title": "Supervised Learning & Regression",
+            "description": "Master linear regression, cost functions, gradient descent, and evaluation metrics.",
+            "xpReward": 50,
+            "resources": {
+                "youtube": "https://www.youtube.com/watch?v=JcI5V12B580",
+                "youtubeTitle": "Linear Regression Complete Tutorial by StatQuest",
+                "docs": "https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html",
+                "docsTitle": "Scikit-Learn LinearRegression Docs",
+                "course": "Machine Learning Specialization by Andrew Ng"
+            },
+            "quiz": {
+                "questions": [
+                    {"question": "What is the primary goal of linear regression?", "options": ["To classify image classes", "To model relations by fitting a linear equation to observed data", "To cluster similar data points", "To reduce matrix dimensions"], "answer": 1},
+                    {"question": "What is the cost function used to measure in regression?", "options": ["Computation speed", "Memory layout", "Error between predicted and actual values", "Number of training loops"], "answer": 2},
+                    {"question": "Which algorithm is commonly used to minimize the cost function?", "options": ["Binary search", "Gradient Descent", "Dijkstra's Algorithm", "Random Search"], "answer": 1}
+                ]
+            },
+            "challenge": {
+                "title": "Train a Linear Model",
+                "description": "Complete the Python code using Scikit-Learn to fit a `LinearRegression` model using training data `X` and `y`.",
+                "placeholder": "from sklearn.linear_model import LinearRegression\n\ndef train_model(X, y):\n    model = LinearRegression()\n    # Fit the model and return it:\n    \n    return model",
+                "testCase": "code.includes('fit(X, y)') || code.includes('fit')"
+            }
+        },
+        {
+            "id": "ai_3",
+            "phase": "Phase 2: Supervised Learning",
+            "title": "Classification & Decision Trees",
+            "description": "Learn classification metrics (precision, recall), logistic regression, and decision tree structures.",
+            "xpReward": 60,
+            "resources": {
+                "youtube": "https://www.youtube.com/watch?v=_L39rEsx-LY",
+                "youtubeTitle": "Decision Trees Explained by StatQuest",
+                "docs": "https://scikit-learn.org/stable/modules/tree.html",
+                "docsTitle": "Scikit-Learn Decision Trees Docs",
+                "course": "Intro to Machine Learning with PyTorch & Scikit"
+            },
+            "quiz": {
+                "questions": [
+                    {"question": "Which metric is the ratio of correctly predicted positive observations to the total predicted positives?", "options": ["Accuracy", "Precision", "Recall", "F1 Score"], "answer": 1},
+                    {"question": "Which algorithm splits data nodes based on information gain or Gini impurity?", "options": ["K-Means", "Linear Regression", "Decision Tree", "Neural Network"], "answer": 2},
+                    {"question": "What is overfitting in machine learning?", "options": ["Model performs well on training data but poorly on unseen test data", "Model cannot learn the pattern from training data", "Model training is too fast", "Model has too few parameters"], "answer": 0}
+                ]
+            },
+            "challenge": {
+                "title": "Evaluate Model Precision",
+                "description": "Write a snippet using Scikit-Learn that computes the precision score given true labels `y_true` and predicted labels `y_pred`.",
+                "placeholder": "from sklearn.metrics import precision_score\n\ndef get_precision(y_true, y_pred):\n    # Return the precision score\n    return ",
+                "testCase": "code.includes('precision_score(y_true, y_pred)') || code.includes('precision_score')"
+            }
+        },
+        {
+            "id": "ai_4",
+            "phase": "Phase 3: Neural Networks",
+            "title": "Neural Networks & Deep Learning",
+            "description": "Understand artificial neurons, activation functions (ReLU, Sigmoid), backpropagation, and multi-layer perceptrons.",
+            "xpReward": 70,
+            "resources": {
+                "youtube": "https://www.youtube.com/watch?v=aircAruvnKk",
+                "youtubeTitle": "But what is a neural network? by 3Blue1Brown",
+                "docs": "https://www.tensorflow.org/guide/keras/sequential_model",
+                "docsTitle": "Keras Sequential Model Guide",
+                "course": "Deep Learning Specialization (Coursera)"
+            },
+            "quiz": {
+                "questions": [
+                    {"question": "What is the purpose of an activation function in neural networks?", "options": ["To normalize input speeds", "To introduce non-linearity", "To compute gradients", "To store node weights"], "answer": 1},
+                    {"question": "Which activation function is defined as f(x) = max(0, x)?", "options": ["Sigmoid", "Tanh", "ReLU", "Softmax"], "answer": 2},
+                    {"question": "What is backpropagation?", "options": ["Saving files to disk", "Propagating input values forward", "Calculating gradients of the loss function to update neural network weights", "Initializing weights to zero"], "answer": 2}
+                ]
+            },
+            "challenge": {
+                "title": "Add a Dense Layer in Keras",
+                "description": "Complete the Keras Sequential model definition below by adding a Dense layer with 64 units and a 'relu' activation function.",
+                "placeholder": "from tensorflow.keras.models import Sequential\nfrom tensorflow.keras.layers import Dense\n\ndef build_model():\n    model = Sequential([\n        # Add Dense layer here:\n        \n    ])\n    return model",
+                "testCase": "code.includes('Dense') && code.includes('64') && code.includes('relu')"
+            }
+        },
+        {
+            "id": "ai_5",
+            "phase": "Phase 4: Advanced Tuning",
+            "title": "Model Tuning & Hyperparameters",
+            "description": "Master cross-validation, grid search, learning rates, and regularization (L1/L2) to prevent overfitting.",
+            "xpReward": 80,
+            "resources": {
+                "youtube": "https://www.youtube.com/watch?v=1VbSnhG2VQA",
+                "youtubeTitle": "GridSearchCV and Hyperparameter Tuning by codebasics",
+                "docs": "https://scikit-learn.org/stable/modules/grid_search.html",
+                "docsTitle": "Scikit-Learn Grid Search Guide",
+                "course": "Machine Learning Engineering for Production (MLOps)"
+            },
+            "quiz": {
+                "questions": [
+                    {"question": "What is cross-validation used for?", "options": ["To encrypt training models", "To assess how the results of a statistical analysis will generalize to an independent dataset", "To double model parameters", "To speed up matrix dot products"], "answer": 1},
+                    {"question": "What does L2 regularization (Ridge) add to the loss function?", "options": ["Sum of absolute values of weights", "Sum of squared values of weights", "Square root of gradients", "Maximum value of inputs"], "answer": 1},
+                    {"question": "What happens if the learning rate is too high in gradient descent?", "options": ["The algorithm will never start", "The algorithm may overshoot the minimum and fail to converge", "The model overfitting increases", "The parameters will freeze to zero"], "answer": 1}
+                ]
+            },
+            "challenge": {
+                "title": "Grid Search Hyperparameters",
+                "description": "Complete the Scikit-Learn code to instantiate a `GridSearchCV` using a classifier `clf` and parameter grid `param_grid`.",
+                "placeholder": "from sklearn.model_selection import GridSearchCV\n\ndef get_search(clf, param_grid):\n    # Return GridSearchCV instance\n    return ",
+                "testCase": "code.includes('GridSearchCV(clf, param_grid)') || code.includes('GridSearchCV')"
+            }
+        }
+    ],
+    'cybersecurity': [
+        {
+            "id": "sec_1",
+            "phase": "Phase 1: Foundations",
+            "title": "Linux Command Line Basics",
+            "description": "Learn shell navigation, file permissions, pipe commands, and process management in Linux.",
+            "xpReward": 50,
+            "resources": {
+                "youtube": "https://www.youtube.com/watch?v=wbpDKzK_1c0",
+                "youtubeTitle": "Linux Command Line for Beginners by freeCodeCamp",
+                "docs": "https://www.linux.org/pages/manual/",
+                "docsTitle": "Linux Official Manual Pages",
+                "course": "Introduction to Linux for Cybersecurity"
+            },
+            "quiz": {
+                "questions": [
+                    {"question": "Which command displays your current working directory in Linux?", "options": ["ls", "dir", "pwd", "cd"], "answer": 2},
+                    {"question": "What does the command `chmod 755 filename` do?", "options": ["Deletes the file", "Gives read, write, execute to owner, and read/execute to group/others", "Hides the file from search", "Encrypts the file with a password"], "answer": 1},
+                    {"question": "Which character is used to pipe the output of one command as input to another?", "options": [">", "<", "|", "&"], "answer": 2}
+                ]
+            },
+            "challenge": {
+                "title": "Find Word in File Command",
+                "description": "Write a Linux bash command string to search for the word 'admin' in a file called `access.log` using the `grep` utility.",
+                "placeholder": "# Enter your shell command as a string below:\nconst command = \"\";",
+                "testCase": "code.includes('grep') && code.includes('admin') && code.includes('access.log')"
+            }
+        },
+        {
+            "id": "sec_2",
+            "phase": "Phase 2: Networking",
+            "title": "Computer Networking & Wireshark",
+            "description": "Learn TCP/IP stacks, DNS protocol, routing concepts, and analyze packet files in Wireshark.",
+            "xpReward": 50,
+            "resources": {
+                "youtube": "https://www.youtube.com/watch?v=qiQR5rTSshw",
+                "youtubeTitle": "Computer Networking Full Course by freeCodeCamp",
+                "docs": "https://www.wireshark.org/docs/",
+                "docsTitle": "Wireshark Documentation Library",
+                "course": "CompTIA Network+ Certification Preparation"
+            },
+            "quiz": {
+                "questions": [
+                    {"question": "Which layer of the OSI model is responsible for IP routing?", "options": ["Data Link", "Transport", "Network", "Application"], "answer": 2},
+                    {"question": "Which port number is standard for HTTPS traffic?", "options": ["80", "22", "443", "8080"], "answer": 2},
+                    {"question": "What does DNS stand for?", "options": ["Data Network System", "Domain Name System", "Dynamic Node Service", "Distributed Name Server"], "answer": 1}
+                ]
+            },
+            "challenge": {
+                "title": "Configure HTTP Port Check",
+                "description": "Write a JavaScript conditional that checks if a variable `port` is equal to the standard HTTP port (80) or the standard HTTPS port (443).",
+                "placeholder": "function isStandardWebPort(port) {\n  // Return true if standard HTTP/HTTPS port, otherwise false\n  return \n}",
+                "testCase": "code.includes('80') && code.includes('443')"
+            }
+        },
+        {
+            "id": "sec_3",
+            "phase": "Phase 3: Cryptography",
+            "title": "Cryptography & Secure Hashing",
+            "description": "Learn symmetric vs asymmetric encryption, key exchanges, and hashing functions (SHA-256).",
+            "xpReward": 60,
+            "resources": {
+                "youtube": "https://www.youtube.com/watch?v=N3bxcpply6M",
+                "youtubeTitle": "Cryptography Full Course by freeCodeCamp",
+                "docs": "https://docs.python.org/3/library/hashlib.html",
+                "docsTitle": "Python Hashlib Module Docs",
+                "course": "Cryptography in Cyber Defense (Coursera)"
+            },
+            "quiz": {
+                "questions": [
+                    {"question": "What is the main difference between symmetric and asymmetric encryption?", "options": ["Symmetric uses one key for encryption/decryption; asymmetric uses a public/private key pair", "Symmetric encryption is only for files; asymmetric is only for networks", "Symmetric uses public keys; asymmetric uses secret passwords", "Symmetric cannot be decrypted"], "answer": 0},
+                    {"question": "Which cryptographic function is one-way only (cannot be reversed)?", "options": ["AES-256", "RSA", "Hashing (e.g. SHA-256)", "DES"], "answer": 2},
+                    {"question": "What is 'salting' in password hashing?", "options": ["Encrypting the database configuration", "Adding random characters to passwords before hashing to protect against rainbow table attacks", "Compressing the hashed passwords", "Sharing the keys over secure tunnels"], "answer": 1}
+                ]
+            },
+            "challenge": {
+                "title": "Compute SHA-256 Hash",
+                "description": "Complete the Python code using the `hashlib` library to hash the string 'security101' in UTF-8 and return its hexadecimal representation.",
+                "placeholder": "import hashlib\n\ndef get_sha256(text):\n    # Return the SHA-256 hex digest\n    return ",
+                "testCase": "code.includes('sha256') && code.includes('hexdigest')"
+            }
+        },
+        {
+            "id": "sec_4",
+            "phase": "Phase 4: Web Security",
+            "title": "Web App Security & OWASP Top 10",
+            "description": "Learn SQL injection, Cross-Site Scripting (XSS), cross-site request forgery, and mitigation strategies.",
+            "xpReward": 70,
+            "resources": {
+                "youtube": "https://www.youtube.com/watch?v=2fEl3cKpytI",
+                "youtubeTitle": "Web Security & OWASP Top 10 by freeCodeCamp",
+                "docs": "https://owasp.org/www-project-top-ten/",
+                "docsTitle": "OWASP Top 10 Project Page",
+                "course": "Certified Ethical Hacker (CEH) Web Hacking"
+            },
+            "quiz": {
+                "questions": [
+                    {"question": "What is SQL Injection (SQLi)?", "options": ["Overloading databases with spam requests", "Injecting malicious SQL commands into form fields to hijack database queries", "Downloading the database content locally", "Compiling SQL queries to C code"], "answer": 1},
+                    {"question": "How do you protect against Cross-Site Scripting (XSS) in web applications?", "options": ["By using longer passwords", "By sanitizing and escaping all user input before rendering it in the DOM", "By disabling the firewall", "By hosting databases in different regions"], "answer": 1},
+                    {"question": "What does a CSRF attack do?", "options": ["Forces an authenticated user to execute unwanted actions on a web application in which they are currently authenticated", "Decrypts secure traffic on the server", "Steals the hardware details of the server", "Floods the network with packets"], "answer": 0}
+                ]
+            },
+            "challenge": {
+                "title": "Prevent SQL Injection",
+                "description": "Which of the following is the best way to prevent SQL Injection in database queries? Enter 'Parameterized Queries' or 'String Formatting'.",
+                "placeholder": "// Set bestMethod to: 'Parameterized Queries' or 'String Formatting'\nconst bestMethod = \"\";",
+                "testCase": "code.includes('Parameterized Queries')"
+            }
+        },
+        {
+            "id": "sec_5",
+            "phase": "Phase 5: Defenses",
+            "title": "Penetration Testing & Audits",
+            "description": "Learn port scanning in Nmap, vulnerability scanning, and compiling professional risk audit reports.",
+            "xpReward": 80,
+            "resources": {
+                "youtube": "https://www.youtube.com/watch?v=3Kq1MOf3GSo",
+                "youtubeTitle": "Penetration Testing Tutorial by freeCodeCamp",
+                "docs": "https://nmap.org/book/man.html",
+                "docsTitle": "Nmap Reference Guide",
+                "course": "CompTIA PenTest+ Certification Course"
+            },
+            "quiz": {
+                "questions": [
+                    {"question": "What is the primary objective of penetration testing?", "options": ["To build frontend UI layouts", "To identify security weaknesses and exploit them in a controlled, legal environment to assess risk", "To write database schemas", "To monitor daily study streaking stats"], "answer": 1},
+                    {"question": "Which tool is standard for scanning open ports on target hosts?", "options": ["Nmap", "Wireshark", "Metasploit", "Git"], "answer": 0},
+                    {"question": "What is a 'White Hat' hacker?", "options": ["A hacker who breaches systems illegally for profit", "An ethical cybersecurity professional who scans systems with authorization to repair leaks", "A hacker who does not use computers", "A developer who writes React components only"], "answer": 1}
+                ]
+            },
+            "challenge": {
+                "title": "Write Nmap Scan Command",
+                "description": "Write an Nmap command string to perform a service detection scan (-sV) on the IP address '192.168.1.1'.",
+                "placeholder": "# Enter nmap command below as a string:\nconst command = \"\";",
+                "testCase": "code.includes('nmap') && code.includes('-sV') && code.includes('192.168.1.1')"
+            }
+        }
+    ],
+    'computer-science': [
+        {
+            "id": "cs_1",
+            "phase": "Phase 1: Foundations",
+            "title": "Variables, Scopes & Data Types",
+            "description": "Learn variable declarations, mutable vs immutable storage types, and scopes in coding.",
+            "xpReward": 50,
+            "resources": {
+                "youtube": "https://www.youtube.com/watch?v=zOjov-2OZ0E",
+                "youtubeTitle": "Computer Science Basics by freeCodeCamp",
+                "docs": "https://developer.mozilla.org/en-US/docs/Glossary/Scope",
+                "docsTitle": "MDN Web Docs: Scope definition",
+                "course": "Computer Science 101 (edX)"
+            },
+            "quiz": {
+                "questions": [
+                    {"question": "What is the difference between global and local scope?", "options": ["Global is readable throughout the script; local is only accessible inside its enclosing block or function", "Global is faster than local", "Global is only for integers; local is for strings", "There is no difference"], "answer": 0},
+                    {"question": "Which data type represents a binary True/False?", "options": ["Integer", "String", "Boolean", "Float"], "answer": 2},
+                    {"question": "Which array property represents its length in JS?", "options": ["array.size", "array.length", "array.count", "array.width"], "answer": 1}
+                ]
+            },
+            "challenge": {
+                "title": "Calculate Area Function",
+                "description": "Write a JavaScript function `calcArea(w, h)` that takes width and height and returns the product (area).",
+                "placeholder": "function calcArea(w, h) {\n  // Return width * height\n  return \n}",
+                "testCase": "code.includes('w * h') || code.includes('w*h')"
+            }
+        },
+        {
+            "id": "cs_2",
+            "phase": "Phase 2: Algorithms",
+            "title": "Control Structures & Loops",
+            "description": "Learn loops (for, while), nested conditions, recursion, and search operations.",
+            "xpReward": 50,
+            "resources": {
+                "youtube": "https://www.youtube.com/watch?v=hCrO_c227kE",
+                "youtubeTitle": "Algorithms and Data Structures by freeCodeCamp",
+                "docs": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Loops_and_iteration",
+                "docsTitle": "MDN: Loops & Iterations Guide",
+                "course": "Data Structures & Algorithms in Python"
+            },
+            "quiz": {
+                "questions": [
+                    {"question": "What is a loop condition used for?", "options": ["To declare functions", "To determine when the loop should stop iterating", "To encrypt strings", "To load HTML tags"], "answer": 1},
+                    {"question": "What is recursion?", "options": ["A function that calls itself to solve smaller subproblems", "An infinite loop in memory", "Writing CSS grid rules", "Deploying database queries"], "answer": 0},
+                    {"question": "Which loop guarantees that the body runs at least once?", "options": ["for", "while", "do-while", "foreach"], "answer": 2}
+                ]
+            },
+            "challenge": {
+                "title": "Write a Loop Condition",
+                "description": "Write a JavaScript loop condition checking if `i` is less than `10`.",
+                "placeholder": "for (let i = 0; /* condition */; i++) {\n}",
+                "testCase": "code.includes('i < 10') || code.includes('i<10')"
+            }
+        },
+        {
+            "id": "cs_3",
+            "phase": "Phase 3: Core Abstractions",
+            "title": "Data Structures (Lists & Dicts)",
+            "description": "Understand arrays, linked lists, stacks, queues, hash maps, and key-value dictionaries.",
+            "xpReward": 60,
+            "resources": {
+                "youtube": "https://www.youtube.com/watch?v=RBSGKlAoiMs",
+                "youtubeTitle": "Data Structures Easy to Advanced by freeCodeCamp",
+                "docs": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map",
+                "docsTitle": "MDN: Map object guide",
+                "course": "Algorithms & Data Structures Part 1 (Princeton)"
+            },
+            "quiz": {
+                "questions": [
+                    {"question": "Which data structure follows Last-In, First-Out (LIFO)?", "options": ["Queue", "Stack", "Linked List", "Tree"], "answer": 1},
+                    {"question": "What is the time complexity of looking up a key in a hash map on average?", "options": ["O(N)", "O(log N)", "O(1)", "O(N^2)"], "answer": 2},
+                    {"question": "Which structure connects elements using nodes with data and pointer links?", "options": ["Array", "Linked List", "Hash Map", "Tuple"], "answer": 1}
+                ]
+            },
+            "challenge": {
+                "title": "Queue Enqueue Operation",
+                "description": "Complete the JavaScript class method `enqueue(item)` that appends an item to the end of the `this.items` array.",
+                "placeholder": "class Queue {\n  constructor() { this.items = []; }\n  enqueue(item) {\n    // Appends item to this.items\n    \n  }\n}",
+                "testCase": "code.includes('push(item)')"
+            }
+        },
+        {
+            "id": "cs_4",
+            "phase": "Phase 4: Optimization",
+            "title": "Big O Notation & Complexities",
+            "description": "Master measuring algorithmic efficiencies, worst-case scaling, time-space trade-offs.",
+            "xpReward": 70,
+            "resources": {
+                "youtube": "https://www.youtube.com/watch?v=V6mKVRU1evU",
+                "youtubeTitle": "Big O Notation Explained by freeCodeCamp",
+                "docs": "https://en.wikipedia.org/wiki/Big_O_notation",
+                "docsTitle": "Wikipedia: Big O Notation",
+                "course": "Analysis of Algorithms (Stanford)"
+            },
+            "quiz": {
+                "questions": [
+                    {"question": "What does Big O notation describe?", "options": ["Maximum number of lines in a file", "The worst-case scaling behavior of an algorithm's run-time as input size grows", "Database server memory cost in dollars", "Number of imports in code"], "answer": 1},
+                    {"question": "What is the complexity of a nested loop checking all pairs of an N-element array?", "options": ["O(1)", "O(N)", "O(N log N)", "O(N^2)"], "answer": 3},
+                    {"question": "Which time complexity is most efficient for large inputs?", "options": ["O(N^2)", "O(N)", "O(log N)", "O(2^N)"], "answer": 2}
+                ]
+            },
+            "challenge": {
+                "title": "Write O(1) Access Check",
+                "description": "Write a JavaScript function `getFirst(arr)` that accesses the first item of an array, which represents an O(1) constant-time lookup.",
+                "placeholder": "function getFirst(arr) {\n  // Return the first element of arr\n  return \n}",
+                "testCase": "code.includes('arr[0]')"
+            }
+        },
+        {
+            "id": "cs_5",
+            "phase": "Phase 5: Deployments",
+            "title": "Version Control with Git",
+            "description": "Learn branching, commit logs, remote cloning, and staging files in Git.",
+            "xpReward": 80,
+            "resources": {
+                "youtube": "https://www.youtube.com/watch?v=RGOj5yH7evk",
+                "youtubeTitle": "Git and GitHub for Beginners by freeCodeCamp",
+                "docs": "https://git-scm.com/doc",
+                "docsTitle": "Git Documentation Reference Book",
+                "course": "Git Masterclass: Branching & Merging"
+            },
+            "quiz": {
+                "questions": [
+                    {"question": "Which git command stages all modifications in the current directory?", "options": ["git add .", "git commit -a", "git push", "git save"], "answer": 0},
+                    {"question": "What does the command `git checkout -b feature` do?", "options": ["Deletes the feature branch", "Creates and switches to a new branch called feature", "Merges feature into main", "Resets the commits to head"], "answer": 1},
+                    {"question": "Which command downloads a copy of a remote repository?", "options": ["git clone", "git fetch", "git pull", "git download"], "answer": 0}
+                ]
+            },
+            "challenge": {
+                "title": "Git Commit Command",
+                "description": "Write a Git command string to commit staged files with the message 'initial release'.",
+                "placeholder": "# Enter your Git command as a string below:\nconst command = \"\";",
+                "testCase": "code.includes('git commit') && code.includes('-m') && code.includes('initial release')"
+            }
+        }
+    ]
+}
+
+# Served by the serve_react wildcard handler at the bottom
 
 # Load CSV datasets
 def load_datasets():
@@ -185,6 +900,72 @@ def recommend_courses(learner_profile, assessment_skills, skill_gaps):
 
 # Served by the serve_react wildcard handler at the bottom
 
+@app.route('/signup', methods=['POST'])
+def signup():
+    """Register a new user with email and password"""
+    try:
+        data = request.json or {}
+        name = data.get('name', '').strip()
+        email = data.get('email', '').strip().lower()
+        password = data.get('password', '')
+
+        if not name or not email or not password:
+            return jsonify({'error': 'Name, email, and password are required'}), 400
+
+        if email in users:
+            return jsonify({'error': 'Email is already registered'}), 400
+
+        # Hash password and store user
+        users[email] = {
+            'name': name,
+            'email': email,
+            'password_hash': hash_password(password)
+        }
+
+        return jsonify({
+            'success': True,
+            'message': 'Registration successful',
+            'userId': email,
+            'user': {
+                'name': name,
+                'email': email
+            }
+        }), 201
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/login', methods=['POST'])
+def login():
+    """Log in an existing user with email and password"""
+    try:
+        data = request.json or {}
+        email = data.get('email', '').strip().lower()
+        password = data.get('password', '')
+
+        if not email or not password:
+            return jsonify({'error': 'Email and password are required'}), 400
+
+        if email not in users:
+            return jsonify({'error': 'Invalid email or password'}), 401
+
+        user = users[email]
+        if user['password_hash'] != hash_password(password):
+            return jsonify({'error': 'Invalid email or password'}), 401
+
+        return jsonify({
+            'success': True,
+            'message': 'Login successful',
+            'userId': email,
+            'user': {
+                'name': user['name'],
+                'email': user['email']
+            }
+        }), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/register', methods=['POST'])
 def register_learner():
     """Register a new learner profile"""
@@ -326,12 +1107,24 @@ def generate_learning_path():
         # Get course recommendations
         recommended_courses = recommend_courses(profile, assessment['skills'], skill_gaps)
         
+        # Fetch matching pre-defined milestones
+        domain = profile.get('currentDomain', 'web-development')
+        domain_milestones = DOMAINS_ROADMAPS.get(domain, DOMAINS_ROADMAPS['computer-science'])
+        
+        # Copy milestones and set starting status to not-started
+        milestones = []
+        for ms in domain_milestones:
+            m_copy = dict(ms)
+            m_copy['status'] = 'not-started'
+            milestones.append(m_copy)
+            
         # Generate learning path
         learning_path = {
             'userId': user_id,
             'generatedAt': datetime.now().isoformat(),
             'skills': recommended_skills,
             'courses': recommended_courses,
+            'milestones': milestones,
             'totalSkills': len(recommended_skills),
             'totalCourses': len(recommended_courses),
             'skillGaps': skill_gaps
@@ -341,18 +1134,24 @@ def generate_learning_path():
         learning_paths[user_id] = learning_path
         
         # Initialize progress data
-        if user_id not in progress_data:
-            progress_data[user_id] = {
-                'skills': [
-                    {'name': skill['name'], 'progress': 0, 'level': skill['level']}
-                    for skill in recommended_skills
-                ],
-                'courses': [
-                    {'title': course['title'], 'provider': course['provider'], 
-                     'progress': 0, 'status': 'not-started'}
-                    for course in recommended_courses
-                ]
-            }
+        progress_data[user_id] = {
+            'skills': [
+                {'name': skill['name'], 'progress': 0, 'level': skill['level']}
+                for skill in recommended_skills
+            ],
+            'courses': [
+                {'title': course['title'], 'provider': course['provider'], 
+                 'progress': 0, 'status': 'not-started'}
+                for course in recommended_courses
+            ],
+            'milestones': [
+                {'id': ms['id'], 'title': ms['title'], 'status': 'not-started'}
+                for ms in domain_milestones
+            ]
+        }
+        
+        # Initialize achievements if not already present
+        get_user_achievements(user_id)
         
         return jsonify({
             'success': True,
@@ -374,9 +1173,16 @@ def get_dashboard_data(user_id):
         # Get progress data
         user_progress = progress_data.get(user_id, {
             'skills': [],
-            'courses': []
+            'courses': [],
+            'milestones': []
         })
         
+        if 'milestones' not in user_progress and user_id in learning_paths:
+            user_progress['milestones'] = [
+                {'id': ms['id'], 'title': ms['title'], 'status': ms.get('status', 'not-started')}
+                for ms in learning_paths[user_id].get('milestones', [])
+            ]
+            
         # Calculate statistics
         total_courses = len(user_progress['courses'])
         completed_courses = len([c for c in user_progress['courses'] if c.get('progress', 0) == 100])
@@ -400,8 +1206,14 @@ def get_dashboard_data(user_id):
                             for s in user_progress['skills'])
             avg_level = round(total_level / total_skills, 1)
         
-        # Calculate hours completed (assuming 40 hours per course on average)
+        # Calculate hours completed
         hours_completed = round(sum(c.get('progress', 0) / 100 * 40 for c in user_progress['courses']), 1)
+        
+        achievements = get_user_achievements(user_id)
+        
+        # Include milestones completion count in statistics
+        total_milestones = len(user_progress.get('milestones', []))
+        completed_milestones = len([m for m in user_progress.get('milestones', []) if m.get('status') == 'completed'])
         
         dashboard_data = {
             'userId': user_id,
@@ -409,10 +1221,14 @@ def get_dashboard_data(user_id):
                 'totalCourses': total_courses,
                 'completedCourses': completed_courses,
                 'inProgressCourses': in_progress_courses,
-                'overallProgress': overall_progress
+                'overallProgress': overall_progress,
+                'totalMilestones': total_milestones,
+                'completedMilestones': completed_milestones
             },
             'skills': user_progress['skills'],
             'courses': user_progress['courses'],
+            'milestones': user_progress.get('milestones', []),
+            'achievements': achievements,
             'summary': {
                 'totalSkills': total_skills,
                 'masteredSkills': mastered_skills,
@@ -470,6 +1286,246 @@ def update_progress():
             'progress': progress_data[user_id]
         }), 200
         
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/achievements/<user_id>', methods=['GET'])
+def get_achievements(user_id):
+    """Retrieve achievements, XP, streak, and badges for a user"""
+    try:
+        achievements = get_user_achievements(user_id)
+        return jsonify({
+            'success': True,
+            'achievements': achievements
+        }), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/update-achievements', methods=['POST'])
+def update_achievements():
+    """Trigger XP increase, update study streaks, and unlock badges"""
+    try:
+        data = request.json or {}
+        user_id = data.get('userId')
+        xp_gain = data.get('xpGain', 0)
+        
+        if not user_id:
+            return jsonify({'error': 'Missing userId'}), 400
+            
+        achievements = get_user_achievements(user_id)
+        
+        # Update XP
+        achievements['xp'] += xp_gain
+        
+        # Check streak
+        today_str = datetime.now().strftime('%Y-%m-%d')
+        last_active = achievements['last_active']
+        
+        if last_active:
+            try:
+                last_date = datetime.strptime(last_active, '%Y-%m-%d')
+                today_date = datetime.strptime(today_str, '%Y-%m-%d')
+                delta = (today_date - last_date).days
+                
+                if delta == 1:
+                    achievements['streak'] += 1
+                elif delta > 1:
+                    achievements['streak'] = 1
+            except Exception:
+                achievements['streak'] = 1
+        else:
+            achievements['streak'] = 1
+            
+        achievements['last_active'] = today_str
+        
+        # Badge unlocks check
+        new_badges = []
+        if achievements['xp'] >= 50 and 'first_steps' not in achievements['badges']:
+            achievements['badges'].append('first_steps')
+            new_badges.append('first_steps')
+            
+        if achievements['streak'] >= 3 and 'streak_starter' not in achievements['badges']:
+            achievements['badges'].append('streak_starter')
+            new_badges.append('streak_starter')
+            
+        if achievements['xp'] >= 200 and 'xp_champion' not in achievements['badges']:
+            achievements['badges'].append('xp_champion')
+            new_badges.append('xp_champion')
+            
+        return jsonify({
+            'success': True,
+            'achievements': achievements,
+            'newBadges': new_badges
+        }), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/submit-quiz', methods=['POST'])
+def submit_quiz():
+    """Submit a quiz for a specific milestone"""
+    try:
+        data = request.json or {}
+        user_id = data.get('userId')
+        milestone_id = data.get('milestoneId')
+        score = data.get('score', 0)
+        total_questions = data.get('totalQuestions', 3)
+        
+        if not user_id or not milestone_id:
+            return jsonify({'error': 'Missing userId or milestoneId'}), 400
+            
+        # Complete milestone in roadmap progress
+        if user_id in learning_paths:
+            path = learning_paths[user_id]
+            for ms in path.get('milestones', []):
+                if ms['id'] == milestone_id:
+                    ms['status'] = 'completed'
+                    
+        # Update progress data if exists
+        if user_id in progress_data:
+            milestones_prog = progress_data[user_id].get('milestones', [])
+            for msp in milestones_prog:
+                if msp['id'] == milestone_id:
+                    msp['status'] = 'completed'
+                    
+        achievements = get_user_achievements(user_id)
+        
+        # Check if perfect score
+        unlocked = []
+        if score == total_questions:
+            if 'quiz_master' not in achievements['badges']:
+                achievements['badges'].append('quiz_master')
+                unlocked.append('quiz_master')
+                
+        # Award XP
+        achievements['xp'] += 30
+        
+        # Check if all milestones are completed to unlock Domain Wizard badge
+        if user_id in learning_paths:
+            all_completed = all(ms.get('status') == 'completed' for ms in learning_paths[user_id].get('milestones', []))
+            if all_completed:
+                profile = learner_profiles.get(user_id, {})
+                domain = profile.get('currentDomain', 'web-development')
+                badge_name = f"{domain.split('-')[0]}_wizard"
+                if badge_name not in achievements['badges']:
+                    achievements['badges'].append(badge_name)
+                    unlocked.append(badge_name)
+                    
+        # Track streak
+        today_str = datetime.now().strftime('%Y-%m-%d')
+        achievements['last_active'] = today_str
+        
+        return jsonify({
+            'success': True,
+            'achievements': achievements,
+            'unlockedBadges': unlocked
+        }), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/submit-challenge', methods=['POST'])
+def submit_challenge():
+    """Submit a coding challenge for a specific milestone"""
+    try:
+        data = request.json or {}
+        user_id = data.get('userId')
+        milestone_id = data.get('milestoneId')
+        code = data.get('code', '')
+        
+        if not user_id or not milestone_id:
+            return jsonify({'error': 'Missing userId or milestoneId'}), 400
+            
+        # Complete milestone
+        if user_id in learning_paths:
+            path = learning_paths[user_id]
+            for ms in path.get('milestones', []):
+                if ms['id'] == milestone_id:
+                    ms['status'] = 'completed'
+                    
+        if user_id in progress_data:
+            milestones_prog = progress_data[user_id].get('milestones', [])
+            for msp in milestones_prog:
+                if msp['id'] == milestone_id:
+                    msp['status'] = 'completed'
+                    
+        achievements = get_user_achievements(user_id)
+        
+        # Unlock Code Warrior badge
+        unlocked = []
+        if 'code_warrior' not in achievements['badges']:
+            achievements['badges'].append('code_warrior')
+            unlocked.append('code_warrior')
+            
+        # Award XP
+        achievements['xp'] += 40
+        
+        # Check if all milestones are completed
+        if user_id in learning_paths:
+            all_completed = all(ms.get('status') == 'completed' for ms in learning_paths[user_id].get('milestones', []))
+            if all_completed:
+                profile = learner_profiles.get(user_id, {})
+                domain = profile.get('currentDomain', 'web-development')
+                badge_name = f"{domain.split('-')[0]}_wizard"
+                if badge_name not in achievements['badges']:
+                    achievements['badges'].append(badge_name)
+                    unlocked.append(badge_name)
+                    
+        achievements['last_active'] = datetime.now().strftime('%Y-%m-%d')
+        
+        return jsonify({
+            'success': True,
+            'achievements': achievements,
+            'unlockedBadges': unlocked
+        }), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/toggle-milestone', methods=['POST'])
+def toggle_milestone():
+    """Toggle the completion status of a milestone"""
+    try:
+        data = request.json or {}
+        user_id = data.get('userId')
+        milestone_id = data.get('milestoneId')
+        completed = data.get('completed', False)
+        
+        if not user_id or not milestone_id:
+            return jsonify({'error': 'Missing userId or milestoneId'}), 400
+            
+        new_status = 'completed' if completed else 'not-started'
+        
+        if user_id in learning_paths:
+            path = learning_paths[user_id]
+            for ms in path.get('milestones', []):
+                if ms['id'] == milestone_id:
+                    ms['status'] = new_status
+                    
+        if user_id in progress_data:
+            milestones_prog = progress_data[user_id].get('milestones', [])
+            for msp in milestones_prog:
+                if msp['id'] == milestone_id:
+                    msp['status'] = new_status
+                    
+        achievements = get_user_achievements(user_id)
+        if completed:
+            achievements['xp'] += 20
+            
+        # Check if all completed
+        unlocked = []
+        if completed and user_id in learning_paths:
+            all_completed = all(ms.get('status') == 'completed' for ms in learning_paths[user_id].get('milestones', []))
+            if all_completed:
+                profile = learner_profiles.get(user_id, {})
+                domain = profile.get('currentDomain', 'web-development')
+                badge_name = f"{domain.split('-')[0]}_wizard"
+                if badge_name not in achievements['badges']:
+                    achievements['badges'].append(badge_name)
+                    unlocked.append(badge_name)
+                    
+        return jsonify({
+            'success': True,
+            'achievements': achievements,
+            'unlockedBadges': unlocked
+        }), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -747,13 +1803,18 @@ def chat():
         message = str(data.get('message', '')).lower().strip()
         user_name = data.get('userName', 'Learner')
         user_domain = data.get('userDomain', 'web-development')
+        xp = data.get('xp', 0)
+        streak = data.get('streak', 0)
         
         if not message:
             return jsonify({'response': "Hello! I am your AI Study Copilot. Ask me anything about your learning path, courses, or schedule!"})
             
         response = ""
         
-        if "hello" in message or "hi" in message or "hey" in message:
+        if "progress" in message or "status" in message or "xp" in message or "streak" in message or "level" in message:
+            level = int(xp // 100) + 1
+            response = f"Sure {user_name}! Here is your real-time learning telemetry: \n🔥 **Streak**: {streak} days\n⚡ **Experience**: {xp} XP\n🏆 **Learner Level**: Level {level}\n\nYou're doing fantastic! Keep up the momentum to unlock more exclusive badges like the Domain Wizard!"
+        elif "hello" in message or "hi" in message or "hey" in message:
             response = f"Hi {user_name}! 👋 I am your AI Study Tutor. I can help answer coding questions, recommend studies, or help you schedule your study hours. What are we studying today?"
         elif "react" in message:
             response = "React is a fantastic component-based UI library! ⚛️ To learn React effectively, start with:\n1. HTML5 & CSS3 layouts\n2. ES6+ JavaScript concepts (destructuring, map/filter, modules, async/await)\n3. React basics (components, props, state)\n4. React Hooks (useState, useEffect)\n\nI recommend taking the 'React - The Complete Guide' course. Would you like me to outline a weekly schedule for React?"

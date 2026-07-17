@@ -385,17 +385,6 @@ function DemoHub() {
     const hours = parseInt(hoursOverride || plannerHours);
     const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
     
-    let domain = 'Web Development';
-    try {
-      const profile = localStorage.getItem('learnerProfile');
-      if (profile) {
-        const prof = JSON.parse(profile);
-        if (prof.currentDomain) {
-          domain = prof.currentDomain.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-        }
-      }
-    } catch (e) {}
-
     let hoursPerDay = Array(7).fill(0);
     if (hours === 5) {
       for(let i=0; i<5; i++) hoursPerDay[i] = 1;
@@ -412,29 +401,94 @@ function DemoHub() {
       hoursPerDay[5] = 2.5; hoursPerDay[6] = 2.5;
     }
 
-    const topics = {
-      'Web Development': [
-        'HTML Semantic Layouts', 'CSS Flexbox & Grids', 'Modern JS Arrays', 
-        'React Hook Components', 'API Integration', 'Portfolio Build', 'Version Git Control'
-      ],
-      'Data Science': [
-        'Python Pandas Dataframes', 'Numpy Calculations', 'Matplotlib Plotting',
-        'SQL Joins & Queries', 'Exploratory Analysis', 'Feature Engineering', 'Probability Math'
-      ],
-      'Ai Ml': [
-        'Linear Regression math', 'Gradient Descent tuning', 'Decision Trees build',
-        'Neural Networks basics', 'Keras Dense Layers', 'PyTorch Tensor basics', 'Model Metrics check'
-      ]
-    };
+    // Try parsing the actual learning path milestones
+    let cachedMilestones = [];
+    try {
+      const cachedPath = localStorage.getItem('learningPath');
+      if (cachedPath) {
+        cachedMilestones = JSON.parse(cachedPath).milestones || [];
+      }
+    } catch (e) {
+      console.error('Error loading roadmap milestones for planner:', e);
+    }
 
-    const activeTopics = topics[domain] || topics['Web Development'];
-    const schedule = days.map((day, idx) => ({
-      day,
-      hours: hoursPerDay[idx],
-      topic: activeTopics[idx] || 'Hands-on Practice'
-    }));
+    let milestoneIdx = 0;
+    const schedule = days.map((day, idx) => {
+      const dayHrs = hoursPerDay[idx];
+      let assignedMilestone = null;
+      
+      if (dayHrs > 0 && cachedMilestones.length > 0) {
+        assignedMilestone = cachedMilestones[milestoneIdx % cachedMilestones.length];
+        milestoneIdx += 1;
+      }
+      
+      return {
+        day,
+        hours: dayHrs,
+        topic: assignedMilestone ? assignedMilestone.title : (dayHrs > 0 ? 'Hands-on Practice' : 'Rest Day'),
+        milestoneId: assignedMilestone ? assignedMilestone.id : null,
+        completed: assignedMilestone ? (assignedMilestone.status === 'completed') : false
+      };
+    });
 
     setPlannerSchedule(schedule);
+  };
+
+  const handleToggleMilestoneCompleted = async (milestoneId, completed) => {
+    if (!milestoneId) return;
+    try {
+      const response = await fetch(`${API_BASE}/toggle-milestone`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          milestoneId,
+          completed
+        })
+      });
+      const result = await response.json();
+      
+      if (response.ok && result.success) {
+        // Update local learningPath cache
+        const cachedPath = localStorage.getItem('learningPath');
+        if (cachedPath) {
+          try {
+            const path = JSON.parse(cachedPath);
+            path.milestones = path.milestones.map(ms => {
+              if (ms.id === milestoneId) {
+                return { ...ms, status: completed ? 'completed' : 'not-started' };
+              }
+              return ms;
+            });
+            localStorage.setItem('learningPath', JSON.stringify(path));
+          } catch (e) {}
+        }
+        
+        // Regenerate schedule to update UI checkbox state
+        generateSchedule(plannerHours);
+        
+        // Fire progression event
+        window.dispatchEvent(new Event('progress-change'));
+      }
+    } catch (e) {
+      console.error(e);
+      // Offline fallback: toggle locally
+      const cachedPath = localStorage.getItem('learningPath');
+      if (cachedPath) {
+        try {
+          const path = JSON.parse(cachedPath);
+          path.milestones = path.milestones.map(ms => {
+            if (ms.id === milestoneId) {
+              return { ...ms, status: completed ? 'completed' : 'not-started' };
+            }
+            return ms;
+          });
+          localStorage.setItem('learningPath', JSON.stringify(path));
+        } catch (e) {}
+      }
+      generateSchedule(plannerHours);
+      window.dispatchEvent(new Event('progress-change'));
+    }
   };
 
   // Checkout Upgrade
@@ -836,7 +890,7 @@ function DemoHub() {
           <div className="row row-cols-1 row-cols-md-7 g-2" id="calendar-grid">
             {plannerSchedule.map((item, idx) => (
               <div className="col" key={idx}>
-                <div className="timetable-cell">
+                <div className="timetable-cell" style={{ border: item.completed ? '1px solid #10b981' : '1px solid rgba(255,255,255,0.08)', background: item.completed ? 'rgba(16, 185, 129, 0.05)' : 'rgba(255,255,255,0.01)' }}>
                   <div className="timetable-header">{item.day}</div>
                   {item.hours > 0 ? (
                     <>
@@ -844,7 +898,24 @@ function DemoHub() {
                         {item.hours} hrs session
                       </span>
                       <div className="text-white-50 small mt-1">Topic:</div>
-                      <div className="fw-bold text-white mb-2" style={{ fontSize: '13px' }}>{item.topic}</div>
+                      <div className="fw-bold text-white mb-2" style={{ fontSize: '13px', textDecoration: item.completed ? 'line-through' : 'none', opacity: item.completed ? 0.6 : 1 }}>
+                        {item.topic}
+                      </div>
+                      {item.milestoneId && (
+                        <div className="form-check d-flex justify-content-center m-0 mt-2">
+                          <input
+                            type="checkbox"
+                            className="form-check-input"
+                            checked={item.completed}
+                            onChange={(e) => handleToggleMilestoneCompleted(item.milestoneId, e.target.checked)}
+                            style={{ cursor: 'pointer', transform: 'scale(1.1)' }}
+                            id={`planner-ms-${idx}`}
+                          />
+                          <label className="form-check-label text-muted small ms-2" htmlFor={`planner-ms-${idx}`} style={{ cursor: 'pointer', fontSize: '11px' }}>
+                            {item.completed ? 'Completed' : 'Mark Done'}
+                          </label>
+                        </div>
+                      )}
                     </>
                   ) : (
                     <>

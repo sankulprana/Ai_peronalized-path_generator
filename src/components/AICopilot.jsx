@@ -84,6 +84,18 @@ function AICopilot() {
     setIsTyping(true);
 
     const student = getStudentInfo();
+    
+    // Retrieve achievements for context
+    const achievementsStr = localStorage.getItem('achievements');
+    let xp = 0;
+    let streak = 0;
+    if (achievementsStr) {
+      try {
+        const ach = JSON.parse(achievementsStr);
+        xp = ach.xp || 0;
+        streak = ach.streak || 0;
+      } catch (e) {}
+    }
 
     try {
       const response = await fetch(`${API_BASE}/chat`, {
@@ -94,7 +106,9 @@ function AICopilot() {
         body: JSON.stringify({
           message: text,
           userName: student.name,
-          userDomain: student.domain
+          userDomain: student.domain,
+          xp: xp,
+          streak: streak
         })
       });
 
@@ -117,7 +131,21 @@ function AICopilot() {
     const query = text.toLowerCase();
     let reply = "";
 
-    if (query.includes('react')) {
+    const achievementsStr = localStorage.getItem('achievements');
+    let xp = 0;
+    let streak = 0;
+    if (achievementsStr) {
+      try {
+        const ach = JSON.parse(achievementsStr);
+        xp = ach.xp || 0;
+        streak = ach.streak || 0;
+      } catch (e) {}
+    }
+    const level = Math.floor(xp / 100) + 1;
+
+    if (query.includes('progress') || query.includes('status') || query.includes('xp') || query.includes('streak') || query.includes('level')) {
+      reply = `Here is your current progression summary:\n🔥 **Streak**: ${streak} days\n⚡ **Experience**: ${xp} XP\n🏆 **Level**: Level ${level}\n\nYou're doing amazing! Complete more quizzes and coding challenges to level up!`;
+    } else if (query.includes('react')) {
       reply = `It looks like you want to learn React! ⚛️ Make sure you have a solid foundation in HTML, CSS, and modern JavaScript first. For React, focus on Props, State, Hooks, and Component lifecycle. The 'React - The Complete Guide' course is recommended!`;
     } else if (query.includes('javascript') || query.includes('js')) {
       reply = `JavaScript is the language of the web! 🌐 Practice array methods (map, filter, reduce), closures, promises, and async/await. Check out the 'Complete JavaScript Course 2024' in the suggested courses!`;

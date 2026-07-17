@@ -33,6 +33,19 @@ function UserAvatar({ googleUser, size }) {
   );
 }
 
+const CAREER_SUGGESTIONS = [
+  "Become a Full-Stack Web Developer",
+  "Become a Frontend React Engineer",
+  "Become a Backend Node.js Developer",
+  "Become a Python Data Scientist",
+  "Become a Machine Learning Research Engineer",
+  "Become a Certified Ethical Hacker & Security Auditor",
+  "Become a Cybersecurity Network Administrator",
+  "Become a Cloud Solutions Architect",
+  "Become a Mobile iOS/Android Developer",
+  "Become a Game Designer & Unity Developer"
+];
+
 function Profile() {
   const navigate = useNavigate();
   
@@ -43,11 +56,20 @@ function Profile() {
   const [isEditing, setIsEditing] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
 
+  // Auth Form States
+  const [authMode, setAuthMode] = useState('signin'); // 'signin' or 'signup'
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+  const [authError, setAuthError] = useState('');
+  const [authLoading, setAuthLoading] = useState(false);
+
   // Form states
   const [age, setAge] = useState('');
   const [educationLevel, setEducationLevel] = useState('');
   const [currentDomain, setCurrentDomain] = useState('');
   const [careerGoal, setCareerGoal] = useState('');
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const [experienceLevel, setExperienceLevel] = useState('beginner');
   const [learningStyle, setLearningStyle] = useState('visual');
   const [weeklyStudyHours, setWeeklyStudyHours] = useState('10');
@@ -143,6 +165,65 @@ function Profile() {
     }
   }, [userId]);
 
+  // Handle Custom Email & Password Authentication
+  const handleAuthSubmit = async (e) => {
+    e.preventDefault();
+    setAuthError('');
+    setAuthLoading(true);
+
+    if (!email || !password || (authMode === 'signup' && !name)) {
+      setAuthError('Please fill in all required fields.');
+      setAuthLoading(false);
+      return;
+    }
+
+    const payload = authMode === 'signup' 
+      ? { name, email, password }
+      : { email, password };
+
+    const endpoint = authMode === 'signup' ? '/signup' : '/login';
+
+    try {
+      const response = await fetch(`${API_BASE}${endpoint}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const result = await response.json();
+
+      if (!response.ok) {
+        setAuthError(result.error || 'Authentication failed. Please try again.');
+        setAuthLoading(false);
+        return;
+      }
+
+      // Successful auth
+      const userObj = {
+        email: result.user.email,
+        name: result.user.name,
+        isCustomAuth: true
+      };
+
+      localStorage.setItem('userId', result.userId);
+      localStorage.setItem('googleUser', JSON.stringify(userObj));
+      window.dispatchEvent(new Event('auth-change'));
+      setUserId(result.userId);
+      setGoogleUser(userObj);
+      
+      // Reset form states
+      setEmail('');
+      setPassword('');
+      setName('');
+      setAuthError('');
+
+    } catch (err) {
+      console.error('Authentication error:', err);
+      setAuthError('Unable to connect to authentication server. Please try again later.');
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
   // Simulate Gmail Login
   const handleDemoLogin = () => {
     const mockUser = {
@@ -199,7 +280,7 @@ function Profile() {
 
     const learnerProfileData = {
       userId: userId,
-      fullName: googleUser.name,
+      fullName: googleUser?.name || 'Learner',
       age: parseInt(age),
       educationLevel,
       currentDomain,
@@ -271,33 +352,140 @@ function Profile() {
 
           {/* STATE 1: Logged Out */}
           {!userId && (
-            <div className="glass-card text-center p-5">
-              <div className="mb-4">
-                <i className="bi bi-shield-lock-fill text-primary-light" style={{ fontSize: '3.5rem' }}></i>
-              </div>
-              <h1 className="fw-bold mb-3 text-white">Gmail Authentication</h1>
-              <p className="text-muted mb-4">
-                Securely log in using your Gmail account to access your personalized learning pathways
-              </p>
-
-              {/* Google Sign-in Container */}
-              <div className="d-flex justify-content-center mb-4">
-                <div id="google-signin-btn-container"></div>
+            <div className="glass-card p-5 animate-fade-in">
+              <div className="text-center mb-4">
+                <div className="mb-3">
+                  <i className="bi bi-shield-lock-fill text-primary-light" style={{ fontSize: '3.5rem' }}></i>
+                </div>
+                <h1 className="fw-bold mb-2 text-white">Learner Portal Authentication</h1>
+                <p className="text-muted">
+                  Log in or create an account to access your personalized learning pathways
+                </p>
               </div>
 
+              {/* Tab Selector */}
+              <div className="d-flex justify-content-center mb-4 bg-dark bg-opacity-30 p-1 rounded-pill border border-secondary border-opacity-25" style={{ maxWidth: '320px', margin: '0 auto' }}>
+                <button 
+                  className={`btn rounded-pill px-4 py-2 text-sm flex-grow-1 fw-bold ${authMode === 'signin' ? 'btn-gradient text-white border-0' : 'btn-link text-white-50 text-decoration-none'}`}
+                  style={{ transition: 'all 0.3s ease' }}
+                  onClick={() => { setAuthMode('signin'); setAuthError(''); }}
+                >
+                  Sign In
+                </button>
+                <button 
+                  className={`btn rounded-pill px-4 py-2 text-sm flex-grow-1 fw-bold ${authMode === 'signup' ? 'btn-gradient text-white border-0' : 'btn-link text-white-50 text-decoration-none'}`}
+                  style={{ transition: 'all 0.3s ease' }}
+                  onClick={() => { setAuthMode('signup'); setAuthError(''); }}
+                >
+                  Sign Up
+                </button>
+              </div>
+
+              {authError && (
+                <div className="alert alert-danger d-flex align-items-center mb-4" role="alert">
+                  <i className="bi bi-exclamation-triangle-fill me-2"></i>
+                  <div>{authError}</div>
+                </div>
+              )}
+
+              {/* Form */}
+              <form onSubmit={handleAuthSubmit} className="mb-4 text-start">
+                {authMode === 'signup' && (
+                  <div className="mb-3">
+                    <label className="form-label text-white-50">Full Name</label>
+                    <div className="input-group">
+                      <span className="input-group-text bg-dark border-secondary border-opacity-25 text-white-50">
+                        <i className="bi bi-person"></i>
+                      </span>
+                      <input 
+                        type="text" 
+                        className="form-control" 
+                        placeholder="John Doe" 
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        required
+                      />
+                    </div>
+                  </div>
+                )}
+
+                <div className="mb-3">
+                  <label className="form-label text-white-50">Email Address</label>
+                  <div className="input-group">
+                    <span className="input-group-text bg-dark border-secondary border-opacity-25 text-white-50">
+                      <i className="bi bi-envelope"></i>
+                    </span>
+                    <input 
+                      type="email" 
+                      className="form-control" 
+                      placeholder="name@example.com" 
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="mb-4">
+                  <label className="form-label text-white-50">Password</label>
+                  <div className="input-group">
+                    <span className="input-group-text bg-dark border-secondary border-opacity-25 text-white-50">
+                      <i className="bi bi-key"></i>
+                    </span>
+                    <input 
+                      type="password" 
+                      className="form-control" 
+                      placeholder="••••••••" 
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <button 
+                  type="submit" 
+                  className="btn btn-gradient w-100 py-3 fw-bold d-flex align-items-center justify-content-center gap-2"
+                  disabled={authLoading}
+                >
+                  {authLoading ? (
+                    <>
+                      <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <i className={`bi ${authMode === 'signin' ? 'bi-box-arrow-in-right' : 'bi-person-plus-fill'}`}></i>
+                      {authMode === 'signin' ? 'Sign In' : 'Create Account'}
+                    </>
+                  )}
+                </button>
+              </form>
+
+              {/* Divider */}
               <div className="d-flex align-items-center text-muted mb-4 justify-content-center">
                 <span className="w-25 border-bottom border-secondary border-opacity-25"></span>
-                <span className="mx-3 fw-bold">OR</span>
+                <span className="mx-3 fw-bold" style={{ fontSize: '0.75rem', letterSpacing: '0.05em' }}>OR CONTINUE WITH</span>
                 <span className="w-25 border-bottom border-secondary border-opacity-25"></span>
               </div>
 
-              {/* Demo Login */}
-              <button type="button" className="btn btn-outline-custom w-100 py-3 d-flex align-items-center justify-content-center gap-2" onClick={handleDemoLogin}>
-                <i className="bi bi-google text-danger"></i> Continue with Demo Gmail
-              </button>
-              
-              <small className="text-muted d-block mt-3 text-start bg-dark bg-opacity-20 p-3 rounded" style={{ fontSize: '0.825rem', border: '1px solid var(--border-color)' }}>
-                <i className="bi bi-info-circle me-1"></i> Google SDK will prompt credentials if running in configured domain. Use <strong>"Demo Gmail"</strong> for instant local testing.
+              {/* Alternative Auth Methods */}
+              <div className="d-flex flex-column align-items-center gap-3">
+                {/* Google Button */}
+                <div id="google-signin-btn-container"></div>
+
+                {/* Demo User Login Button */}
+                <button 
+                  type="button" 
+                  className="btn btn-outline-custom w-100 py-2.5 d-flex align-items-center justify-content-center gap-2" 
+                  onClick={handleDemoLogin}
+                >
+                  <i className="bi bi-google text-danger"></i> Continue with Demo Gmail
+                </button>
+              </div>
+
+              <small className="text-muted d-block text-center mt-4 bg-dark bg-opacity-20 p-3 rounded" style={{ fontSize: '0.8rem', border: '1px solid var(--border-color)', lineHeight: '1.4' }}>
+                <i className="bi bi-info-circle me-1"></i> Use credentials <strong>learner.demo@gmail.com</strong> / <strong>password123</strong> for immediate demo testing.
               </small>
             </div>
           )}
@@ -424,16 +612,41 @@ function Profile() {
                   <h5 className="mb-3 text-primary-light fw-bold">
                     <i className="bi bi-bullseye me-2"></i>Career & Learning Preferences
                   </h5>
-                  <div className="mb-3">
+                  <div className="mb-3 position-relative">
                     <label className="form-label">Career Goal</label>
-                    <textarea 
+                    <input 
+                      type="text"
                       className="form-control" 
-                      rows="3" 
                       value={careerGoal}
-                      onChange={(e) => setCareerGoal(e.target.value)}
-                      placeholder="Describe your career goals and aspirations..."
+                      onChange={(e) => {
+                        setCareerGoal(e.target.value);
+                        setShowSuggestions(true);
+                      }}
+                      onFocus={() => setShowSuggestions(true)}
+                      onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                      placeholder="e.g. Become a Full-Stack Web Developer..."
                       required
-                    ></textarea>
+                      autoComplete="off"
+                    />
+                    {showSuggestions && (
+                      <ul className="list-group position-absolute w-100 mt-1 shadow-lg" style={{ zIndex: 1000, maxHeight: '200px', overflowY: 'auto' }}>
+                        {CAREER_SUGGESTIONS.filter(g => 
+                          g.toLowerCase().includes(careerGoal.toLowerCase())
+                        ).map((suggestion, index) => (
+                          <li 
+                            key={index}
+                            className="list-group-item list-group-item-action bg-dark text-white border-secondary border-opacity-25"
+                            style={{ cursor: 'pointer' }}
+                            onMouseDown={() => {
+                              setCareerGoal(suggestion);
+                              setShowSuggestions(false);
+                            }}
+                          >
+                            {suggestion}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                   </div>
 
                   {/* Experience Level */}

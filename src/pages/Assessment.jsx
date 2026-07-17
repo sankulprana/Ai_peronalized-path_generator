@@ -1,6 +1,109 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+const DOMAIN_QUIZZES = {
+  'web-development': [
+    {
+      skill: 'HTML/CSS',
+      question: 'Which CSS property defines a grid layout container?',
+      options: ['display: block', 'display: grid', 'grid-template: container', 'display: flex-grid'],
+      answer: 1
+    },
+    {
+      skill: 'JavaScript',
+      question: 'What is the correct syntax for an ES6 arrow function?',
+      options: ['function myFunc() {}', 'let myFunc = () => {}', 'myFunc: () => {}', '() => myFunc {}'],
+      answer: 1
+    },
+    {
+      skill: 'React',
+      question: 'Which React hook handles side effects in functional components?',
+      options: ['useState', 'useContext', 'useEffect', 'useReducer'],
+      answer: 2
+    }
+  ],
+  'data-science': [
+    {
+      skill: 'Python',
+      question: 'Which method is used to add an item to the end of a Python list?',
+      options: ['add()', 'append()', 'insert()', 'push()'],
+      answer: 1
+    },
+    {
+      skill: 'NumPy',
+      question: 'Which property returns dimensions of a NumPy array?',
+      options: ['dims', 'length', 'shape', 'size'],
+      answer: 2
+    },
+    {
+      skill: 'Pandas',
+      question: 'Which Pandas function loads a CSV file into a DataFrame?',
+      options: ['read_csv()', 'load_csv()', 'open_csv()', 'import_csv()'],
+      answer: 0
+    }
+  ],
+  'ai-ml': [
+    {
+      skill: 'Linear Algebra',
+      question: 'What does the dot product of two perpendicular vectors equal?',
+      options: ['1', '0', '-1', 'Infinity'],
+      answer: 1
+    },
+    {
+      skill: 'Supervised Learning',
+      question: 'Which algorithm fits a linear equation to model relationships between variables?',
+      options: ['K-Means Clustering', 'Decision Tree', 'Linear Regression', 'Neural Network'],
+      answer: 2
+    },
+    {
+      skill: 'Deep Learning',
+      question: 'Which activation function returns max(0, x)?',
+      options: ['Sigmoid', 'Tanh', 'ReLU', 'Softmax'],
+      answer: 2
+    }
+  ],
+  'cybersecurity': [
+    {
+      skill: 'Linux CLI',
+      question: 'Which command displays the current working directory in Linux?',
+      options: ['ls', 'pwd', 'cd', 'dir'],
+      answer: 1
+    },
+    {
+      skill: 'Cryptography',
+      question: 'Which cryptographic hash function is one-way only?',
+      options: ['AES-256', 'RSA', 'SHA-256', 'DES'],
+      answer: 2
+    },
+    {
+      skill: 'Web Security',
+      question: 'What is the best defense against SQL Injection attacks?',
+      options: ['Parameterized Queries', 'Longer passwords', 'Firewalls', 'HTTPS'],
+      answer: 0
+    }
+  ],
+  'computer-science': [
+    {
+      skill: 'Variables & Scopes',
+      question: 'Which scope is accessible throughout the entire script?',
+      options: ['Local scope', 'Enclosed scope', 'Global scope', 'Block scope'],
+      answer: 2
+    },
+    {
+      skill: 'Data Structures',
+      question: 'Which data structure operates on a Last-In, First-Out (LIFO) basis?',
+      options: ['Queue', 'Stack', 'Linked List', 'Tree'],
+      answer: 1
+    },
+    {
+      skill: 'Algorithms',
+      question: 'What is the average time complexity of looking up a key in a Hash Map?',
+      options: ['O(N)', 'O(log N)', 'O(1)', 'O(N log N)'],
+      answer: 2
+    }
+  ]
+};
+
 function Assessment() {
   const navigate = useNavigate();
 
@@ -10,6 +113,12 @@ function Assessment() {
   const [skillName, setSkillName] = useState('');
   const [skillLevel, setSkillLevel] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Quiz States
+  const [showQuiz, setShowQuiz] = useState(false);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [selectedAnswers, setSelectedAnswers] = useState({});
+  const [quizComplete, setQuizComplete] = useState(false);
 
   const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:')
     ? 'http://localhost:5000'
@@ -142,6 +251,48 @@ function Assessment() {
     }
   };
 
+  // Get active domain
+  const profileString = localStorage.getItem('learnerProfile');
+  const userProfile = profileString ? JSON.parse(profileString) : null;
+  const currentDomain = userProfile?.currentDomain || 'computer-science';
+  const quizQuestions = DOMAIN_QUIZZES[currentDomain] || DOMAIN_QUIZZES['computer-science'];
+
+  const handleAnswerSelect = (optionIndex) => {
+    setSelectedAnswers({
+      ...selectedAnswers,
+      [currentQuestionIndex]: optionIndex
+    });
+  };
+
+  const handleNextQuestion = () => {
+    if (selectedAnswers[currentQuestionIndex] === undefined) {
+      alert('Please select an option before proceeding.');
+      return;
+    }
+    if (currentQuestionIndex < quizQuestions.length - 1) {
+      setCurrentQuestionIndex(currentQuestionIndex + 1);
+    } else {
+      setQuizComplete(true);
+      // Auto-populate skills based on answers
+      const newSkills = quizQuestions.map((q, idx) => {
+        const isCorrect = selectedAnswers[idx] === q.answer;
+        return {
+          id: Date.now() + idx,
+          name: q.skill,
+          level: isCorrect ? 4 : 2
+        };
+      });
+      saveSkills(newSkills);
+    }
+  };
+
+  const handleResetQuiz = () => {
+    setCurrentQuestionIndex(0);
+    setSelectedAnswers({});
+    setQuizComplete(false);
+    setShowQuiz(false);
+  };
+
   return (
     <div className="container mt-4 mb-5">
       <div className="row justify-content-center">
@@ -154,6 +305,98 @@ function Assessment() {
             </h1>
             <p className="text-muted">Rate your current expertise to customize recommendations</p>
           </div>
+
+          {/* Interactive Skill Assessment Quiz Container */}
+          {!showQuiz && !quizComplete && (
+            <div className="glass-card mb-4 text-center py-4 px-3">
+              <h4 className="fw-bold text-white mb-2">
+                <i className="bi bi-cpu text-primary-light me-2 animate-pulse" style={{ animationDuration: '2s' }}></i>
+                Take a Quick Skill Assessment Quiz
+              </h4>
+              <p className="text-muted mb-3" style={{ fontSize: '0.95rem' }}>
+                Let our AI assess your starting skill level automatically for <strong>{currentDomain.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}</strong>.
+              </p>
+              <button 
+                type="button" 
+                className="btn btn-gradient px-4 py-2.5 fw-bold"
+                onClick={() => setShowQuiz(true)}
+              >
+                <i className="bi bi-play-circle me-2"></i> Start assessment quiz
+              </button>
+            </div>
+          )}
+
+          {showQuiz && !quizComplete && (
+            <div className="glass-card mb-4 p-4 animate-fade-in">
+              <div className="d-flex justify-content-between align-items-center mb-4">
+                <h5 className="text-primary-light fw-bold m-0">
+                  <i className="bi bi-question-circle me-2"></i>
+                  Question {currentQuestionIndex + 1} of {quizQuestions.length}
+                </h5>
+                <span className="badge bg-primary px-3 py-1.5" style={{ background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)', border: 'none' }}>
+                  {quizQuestions[currentQuestionIndex].skill}
+                </span>
+              </div>
+              <h4 className="text-white fw-bold mb-4">{quizQuestions[currentQuestionIndex].question}</h4>
+              <div className="d-flex flex-column gap-3 mb-4">
+                {quizQuestions[currentQuestionIndex].options.map((option, idx) => {
+                  const isSelected = selectedAnswers[currentQuestionIndex] === idx;
+                  return (
+                    <button
+                      key={idx}
+                      type="button"
+                      className={`btn text-start p-3 rounded-3 border transition-all ${
+                        isSelected 
+                          ? 'bg-primary bg-opacity-25 border-primary text-white shadow-lg' 
+                          : 'bg-dark bg-opacity-35 border-secondary border-opacity-25 text-white-50'
+                      }`}
+                      style={{ transition: 'all 0.2s ease', backdropFilter: 'blur(10px)' }}
+                      onClick={() => handleAnswerSelect(idx)}
+                    >
+                      <span className="fw-bold me-3 text-primary-light">{String.fromCharCode(65 + idx)}.</span>
+                      {option}
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="d-flex justify-content-between">
+                <button
+                  type="button"
+                  className="btn btn-outline-secondary px-4"
+                  onClick={handleResetQuiz}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-gradient px-5 fw-bold"
+                  onClick={handleNextQuestion}
+                  disabled={selectedAnswers[currentQuestionIndex] === undefined}
+                >
+                  {currentQuestionIndex === quizQuestions.length - 1 ? 'Finish & Assess' : 'Next Question'}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {quizComplete && (
+            <div className="glass-card mb-4 text-center p-4 animate-fade-in" style={{ border: '2px solid rgba(16, 185, 129, 0.3)' }}>
+              <div className="mb-3">
+                <i className="bi bi-check-circle-fill text-emerald" style={{ fontSize: '3.5rem' }}></i>
+              </div>
+              <h3 className="fw-bold text-white mb-2">Quiz Completed!</h3>
+              <p className="text-muted mb-4">
+                AI has analyzed your answers and set your initial skill profiles. Review your assessed values in the checklist below.
+              </p>
+              <button
+                type="button"
+                className="btn btn-outline-custom px-4"
+                onClick={handleResetQuiz}
+              >
+                <i className="bi bi-arrow-repeat me-1"></i> Retake quiz
+              </button>
+            </div>
+          )}
 
           {/* Form to add skills */}
           <div className="glass-card mb-4">
