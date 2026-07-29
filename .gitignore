@@ -1,24 +1,80 @@
-# Virtual environment
-venv/
-ENV/
-env/
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Diagnostic reports
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Directory for instrumented code coverage outputs
+coverage
+*.lcov
+
+# Dependency directories
+node_modules/
+backend/node_modules/
+server/node_modules/
+jspm_packages/
+
+# Snowpack dependency directory
+web_modules/
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Microservice cache
+.swc
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# Environment variables
 .env
+.env.development.local
+.env.test.local
+.env.production.local
+.env.local
+backend/.env
+server/.env
 
-# Python caching
-__pycache__/
-*.py[cod]
-*$py.class
-
-# Vercel configuration/cache
-.vercel/
-
-# OS files
+# Stores
 .DS_Store
 Thumbs.db
 
-# Node dependencies and build files
-node_modules/
+# Build outputs
 dist/
+dist-ssr/
+*.local
 
-# Backup files
-index_backup.html
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.ds_store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

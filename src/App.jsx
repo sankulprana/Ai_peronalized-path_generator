@@ -1,33 +1,40 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Navbar from './components/Navbar';
-import AICopilot from './components/AICopilot';
-import Home from './pages/Home';
-import Profile from './pages/Profile';
-import Assessment from './pages/Assessment';
-import LearningPath from './pages/LearningPath';
-import Dashboard from './pages/Dashboard';
-import DemoHub from './pages/DemoHub';
+import { useState } from "react";
+import { Routes, Route } from "react-router-dom";
+import Sidebar from "./components/Sidebar";
+import Topbar from "./components/Topbar";
+import Dashboard from "./pages/Dashboard";
+import Roadmap from "./pages/Roadmap";
+import StudyPlanner from "./pages/StudyPlanner";
+import Resources from "./pages/Resources";
+import DoubtSolver from "./pages/DoubtSolver";
+import Progress from "./pages/Progress";
+import Achievements from "./pages/Achievements";
+import { HeaderProvider } from "./context/HeaderContext";
 
-function App() {
+export default function App() {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   return (
-    <Router>
-      <div className="app-container">
-        <Navbar />
-        <main className="main-content">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/assessment" element={<Assessment />} />
-            <Route path="/learning-path" element={<LearningPath />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/demo-hub" element={<DemoHub />} />
-          </Routes>
-        </main>
-        <AICopilot />
+    <HeaderProvider>
+      <div className="flex min-h-screen bg-gray-50">
+        <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+
+        <div className="flex min-w-0 flex-1 flex-col">
+          <Topbar onMenuClick={() => setSidebarOpen((v) => !v)} />
+
+          <main className="flex-1">
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/roadmap" element={<Roadmap />} />
+              <Route path="/study-planner" element={<StudyPlanner />} />
+              <Route path="/resources" element={<Resources />} />
+              <Route path="/doubt-solver" element={<DoubtSolver />} />
+              <Route path="/progress" element={<Progress />} />
+              <Route path="/achievements" element={<Achievements />} />
+            </Routes>
+          </main>
+        </div>
       </div>
-    </Router>
+    </HeaderProvider>
   );
 }
-
-export default App;
