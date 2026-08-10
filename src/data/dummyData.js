@@ -42,17 +42,60 @@ export const goal = {
 };
 
 export const topStats = [
-  { label: "Total XP Earned", value: "1465", icon: "bolt" },
-  { label: "Day Streak", value: "12", icon: "flame" },
-  { label: "Topics Completed", value: "2/13", icon: "check" },
-  { label: "Current Level", value: "Lv. 5", icon: "star" },
+  { label: "Total XP Earned", value: "0 XP", icon: "bolt" },
+  { label: "Day Streak", value: "0 days", icon: "flame" },
+  { label: "Topics Completed", value: "0/12", icon: "check" },
+  { label: "Current Level", value: "Lv. 1", icon: "star" },
 ];
 
-export const roadmapItems = [
-  { id: 1, title: "Flexbox & Grid Layout", xp: 60, active: true },
-  { id: 2, title: "JavaScript Basics", xp: 70, active: false },
-  { id: 3, title: "DOM Manipulation", xp: 65, active: false },
-];
+export const domainTopics = {
+  "Backend Developer": [
+    { id: "1", title: "Node.js Architecture & Event Loop Fundamentals", xp: 60, completed: false, active: true },
+    { id: "2", title: "Express.js Routing & Middleware Pipeline", xp: 70, completed: false },
+    { id: "3", title: "RESTful API Specs & JSON Payload Validation", xp: 65, completed: false },
+    { id: "4", title: "MongoDB Schema Modeling & Mongoose Queries", xp: 85, completed: false },
+    { id: "5", title: "Authentication with JWT & Password Hashing", xp: 90, completed: false },
+  ],
+  "Frontend Developer": [
+    { id: "1", title: "HTML5 Semantic Architecture & Accessibility", xp: 50, completed: false, active: true },
+    { id: "2", title: "CSS Flexbox & Responsive Grid Layouts", xp: 60, completed: false },
+    { id: "3", title: "Modern JavaScript ES6+ Async/Await Control", xp: 75, completed: false },
+    { id: "4", title: "React Component Lifecycle & Custom Hooks", xp: 85, completed: false },
+    { id: "5", title: "Tailwind CSS Design Tokens & Micro-Animations", xp: 65, completed: false },
+  ],
+  "AI & Data Science": [
+    { id: "1", title: "Python Data Structures & NumPy Vectorization", xp: 60, completed: false, active: true },
+    { id: "2", title: "Pandas Data Cleaning & Feature Engineering", xp: 70, completed: false },
+    { id: "3", title: "Supervised Learning Models with Scikit-Learn", xp: 85, completed: false },
+    { id: "4", title: "Neural Networks & PyTorch Tensors Fundamentals", xp: 95, completed: false },
+    { id: "5", title: "Large Language Models & Prompt Engineering", xp: 100, completed: false },
+  ],
+  "Fullstack Engineer": [
+    { id: "1", title: "Fullstack App Architecture & Project Structuring", xp: 65, completed: false, active: true },
+    { id: "2", title: "React Frontend with Express REST Backend Integration", xp: 80, completed: false },
+    { id: "3", title: "PostgreSQL Relational Design & Prisma ORM", xp: 85, completed: false },
+    { id: "4", title: "Containerization with Docker & Environment Config", xp: 90, completed: false },
+  ],
+  "Mobile Developer": [
+    { id: "1", title: "React Native Mobile Component Basics & State", xp: 60, completed: false, active: true },
+    { id: "2", title: "Mobile Navigation & Stack Screen Routing", xp: 70, completed: false },
+    { id: "3", title: "AsyncStorage & Local Offline Persistence", xp: 75, completed: false },
+    { id: "4", title: "Native Device API Integration (Camera/Location)", xp: 90, completed: false },
+  ],
+  "DevOps & Cloud": [
+    { id: "1", title: "Linux Shell Scripting & CLI Fundamentals", xp: 60, completed: false, active: true },
+    { id: "2", title: "Docker Containerization & Multi-stage Builds", xp: 80, completed: false },
+    { id: "3", title: "Kubernetes Cluster Pods & Deployment Services", xp: 95, completed: false },
+    { id: "4", title: "CI/CD Pipeline Automation with GitHub Actions", xp: 85, completed: false },
+  ],
+  "Cybersecurity": [
+    { id: "1", title: "Networking Protocols TCP/IP & HTTP Security", xp: 65, completed: false, active: true },
+    { id: "2", title: "OWASP Top 10 Web Vulnerabilities & Prevention", xp: 85, completed: false },
+    { id: "3", title: "Symmetric & Asymmetric Cryptography Basics", xp: 80, completed: false },
+  ],
+};
+
+export const roadmapItems = domainTopics["Backend Developer"];
 
 export const quickActions = [
   {

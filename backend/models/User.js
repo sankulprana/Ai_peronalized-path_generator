@@ -55,6 +55,23 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    isOnboarded: {
+      type: Boolean,
+      default: false,
+    },
+    interests: [
+      {
+        type: String,
+      },
+    ],
+    skillLevel: {
+      type: String,
+      default: "beginner",
+    },
+    weeklyHours: {
+      type: Number,
+      default: 5,
+    },
     lastActiveDate: {
       type: Date,
       default: Date.now,

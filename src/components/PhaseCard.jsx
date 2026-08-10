@@ -1,9 +1,13 @@
 import { useState } from "react";
 import { ChevronUp, ChevronDown, CheckCircle2, Circle } from "lucide-react";
 
-function TaskRow({ task }) {
+function TaskRow({ task, onToggle }) {
+  const taskId = task._id || task.id;
   return (
-    <li className="flex items-center gap-3.5 border-t border-gray-100 px-6 py-4 first:border-t-0">
+    <li
+      onClick={() => onToggle && onToggle(taskId)}
+      className="flex cursor-pointer items-center gap-3.5 border-t border-gray-100 px-6 py-4 first:border-t-0 hover:bg-violet-50/50 transition-all select-none"
+    >
       {task.completed ? (
         <CheckCircle2
           className="h-5 w-5 shrink-0 text-emerald-500"
@@ -35,7 +39,7 @@ function TaskRow({ task }) {
   );
 }
 
-export default function PhaseCard({ phase, status }) {
+export default function PhaseCard({ phase, status, onToggleTask }) {
   const [open, setOpen] = useState(true);
   const done = phase.tasks.filter((t) => t.completed).length;
   const total = phase.tasks.length;
@@ -49,7 +53,7 @@ export default function PhaseCard({ phase, status }) {
       >
         <div>
           <p className="text-xs font-bold uppercase tracking-wider text-violet-600">
-            {phase.phase} <span className="text-gray-400">· {phase.duration}</span>
+            {phase.phaseName || phase.phase} <span className="text-gray-400">· {phase.duration}</span>
           </p>
           <h3 className="mt-1 text-lg font-bold text-gray-900">
             {phase.title}
@@ -67,7 +71,7 @@ export default function PhaseCard({ phase, status }) {
           <div className="hidden h-1.5 w-28 overflow-hidden rounded-full bg-gray-100 sm:block">
             <div
               className={[
-                "h-full rounded-full",
+                "h-full rounded-full transition-all duration-300",
                 percent > 0
                   ? "bg-gradient-to-r from-sky-400 to-violet-500"
                   : "bg-gray-200",
@@ -88,8 +92,8 @@ export default function PhaseCard({ phase, status }) {
 
       {open && (
         <ul className="border-t border-gray-100">
-          {phase.tasks.map((task) => (
-            <TaskRow key={task.id} task={task} />
+          {phase.tasks.map((task, idx) => (
+            <TaskRow key={task._id || task.id || idx} task={task} onToggle={onToggleTask} />
           ))}
         </ul>
       )}

@@ -201,3 +201,54 @@ Ensure "type" is one of: "theory", "practice", "review", or "project". Provide 3
     return generateAlgorithmicFallback({ targetRole, skillLevel, durationWeeks });
   }
 };
+
+/**
+ * AI Assistant for solving student doubts
+ * @param {Object} options - { query, contextGoal }
+ * @returns {Promise<Object>} { answer, suggestedFollowups }
+ */
+export const solveDoubtAI = async ({ query, contextGoal = "Backend Developer" }) => {
+  const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_KEY;
+
+  if (!apiKey) {
+    return {
+      answer: `Great question about **${query}**!\n\nIn ${contextGoal} learning, this topic is key to building reliable systems. Here is a breakdown:\n\n1. **Core Concept**: It ensures proper architecture, separation of concerns, and clean execution.\n2. **Best Practice**: Keep your implementation modular, write unit tests, and follow industry standard conventions.\n3. **Real-world Application**: Widely used in modern production applications for performance and scalability.\n\nFeel free to ask follow-up questions or request code snippets! 🚀`,
+      timestamp: new Date().toISOString(),
+    };
+  }
+
+  try {
+    const prompt = `You are a friendly, highly knowledgeable AI Tech Mentor helping a student studying to become a ${contextGoal}.
+Question: "${query}"
+
+Provide a clear, encouraging, structured response in markdown. Focus on core concepts, best practices, and practical examples.`;
+
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { temperature: 0.7 },
+        }),
+      }
+    );
+
+    if (!response.ok) throw new Error("Gemini API error");
+
+    const data = await response.json();
+    const answer = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+    return {
+      answer: answer || "I couldn't generate an answer right now. Please try rephrasing your question.",
+      timestamp: new Date().toISOString(),
+    };
+  } catch (err) {
+    return {
+      answer: `Great question about **${query}**!\n\nIn ${contextGoal} learning, this topic is key to building reliable systems. Here is a breakdown:\n\n1. **Core Concept**: It ensures proper architecture, separation of concerns, and clean execution.\n2. **Best Practice**: Keep your implementation modular, write unit tests, and follow industry standard conventions.\n\nFeel free to ask follow-up questions! 🚀`,
+      timestamp: new Date().toISOString(),
+    };
+  }
+};
+

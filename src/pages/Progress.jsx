@@ -1,6 +1,8 @@
+import { useState, useEffect } from "react";
 import { usePageHeader } from "../context/HeaderContext";
-import { progressData } from "../data/dummyData";
+import { progressData as fallbackProgress } from "../data/dummyData";
 import { Flame } from "lucide-react";
+import { api } from "../services/api";
 
 export default function Progress() {
   usePageHeader({
@@ -8,22 +10,42 @@ export default function Progress() {
     goalLabel: "Backend Developer",
   });
 
+  const [data, setData] = useState(fallbackProgress);
+
+  useEffect(() => {
+    api.progress
+      .getAnalytics()
+      .then((res) => {
+        if (res.progress) {
+          setData({
+            ...fallbackProgress,
+            streak: {
+              ...fallbackProgress.streak,
+              count: res.progress.streakDays || fallbackProgress.streak.count,
+            },
+            xpGrowth: res.progress.weeklyXP || fallbackProgress.xpGrowth,
+          });
+        }
+      })
+      .catch((err) => {
+        console.warn("Using offline progress fallback:", err.message);
+      });
+  }, []);
+
   // SVG Radar Chart Math calculations
   const cx = 160;
   const cy = 160;
   const radius = 100;
-  const skills = progressData.skillsRadar;
+  const skills = data.skillsRadar;
   const totalAxes = skills.length;
 
   const getCoordinates = (index, valueScale = 1) => {
-    // 0 index is top (-90 degrees)
     const angle = (Math.PI * 2 * index) / totalAxes - Math.PI / 2;
     const x = cx + radius * valueScale * Math.cos(angle);
     const y = cy + radius * valueScale * Math.sin(angle);
     return { x, y };
   };
 
-  // Generate radar polygon points
   const polygonPoints = skills
     .map((skill, i) => {
       const { x, y } = getCoordinates(i, skill.value);
@@ -31,22 +53,20 @@ export default function Progress() {
     })
     .join(" ");
 
-  // XP Growth Line Chart Math
-  const xpPoints = progressData.xpGrowth;
+  const xpPoints = data.xpGrowth;
   const chartWidth = 400;
   const chartHeight = 220;
   const paddingX = 40;
   const paddingY = 30;
 
   const getLineCoords = (index, xp) => {
-    const x = paddingX + (index * (chartWidth - paddingX * 2)) / (xpPoints.length - 1);
+    const x = paddingX + (index * (chartWidth - paddingX * 2)) / Math.max(1, xpPoints.length - 1);
     const y = chartHeight - paddingY - (xp / 800) * (chartHeight - paddingY * 2);
     return { x, y };
   };
 
   const lineCoords = xpPoints.map((item, i) => getLineCoords(i, item.xp));
 
-  // Build SVG path
   const pathD = lineCoords.reduce((acc, point, i, a) => {
     if (i === 0) return `M ${point.x} ${point.y}`;
     const prev = a[i - 1];
@@ -59,19 +79,16 @@ export default function Progress() {
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto">
-      {/* Header section */}
       <div>
         <h2 className="text-2xl font-bold text-gray-900">
-          {progressData.title}
+          {data.title}
         </h2>
         <p className="text-sm text-gray-500 mt-1">
-          {progressData.subtitle}
+          {data.subtitle}
         </p>
       </div>
 
-      {/* Grid Row 1: Skill Radar & XP Growth */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Skill Radar Card */}
         <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-xs flex flex-col justify-between">
           <div>
             <h3 className="text-lg font-bold text-gray-900">Skill Radar</h3>
@@ -82,7 +99,6 @@ export default function Progress() {
 
           <div className="flex items-center justify-center my-4">
             <svg width="320" height="320" viewBox="0 0 320 320" className="overflow-visible">
-              {/* Radar Grid Circles / Webs */}
               {[0.2, 0.4, 0.6, 0.8, 1].map((scale, levelIdx) => {
                 const levelPoints = skills
                   .map((_, i) => {
@@ -102,7 +118,6 @@ export default function Progress() {
                 );
               })}
 
-              {/* Axis lines */}
               {skills.map((_, i) => {
                 const { x, y } = getCoordinates(i, 1);
                 return (
@@ -118,7 +133,6 @@ export default function Progress() {
                 );
               })}
 
-              {/* Data Polygon */}
               <polygon
                 points={polygonPoints}
                 fill="rgba(168, 85, 247, 0.25)"
@@ -126,7 +140,6 @@ export default function Progress() {
                 strokeWidth="2"
               />
 
-              {/* Data Vertices */}
               {skills.map((skill, i) => {
                 const { x, y } = getCoordinates(i, skill.value);
                 return (
@@ -142,7 +155,6 @@ export default function Progress() {
                 );
               })}
 
-              {/* Axis Labels */}
               {skills.map((skill, i) => {
                 const { x, y } = getCoordinates(i, 1.22);
                 let textAnchor = "middle";
@@ -165,7 +177,6 @@ export default function Progress() {
           </div>
         </div>
 
-        {/* XP Growth Line Chart Card */}
         <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-xs flex flex-col justify-between">
           <div>
             <h3 className="text-lg font-bold text-gray-900">XP Growth</h3>
@@ -176,7 +187,6 @@ export default function Progress() {
 
           <div className="w-full flex items-center justify-center my-4 overflow-x-auto">
             <svg width="400" height="240" viewBox="0 0 400 240" className="overflow-visible">
-              {/* Y Axis Grid Lines & Labels */}
               {[0, 200, 400, 600, 800].map((val) => {
                 const y = chartHeight - paddingY - (val / 800) * (chartHeight - paddingY * 2);
                 return (
@@ -201,7 +211,6 @@ export default function Progress() {
                 );
               })}
 
-              {/* Curved Line */}
               <path
                 d={pathD}
                 fill="none"
@@ -210,7 +219,6 @@ export default function Progress() {
                 strokeLinecap="round"
               />
 
-              {/* Data points & X Labels */}
               {lineCoords.map((pt, i) => (
                 <g key={i}>
                   <circle
@@ -228,7 +236,7 @@ export default function Progress() {
                     textAnchor="middle"
                     className="text-[11px] fill-gray-500 font-medium"
                   >
-                    {xpPoints[i].week}
+                    {xpPoints[i]?.week}
                   </text>
                 </g>
               ))}
@@ -237,12 +245,11 @@ export default function Progress() {
         </div>
       </div>
 
-      {/* Row 2: Skill Breakdown */}
       <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-xs space-y-4">
         <h3 className="text-lg font-bold text-gray-900">Skill Breakdown</h3>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-          {progressData.skillsBreakdown.map((item, idx) => (
+          {data.skillsBreakdown.map((item, idx) => (
             <div key={idx} className="space-y-1.5">
               <div className="flex justify-between text-xs font-semibold">
                 <span className="text-gray-900">{item.label}</span>
@@ -259,24 +266,22 @@ export default function Progress() {
         </div>
       </div>
 
-      {/* Row 3: Study Streak */}
       <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-xs space-y-4">
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-lg font-bold text-gray-900">Study Streak</h3>
             <p className="text-xs text-gray-500 mt-0.5">
-              Last {progressData.streak.totalDays} days of activity
+              Last {data.streak.totalDays} days of activity
             </p>
           </div>
           <div className="flex items-center gap-1.5 text-amber-500 font-bold text-sm">
             <Flame className="h-4 w-4 fill-amber-500" />
-            <span>{progressData.streak.count} day streak</span>
+            <span>{data.streak.count} day streak</span>
           </div>
         </div>
 
-        {/* Activity Pills Grid */}
         <div className="flex flex-wrap gap-2.5 pt-2">
-          {progressData.streak.days.map((status, idx) => (
+          {data.streak.days.map((status, idx) => (
             <div
               key={idx}
               className={`h-7 w-7 sm:h-8 sm:w-8 rounded-xl transition-transform hover:scale-110 ${
@@ -290,7 +295,6 @@ export default function Progress() {
           ))}
         </div>
 
-        {/* Streak Legend */}
         <div className="flex items-center gap-6 text-xs text-gray-500 font-medium pt-2">
           <div className="flex items-center gap-1.5">
             <span className="h-2.5 w-2.5 rounded-full bg-gray-200" />

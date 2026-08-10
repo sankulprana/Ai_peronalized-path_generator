@@ -17,16 +17,17 @@ const COLOR_MAP = {
 const FILLED = new Set(["bolt", "flame"]);
 
 export default function StatCard({ label, value, icon }) {
-  const Icon = ICONS[icon];
+  const Icon = ICONS[icon] || Zap;
+  const color = COLOR_MAP[icon] || "bg-violet-100 text-violet-600";
   return (
     <div className="flex items-center gap-4 rounded-2xl border border-gray-100 bg-white p-5 shadow-card">
       <div
-        className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${COLOR_MAP[icon]}`}
+        className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${color}`}
       >
         <Icon
           className="h-5 w-5"
           strokeWidth={2}
-          fill={FILLED.has(icon) ? "currentColor" : "none"}
+          fill={icon && FILLED.has(icon) ? "currentColor" : "none"}
         />
       </div>
       <div>

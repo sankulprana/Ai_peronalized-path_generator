@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { usePageHeader } from "../context/HeaderContext";
 import { doubtSolverData } from "../data/dummyData";
-import { Bot, Send, Sparkles, User, Loader2 } from "lucide-react";
+import { Bot, Send, User, Loader2 } from "lucide-react";
+import { api } from "../services/api";
 
 export default function DoubtSolver() {
   usePageHeader({
@@ -22,11 +23,10 @@ export default function DoubtSolver() {
     scrollToBottom();
   }, [messages, isTyping]);
 
-  const handleSend = (textToSend) => {
+  const handleSend = async (textToSend) => {
     const query = textToSend || inputText;
     if (!query.trim()) return;
 
-    // Add user message
     const userMsg = {
       id: Date.now(),
       sender: "user",
@@ -38,22 +38,31 @@ export default function DoubtSolver() {
     if (!textToSend) setInputText("");
     setIsTyping(true);
 
-    // Simulate AI response delay
-    setTimeout(() => {
-      let aiResponseText =
+    try {
+      const res = await api.ai.askDoubt(query, "Backend Developer");
+      const aiMsg = {
+        id: Date.now() + 1,
+        sender: "ai",
+        text: res.answer || "I couldn't process that question right now.",
+        timestamp: "Just now",
+      };
+      setMessages((prev) => [...prev, aiMsg]);
+    } catch (err) {
+      console.warn("Backend AI solver error, using client fallback:", err.message);
+      const fallbackText =
         doubtSolverData.presetAnswers[query] ||
-        `Great question about **${query}**!\n\nIn backend development, this topic plays a crucial role in building resilient and scalable systems. Here's a quick summary:\n\n1. **Core Concept**: It ensures decoupled architecture and efficient resource management.\n2. **Best Practice**: Always structure your handlers cleanly and monitor performance metrics.\n\nFeel free to ask follow-up questions or request code examples! 🚀`;
+        `Great question about **${query}**!\n\nIn learning paths, this topic is crucial for building resilient systems. Keep diving deeper into best practices and practical implementation! 🚀`;
 
       const aiMsg = {
         id: Date.now() + 1,
         sender: "ai",
-        text: aiResponseText,
+        text: fallbackText,
         timestamp: "Just now",
       };
-
       setMessages((prev) => [...prev, aiMsg]);
+    } finally {
       setIsTyping(false);
-    }, 700);
+    }
   };
 
   return (

@@ -198,8 +198,60 @@ export const updateUserProfile = async (req, res, next) => {
           level: updatedUser.level,
           xp: updatedUser.xp,
           streak: updatedUser.streak,
+          targetGoal: user.targetGoal,
+          avatar: user.avatar,
+          isOnboarded: user.isOnboarded || false,
+          interests: user.interests || [],
+          skillLevel: user.skillLevel || "beginner",
+          weeklyHours: user.weeklyHours || 5,
+        },
+      });
+    } else {
+      res.status(404);
+      throw new Error("User not found");
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @desc    Save onboarding preferences
+ * @route   POST /api/auth/onboarding
+ * @access  Private
+ */
+export const completeOnboarding = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id);
+
+    if (user) {
+      const { targetGoal, skillLevel, interests, weeklyHours } = req.body;
+      user.targetGoal = targetGoal || user.targetGoal;
+      user.skillLevel = skillLevel || user.skillLevel;
+      user.interests = Array.isArray(interests) ? interests : user.interests;
+      user.weeklyHours = weeklyHours || user.weeklyHours;
+      user.isOnboarded = true;
+
+      const updatedUser = await user.save();
+
+      res.status(200).json({
+        success: true,
+        message: "Onboarding completed successfully",
+        user: {
+          _id: updatedUser._id,
+          name: updatedUser.name,
+          email: updatedUser.email,
+          role: updatedUser.role,
+          title: updatedUser.title,
+          level: updatedUser.level,
+          xp: updatedUser.xp,
+          streak: updatedUser.streak,
           targetGoal: updatedUser.targetGoal,
           avatar: updatedUser.avatar,
+          isOnboarded: updatedUser.isOnboarded,
+          interests: updatedUser.interests,
+          skillLevel: updatedUser.skillLevel,
+          weeklyHours: updatedUser.weeklyHours,
         },
       });
     } else {

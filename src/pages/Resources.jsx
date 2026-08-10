@@ -1,15 +1,35 @@
-import { useState } from "react";
-import { usePageHeader } from "../context/HeaderContext";
-import { resourcesData } from "../data/dummyData";
-import { Play, FileText, Globe, ExternalLink, Eye, Clock } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useHeaderData, usePageHeader } from "../context/HeaderContext";
+import { resourcesData as fallbackResources } from "../data/dummyData";
+import { Play, FileText, Globe, Eye } from "lucide-react";
+import { api } from "../services/api";
 
 export default function Resources() {
+  const { goalLabel = "Backend Developer" } = useHeaderData();
+
   usePageHeader({
     pageTitle: "Resources",
-    goalLabel: "Backend Developer",
+    goalLabel,
   });
 
   const [activeTab, setActiveTab] = useState("youtube");
+  const [items, setItems] = useState(fallbackResources.items);
+
+  useEffect(() => {
+    api.resources
+      .getAll(activeTab)
+      .then((res) => {
+        if (res.resources && res.resources.length > 0) {
+          setItems((prev) => ({
+            ...prev,
+            [activeTab]: res.resources,
+          }));
+        }
+      })
+      .catch((err) => {
+        console.warn("Using offline resources fallback:", err.message);
+      });
+  }, [activeTab]);
 
   const getCategoryIcon = (id) => {
     switch (id) {
@@ -24,23 +44,23 @@ export default function Resources() {
     }
   };
 
-  const currentItems = resourcesData.items[activeTab] || [];
+  const currentItems = items[activeTab] || fallbackResources.items[activeTab] || [];
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto">
       {/* Header section */}
       <div>
         <h2 className="text-2xl font-bold text-gray-900">
-          {resourcesData.title}
+          {fallbackResources.title}
         </h2>
         <p className="text-sm text-gray-500 mt-1">
-          {resourcesData.subtitle}
+          {fallbackResources.subtitle}
         </p>
       </div>
 
       {/* Category Tabs */}
       <div className="inline-flex p-1.5 bg-gray-100/80 rounded-2xl gap-1">
-        {resourcesData.categories.map((cat) => {
+        {fallbackResources.categories.map((cat) => {
           const Icon = getCategoryIcon(cat.id);
           const isActive = activeTab === cat.id;
 
@@ -67,9 +87,9 @@ export default function Resources() {
 
       {/* Resource Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {currentItems.map((item) => (
+        {currentItems.map((item, idx) => (
           <a
-            key={item.id}
+            key={item._id || item.id || idx}
             href={item.url}
             target="_blank"
             rel="noopener noreferrer"
@@ -84,7 +104,7 @@ export default function Resources() {
 
               {/* Video Duration / Time Badge */}
               <div className="absolute bottom-3 right-3 bg-black/80 text-white text-[11px] font-mono font-medium px-2 py-0.5 rounded-md backdrop-blur-xs">
-                {item.duration}
+                {item.duration || "15 mins"}
               </div>
             </div>
 
@@ -92,7 +112,7 @@ export default function Resources() {
             <div className="p-5 flex flex-col flex-1 justify-between gap-3">
               <div>
                 <span className="text-xs font-semibold text-violet-600 tracking-wide">
-                  {item.tag}
+                  {item.tag || "Resource"}
                 </span>
                 <h3 className="text-base font-bold text-gray-900 group-hover:text-violet-600 transition-colors mt-1 line-clamp-2">
                   {item.title}
@@ -100,10 +120,10 @@ export default function Resources() {
               </div>
 
               <div className="flex items-center justify-between text-xs text-gray-500 pt-2 border-t border-gray-100">
-                <span className="font-medium text-gray-600">{item.author}</span>
+                <span className="font-medium text-gray-600">{item.author || "PathAI Curation"}</span>
                 <div className="flex items-center gap-1">
                   <Eye className="h-3.5 w-3.5 text-gray-400" />
-                  <span>{item.views}</span>
+                  <span>{item.views || "1.2k"}</span>
                 </div>
               </div>
             </div>

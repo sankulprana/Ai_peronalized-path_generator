@@ -1,7 +1,8 @@
-import { NavLink } from "react-router-dom";
-import { Brain } from "lucide-react";
+import { NavLink, Link } from "react-router-dom";
+import { Brain, LogOut, LogIn } from "lucide-react";
 import { navItems } from "../data/dummyData";
 import { useHeaderData } from "../context/HeaderContext";
+import { useAuth } from "../context/AuthContext";
 
 function NavItem({ icon: Icon, label, path }) {
   return (
@@ -24,11 +25,17 @@ function NavItem({ icon: Icon, label, path }) {
 }
 
 export default function Sidebar({ open = true, onClose }) {
-  const { user } = useHeaderData();
+  const { user: headerUser } = useHeaderData();
+  const { user: authUser, logout } = useAuth();
+
+  const currentUser = {
+    name: authUser?.name || headerUser?.name || "Alex Chen",
+    title: authUser?.title || headerUser?.title || "Learner · Lv.3",
+    initial: authUser?.name ? authUser.name.charAt(0).toUpperCase() : headerUser?.initial || "A",
+  };
 
   return (
     <>
-      {/* Mobile overlay */}
       {open && (
         <button
           aria-label="Close sidebar"
@@ -43,7 +50,6 @@ export default function Sidebar({ open = true, onClose }) {
           open ? "translate-x-0" : "-translate-x-full",
         ].join(" ")}
       >
-        {/* Logo */}
         <div className="mb-6 flex items-center gap-2.5 px-2">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-violet-600">
             <Brain className="h-5 w-5 text-white" strokeWidth={2} />
@@ -53,25 +59,44 @@ export default function Sidebar({ open = true, onClose }) {
           </span>
         </div>
 
-        {/* Nav */}
         <nav className="flex flex-1 flex-col gap-1">
           {navItems.map((item) => (
             <NavItem key={item.label} {...item} />
           ))}
         </nav>
 
-        {/* User profile */}
-        <div className="mt-4 flex items-center gap-3 rounded-xl bg-gray-50 px-3 py-2.5">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-violet-600 text-sm font-semibold text-white">
-            {user.initial}
+        {authUser ? (
+          <div className="mt-4 flex items-center justify-between rounded-xl bg-gray-50 px-3 py-2.5 border border-gray-100">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-violet-600 text-sm font-semibold text-white">
+                {currentUser.initial}
+              </div>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold text-gray-900">
+                  {currentUser.name}
+                </p>
+                <p className="truncate text-xs text-gray-500">{currentUser.title}</p>
+              </div>
+            </div>
+            <button
+              onClick={logout}
+              title="Sign Out"
+              className="p-1.5 text-gray-400 hover:text-rose-600 transition-colors"
+            >
+              <LogOut className="h-4 w-4" />
+            </button>
           </div>
-          <div className="min-w-0">
-            <p className="truncate text-sm font-semibold text-gray-900">
-              {user.name}
-            </p>
-            <p className="truncate text-xs text-gray-500">{user.title}</p>
+        ) : (
+          <div className="mt-4 flex flex-col gap-2 pt-2 border-t border-gray-100">
+            <Link
+              to="/login"
+              className="flex items-center justify-center gap-2 rounded-xl bg-violet-50 py-2.5 text-xs font-semibold text-violet-600 hover:bg-violet-100 transition-all"
+            >
+              <LogIn className="h-4 w-4" />
+              Sign In / Sign Up
+            </Link>
           </div>
-        </div>
+        )}
       </aside>
     </>
   );

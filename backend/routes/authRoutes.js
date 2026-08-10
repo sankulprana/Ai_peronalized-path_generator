@@ -4,6 +4,7 @@ import {
   loginUser,
   getUserProfile,
   updateUserProfile,
+  completeOnboarding,
 } from "../controllers/authController.js";
 import { protect } from "../middleware/authMiddleware.js";
 import {
@@ -41,6 +42,13 @@ router.get("/profile", protect, getUserProfile);
  * @access  Private (Requires Bearer token)
  */
 router.put("/profile", protect, validateProfileUpdate, updateUserProfile);
+
+/**
+ * @route   POST /api/auth/onboarding
+ * @desc    Save onboarding preferences
+ * @access  Private
+ */
+router.post("/onboarding", protect, completeOnboarding);
 
 export default router;
 

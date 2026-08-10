@@ -2,7 +2,13 @@ import { Menu, Flame, Zap, RotateCcw } from "lucide-react";
 import { useHeaderData } from "../context/HeaderContext";
 
 export default function Topbar({ onMenuClick }) {
-  const { pageTitle, goalLabel, streak, xp } = useHeaderData();
+  const {
+    pageTitle = "Dashboard",
+    goalLabel = "Backend Developer",
+    streak = 12,
+    xp = 1465,
+    openGoalModal,
+  } = useHeaderData();
 
   return (
     <header className="sticky top-0 z-10 flex h-[73px] items-center justify-between border-b border-gray-100 bg-white px-4 sm:px-6">
@@ -33,7 +39,10 @@ export default function Topbar({ onMenuClick }) {
           <span>{xp}</span>
           <span className="font-medium text-gray-400">XP</span>
         </div>
-        <button className="flex items-center gap-1.5 rounded-full bg-violet-50 px-4 py-2 text-sm font-semibold text-violet-600 hover:bg-violet-100">
+        <button
+          onClick={openGoalModal}
+          className="flex items-center gap-1.5 rounded-full bg-violet-50 px-4 py-2 text-sm font-semibold text-violet-600 hover:bg-violet-100 transition-all active:scale-95"
+        >
           <RotateCcw className="h-4 w-4" />
           <span className="hidden sm:inline">Change Goal</span>
         </button>

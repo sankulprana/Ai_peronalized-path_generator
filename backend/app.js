@@ -9,6 +9,7 @@ import roadmapRoutes from "./routes/roadmapRoutes.js";
 import progressRoutes from "./routes/progressRoutes.js";
 import plannerRoutes from "./routes/plannerRoutes.js";
 import resourceRoutes from "./routes/resourceRoutes.js";
+import aiRoutes from "./routes/aiRoutes.js";
 
 const app = express();
 
@@ -58,6 +59,7 @@ app.get("/api/health", (req, res) => {
       progress: "/api/progress",
       planner: "/api/planner",
       resources: "/api/resources",
+      ai: "/api/ai",
     },
   });
 });
@@ -71,6 +73,8 @@ app.use("/api/roadmaps", roadmapRoutes);
 app.use("/api/progress", progressRoutes);
 app.use("/api/planner", plannerRoutes);
 app.use("/api/resources", resourceRoutes);
+app.use("/api/ai", aiRoutes);
+
 
 /**
  * Centralized Error Handling Pipeline

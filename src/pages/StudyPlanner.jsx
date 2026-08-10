@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { usePageHeader } from "../context/HeaderContext";
-import { studyPlannerData } from "../data/dummyData";
+import { studyPlannerData as fallbackPlanner } from "../data/dummyData";
 import { Calendar, Clock, PlayCircle, CheckCircle2, Sparkles } from "lucide-react";
+import { api } from "../services/api";
 
 export default function StudyPlanner() {
   usePageHeader({
@@ -10,6 +11,27 @@ export default function StudyPlanner() {
   });
 
   const [sessionStarted, setSessionStarted] = useState(false);
+  const [plannerData, setPlannerData] = useState(fallbackPlanner);
+
+  useEffect(() => {
+    api.planner
+      .getPlanner()
+      .then((res) => {
+        if (res.planner) {
+          setPlannerData({
+            weekRange: res.planner.weekRange || fallbackPlanner.weekRange,
+            totalHours: res.planner.totalHours || fallbackPlanner.totalHours,
+            todayDate: res.planner.todayDate || fallbackPlanner.todayDate,
+            legend: fallbackPlanner.legend,
+            days: res.planner.days || fallbackPlanner.days,
+            todayFocus: res.planner.todayFocus || fallbackPlanner.todayFocus,
+          });
+        }
+      })
+      .catch((err) => {
+        console.warn("Using offline planner fallback:", err.message);
+      });
+  }, []);
 
   const getPillStyle = (type) => {
     switch (type) {
@@ -26,6 +48,16 @@ export default function StudyPlanner() {
     }
   };
 
+  const handleStartSession = async () => {
+    const nextState = !sessionStarted;
+    setSessionStarted(nextState);
+    try {
+      await api.planner.toggleSession({ sessionTitle: plannerData.todayFocus.title });
+    } catch (err) {
+      console.warn("Session toggle offline fallback:", err.message);
+    }
+  };
+
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto">
       {/* Header section */}
@@ -33,13 +65,13 @@ export default function StudyPlanner() {
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Study Planner</h2>
           <p className="text-sm text-gray-500 mt-1">
-            {studyPlannerData.weekRange} · {studyPlannerData.totalHours}
+            {plannerData.weekRange} · {plannerData.totalHours}
           </p>
         </div>
 
         {/* Legend */}
         <div className="flex flex-wrap items-center gap-4 text-xs font-medium text-gray-600">
-          {studyPlannerData.legend.map((item) => (
+          {plannerData.legend.map((item) => (
             <div key={item.label} className="flex items-center gap-1.5">
               <span className={`h-2.5 w-2.5 rounded-full ${item.dotBg}`} />
               <span>{item.label}</span>
@@ -50,7 +82,7 @@ export default function StudyPlanner() {
 
       {/* 7 Days Calendar Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
-        {studyPlannerData.days.map((day) => (
+        {plannerData.days.map((day) => (
           <div
             key={day.dayNum}
             className={`rounded-2xl border p-3 flex flex-col min-h-[220px] transition-all ${
@@ -107,7 +139,7 @@ export default function StudyPlanner() {
       {/* Today's Focus Section */}
       <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm space-y-4">
         <h3 className="text-lg font-bold text-gray-900">
-          Today's Focus — {studyPlannerData.todayDate}
+          Today's Focus — {plannerData.todayDate}
         </h3>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -119,20 +151,20 @@ export default function StudyPlanner() {
               </div>
               <div>
                 <h4 className="text-base font-bold text-gray-900">
-                  {studyPlannerData.todayFocus.title}
+                  {plannerData.todayFocus.title}
                 </h4>
                 <p className="text-xs text-gray-500 mt-0.5">
-                  {studyPlannerData.todayFocus.time} · {studyPlannerData.todayFocus.duration} · {studyPlannerData.todayFocus.phase}
+                  {plannerData.todayFocus.time} · {plannerData.todayFocus.duration} · {plannerData.todayFocus.phase}
                 </p>
                 <p className="text-xs font-semibold text-violet-600 mt-1.5 flex items-center gap-1">
                   <Sparkles className="h-3.5 w-3.5" />
-                  +{studyPlannerData.todayFocus.xpReward} XP on completion
+                  +{plannerData.todayFocus.xpReward} XP on completion
                 </p>
               </div>
             </div>
 
             <button
-              onClick={() => setSessionStarted(!sessionStarted)}
+              onClick={handleStartSession}
               className={`w-full sm:w-auto px-6 py-2.5 rounded-full font-semibold text-sm transition-all shadow-sm active:scale-95 flex items-center justify-center gap-2 ${
                 sessionStarted
                   ? "bg-emerald-600 text-white hover:bg-emerald-700"
@@ -158,7 +190,7 @@ export default function StudyPlanner() {
               </div>
               <div>
                 <p className="text-sm font-bold text-gray-900">
-                  {studyPlannerData.todayFocus.sessionsCount} Sessions today
+                  {plannerData.todayFocus.sessionsCount} Sessions today
                 </p>
               </div>
             </div>
@@ -169,7 +201,7 @@ export default function StudyPlanner() {
               </div>
               <div>
                 <p className="text-sm font-bold text-gray-900">
-                  {studyPlannerData.todayFocus.plannedMinutes} Minutes planned
+                  {plannerData.todayFocus.plannedMinutes} Minutes planned
                 </p>
               </div>
             </div>
