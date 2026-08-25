@@ -1,5 +1,6 @@
 import express from "express";
 import { solveDoubtAI } from "../services/aiService.js";
+import { optionalAuth } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
@@ -8,7 +9,7 @@ const router = express.Router();
  * @desc    Solve student doubt with AI mentor
  * @access  Public / Private
  */
-router.post("/doubt-solver", async (req, res, next) => {
+router.post("/doubt-solver", optionalAuth, async (req, res, next) => {
   try {
     const { query, contextGoal } = req.body;
     if (!query) {

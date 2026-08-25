@@ -60,6 +60,36 @@ export const api = {
       });
       return handleResponse(res);
     },
+    updateProfile: async (profileData) => {
+      const res = await fetch(`${API_BASE_URL}/auth/profile`, {
+        method: "PUT",
+        headers: getHeaders(),
+        body: JSON.stringify(profileData),
+      });
+      return handleResponse(res);
+    },
+  },
+
+  // Quizzes API
+  quizzes: {
+    getAssessment: async (role = "") => {
+      const url = role
+        ? `${API_BASE_URL}/quizzes/assessment?role=${encodeURIComponent(role)}`
+        : `${API_BASE_URL}/quizzes/assessment`;
+      const res = await fetch(url, {
+        method: "GET",
+        headers: getHeaders(),
+      });
+      return handleResponse(res);
+    },
+    submit: async (answers, targetRole = "") => {
+      const res = await fetch(`${API_BASE_URL}/quizzes/submit`, {
+        method: "POST",
+        headers: getHeaders(),
+        body: JSON.stringify({ answers, targetRole }),
+      });
+      return handleResponse(res);
+    },
   },
 
   // Dashboard API
@@ -154,6 +184,13 @@ export const api = {
       });
       return handleResponse(res);
     },
+    logDailyActivity: async () => {
+      const res = await fetch(`${API_BASE_URL}/progress/activity`, {
+        method: "POST",
+        headers: getHeaders(),
+      });
+      return handleResponse(res);
+    },
   },
 
   // AI Doubt Solver API
@@ -163,6 +200,18 @@ export const api = {
         method: "POST",
         headers: getHeaders(),
         body: JSON.stringify({ query, contextGoal }),
+      });
+      return handleResponse(res);
+    },
+  },
+
+  // Machine Learning Engine API
+  ml: {
+    predict: async (data) => {
+      const res = await fetch(`${API_BASE_URL}/ml/predict`, {
+        method: "POST",
+        headers: getHeaders(),
+        body: JSON.stringify(data),
       });
       return handleResponse(res);
     },

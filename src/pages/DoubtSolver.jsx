@@ -1,13 +1,15 @@
 import { useState, useRef, useEffect } from "react";
-import { usePageHeader } from "../context/HeaderContext";
+import { usePageHeader, useHeaderData } from "../context/HeaderContext";
 import { doubtSolverData } from "../data/dummyData";
 import { Bot, Send, User, Loader2 } from "lucide-react";
 import { api } from "../services/api";
 
 export default function DoubtSolver() {
+  const { goalLabel = "Backend Developer" } = useHeaderData();
+
   usePageHeader({
     pageTitle: "Doubt Solver",
-    goalLabel: "Backend Developer",
+    goalLabel: goalLabel || "Backend Developer",
   });
 
   const [messages, setMessages] = useState(doubtSolverData.initialMessages);
@@ -39,7 +41,7 @@ export default function DoubtSolver() {
     setIsTyping(true);
 
     try {
-      const res = await api.ai.askDoubt(query, "Backend Developer");
+      const res = await api.ai.askDoubt(query, goalLabel || "Backend Developer");
       const aiMsg = {
         id: Date.now() + 1,
         sender: "ai",

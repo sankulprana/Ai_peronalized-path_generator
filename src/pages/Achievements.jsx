@@ -1,14 +1,44 @@
-import { usePageHeader } from "../context/HeaderContext";
-import { achievementsData } from "../data/dummyData";
+import { usePageHeader, useHeaderData } from "../context/HeaderContext";
+import { achievementsData as fallbackAchievements } from "../data/dummyData";
 import { Zap, CheckCircle2, Lock } from "lucide-react";
 
 export default function Achievements() {
+  const { xp = 0, streak = 0, goalLabel = "Backend Developer" } = useHeaderData();
+
   usePageHeader({
     pageTitle: "Achievements",
-    goalLabel: "Backend Developer",
+    goalLabel: goalLabel || "Backend Developer",
   });
 
-  const { currentLevel, levelProgression, badges } = achievementsData;
+  const level = Math.floor(xp / 300) + 1;
+  const currentLevelMinXP = (level - 1) * 300;
+  const nextLevelXP = level * 300;
+  const xpInCurrentLevel = xp - currentLevelMinXP;
+  const xpNeeded = Math.max(0, nextLevelXP - xp);
+
+  const levelNames = ["Apprentice", "Novice", "Learner", "Developer", "Expert", "Master"];
+  const currentLevelName = levelNames[Math.min(level - 1, levelNames.length - 1)] || "Learner";
+  const nextLevelName = levelNames[Math.min(level, levelNames.length - 1)] || "Master";
+
+  const levelProgression = [
+    { level: 1, name: "Apprentice", xp: "0 XP", status: level > 1 ? "completed" : "active" },
+    { level: 2, name: "Novice", xp: "100 XP", status: level > 2 ? "completed" : level === 2 ? "active" : "locked" },
+    { level: 3, name: "Learner", xp: "300 XP", status: level > 3 ? "completed" : level === 3 ? "active" : "locked" },
+    { level: 4, name: "Developer", xp: "600 XP", status: level > 4 ? "completed" : level === 4 ? "active" : "locked" },
+    { level: 5, name: "Expert", xp: "1000 XP", status: level > 5 ? "completed" : level === 5 ? "active" : "locked" },
+    { level: 6, name: "Master", xp: "2000 XP", status: level >= 6 ? "active" : "locked" },
+  ];
+
+  const badgesList = fallbackAchievements.badges.list.map((badge) => {
+    let earned = badge.earned;
+    if (badge.id === 1) earned = xp >= 50;
+    if (badge.id === 2) earned = streak >= 7;
+    if (badge.id === 3) earned = xp >= 100;
+    if (badge.id === 7) earned = streak >= 30;
+    return { ...badge, earned };
+  });
+
+  const earnedCount = badgesList.filter((b) => b.earned).length;
 
   const getLevelPillStyle = (status) => {
     switch (status) {
@@ -26,14 +56,14 @@ export default function Achievements() {
       {/* Header section */}
       <div>
         <h2 className="text-2xl font-bold text-gray-900">
-          {achievementsData.title}
+          {fallbackAchievements.title}
         </h2>
         <p className="text-sm text-gray-500 mt-1">
-          {achievementsData.subtitle}
+          {fallbackAchievements.subtitle}
         </p>
       </div>
 
-      {/* Main Level 3 Learner Banner */}
+      {/* Main Level Banner */}
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-600 via-slate-700 to-slate-800 p-6 sm:p-8 text-white shadow-md">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 relative z-10">
           <div className="flex items-center gap-5">
@@ -44,10 +74,10 @@ export default function Achievements() {
 
             <div>
               <span className="text-xs font-bold uppercase tracking-wider text-sky-300">
-                LEVEL {currentLevel.levelNum}
+                LEVEL {level}
               </span>
               <h3 className="text-3xl font-extrabold text-white mt-0.5">
-                {currentLevel.levelName}
+                {currentLevelName}
               </h3>
             </div>
           </div>
@@ -55,16 +85,16 @@ export default function Achievements() {
           {/* XP Progress */}
           <div className="w-full sm:w-72 space-y-2">
             <div className="flex justify-between text-xs font-semibold text-gray-300">
-              <span>{currentLevel.xpNeeded} XP until {currentLevel.nextLevelName}</span>
+              <span>{xpNeeded} XP until {nextLevelName}</span>
               <span>
-                {currentLevel.currentXP} / {currentLevel.maxXP} XP
+                {xpInCurrentLevel} / 300 XP
               </span>
             </div>
             <div className="h-3 w-full bg-slate-500/50 rounded-full overflow-hidden p-0.5">
               <div
                 className="h-full rounded-full bg-violet-400 transition-all duration-500"
                 style={{
-                  width: `${(currentLevel.currentXP / currentLevel.maxXP) * 100}%`,
+                  width: `${Math.min(100, (xpInCurrentLevel / 300) * 100)}%`,
                 }}
               />
             </div>
@@ -116,12 +146,12 @@ export default function Achievements() {
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-bold text-gray-900">Badges</h3>
           <span className="text-xs font-semibold text-gray-400">
-            {badges.earnedCount} / {badges.totalCount} earned
+            {earnedCount} / {badgesList.length} earned
           </span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {badges.list.map((badge) => (
+          {badgesList.map((badge) => (
             <div
               key={badge.id}
               className={`rounded-2xl p-5 flex flex-col items-center text-center transition-all ${

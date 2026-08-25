@@ -98,11 +98,22 @@ export const getDashboardData = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
+      stats: {
+        activeGoals: activeRoadmap ? 1 : 0,
+        completedMilestones: topicsDone,
+        streakDays: user.streak || 0,
+        userXP: user.xp || 0,
+        currentLevel: user.level || 1,
+      },
+      topStats,
+      currentGoal,
+      roadmapItems,
+      weeklyXP,
       dashboard: {
         pageTitle: "Dashboard",
         goalLabel: user.targetGoal || "Backend Developer",
-        streak: user.streak || 12,
-        xp: user.xp || 1465,
+        streak: user.streak || 0,
+        xp: user.xp || 0,
         user: userSummary,
         currentGoal,
         topStats,

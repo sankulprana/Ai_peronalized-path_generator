@@ -8,7 +8,6 @@ import StudyPlanner from "./pages/StudyPlanner";
 import Resources from "./pages/Resources";
 import DoubtSolver from "./pages/DoubtSolver";
 import Progress from "./pages/Progress";
-import Achievements from "./pages/Achievements";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import { HeaderProvider } from "./context/HeaderContext";
@@ -40,7 +39,6 @@ export default function App() {
                       <Route path="/resources" element={<Resources />} />
                       <Route path="/doubt-solver" element={<DoubtSolver />} />
                       <Route path="/progress" element={<Progress />} />
-                      <Route path="/achievements" element={<Achievements />} />
                     </Routes>
                   </main>
                 </div>

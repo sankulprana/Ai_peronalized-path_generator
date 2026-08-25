@@ -18,12 +18,16 @@ export default function Progress() {
       .then((res) => {
         if (res.progress) {
           setData({
-            ...fallbackProgress,
+            title: res.progress.title || fallbackProgress.title,
+            subtitle: res.progress.subtitle || fallbackProgress.subtitle,
             streak: {
-              ...fallbackProgress.streak,
-              count: res.progress.streakDays || fallbackProgress.streak.count,
+              count: res.progress.streak?.count !== undefined ? res.progress.streak.count : fallbackProgress.streak.count,
+              totalDays: res.progress.streak?.totalDays || fallbackProgress.streak.totalDays,
+              days: res.progress.streak?.days && res.progress.streak.days.length > 0 ? res.progress.streak.days : fallbackProgress.streak.days,
             },
-            xpGrowth: res.progress.weeklyXP || fallbackProgress.xpGrowth,
+            skillsRadar: res.progress.skillsRadar && res.progress.skillsRadar.length > 0 ? res.progress.skillsRadar : fallbackProgress.skillsRadar,
+            xpGrowth: res.progress.xpGrowth && res.progress.xpGrowth.length > 0 ? res.progress.xpGrowth : fallbackProgress.xpGrowth,
+            skillsBreakdown: res.progress.skillsBreakdown && res.progress.skillsBreakdown.length > 0 ? res.progress.skillsBreakdown : fallbackProgress.skillsBreakdown,
           });
         }
       })

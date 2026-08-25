@@ -19,7 +19,9 @@ export default function Resources() {
     api.resources
       .getAll(activeTab)
       .then((res) => {
-        if (res.resources && res.resources.length > 0) {
+        if (res.resources?.items) {
+          setItems(res.resources.items);
+        } else if (res.resources && Array.isArray(res.resources)) {
           setItems((prev) => ({
             ...prev,
             [activeTab]: res.resources,

@@ -1,5 +1,12 @@
+import bcrypt from "bcryptjs";
+import mongoose from "mongoose";
 import User from "../models/User.js";
 import generateToken from "../utils/generateToken.js";
+
+// In-Memory fallback user store when MongoDB is offline
+const memoryUsers = [];
+
+const isDBConnected = () => mongoose.connection.readyState === 1;
 
 /**
  * @desc    Register a new user
@@ -10,31 +17,30 @@ export const registerUser = async (req, res, next) => {
   try {
     const { name, email, password, targetGoal } = req.body;
 
-    // Validation
     if (!name || !email || !password) {
       res.status(400);
       throw new Error("Please provide name, email, and password");
     }
 
-    // Check if user exists
-    const userExists = await User.findOne({ email });
-    if (userExists) {
-      res.status(400);
-      throw new Error("User already exists with this email");
-    }
+    const cleanEmail = email.toLowerCase().trim();
 
-    // Create User
-    const user = await User.create({
-      name,
-      email,
-      password,
-      targetGoal: targetGoal || "Backend Developer",
-    });
+    if (isDBConnected()) {
+      const userExists = await User.findOne({ email: cleanEmail });
+      if (userExists) {
+        res.status(400);
+        throw new Error("User already exists with this email");
+      }
 
-    if (user) {
+      const user = await User.create({
+        name,
+        email: cleanEmail,
+        password,
+        targetGoal: targetGoal || "Backend Developer",
+      });
+
       const token = generateToken(user._id);
 
-      res.status(201).json({
+      return res.status(201).json({
         success: true,
         message: "User registered successfully",
         token,
@@ -52,8 +58,50 @@ export const registerUser = async (req, res, next) => {
         },
       });
     } else {
-      res.status(400);
-      throw new Error("Invalid user data");
+      // Memory Fallback Mode
+      const userExists = memoryUsers.find((u) => u.email === cleanEmail);
+      if (userExists) {
+        res.status(400);
+        throw new Error("User already exists with this email");
+      }
+
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(password, salt);
+
+      const memUser = {
+        _id: "mem_" + Date.now(),
+        name,
+        email: cleanEmail,
+        password: hashedPassword,
+        targetGoal: targetGoal || "Backend Developer",
+        role: "user",
+        title: "Apprentice · Lv.1",
+        level: 1,
+        xp: 100,
+        streak: 1,
+        avatar: "",
+      };
+
+      memoryUsers.push(memUser);
+      const token = generateToken(memUser._id);
+
+      return res.status(201).json({
+        success: true,
+        message: "User registered successfully (In-Memory Mode)",
+        token,
+        user: {
+          _id: memUser._id,
+          name: memUser.name,
+          email: memUser.email,
+          role: memUser.role,
+          title: memUser.title,
+          level: memUser.level,
+          xp: memUser.xp,
+          streak: memUser.streak,
+          targetGoal: memUser.targetGoal,
+          avatar: memUser.avatar,
+        },
+      });
     }
   } catch (error) {
     next(error);
@@ -69,50 +117,84 @@ export const loginUser = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
-    // Validation
     if (!email || !password) {
       res.status(400);
       throw new Error("Please provide email and password");
     }
 
-    // Check for user and explicitly select password field
-    const user = await User.findOne({ email }).select("+password");
+    const cleanEmail = email.toLowerCase().trim();
 
-    if (!user) {
-      res.status(401);
-      throw new Error("Invalid credentials");
+    if (isDBConnected()) {
+      const user = await User.findOne({ email: cleanEmail }).select("+password");
+
+      if (!user) {
+        res.status(401);
+        throw new Error("Invalid email or password");
+      }
+
+      const isMatch = await user.matchPassword(password);
+      if (!isMatch) {
+        res.status(401);
+        throw new Error("Invalid email or password");
+      }
+
+      user.lastActiveDate = Date.now();
+      await user.save({ validateBeforeSave: false });
+
+      const token = generateToken(user._id);
+
+      return res.status(200).json({
+        success: true,
+        message: "Logged in successfully",
+        token,
+        user: {
+          _id: user._id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          title: user.title,
+          level: user.level,
+          xp: user.xp,
+          streak: user.streak,
+          targetGoal: user.targetGoal,
+          avatar: user.avatar,
+        },
+      });
+    } else {
+      // Memory Fallback Mode
+      const user = memoryUsers.find((u) => u.email === cleanEmail);
+
+      if (!user) {
+        res.status(401);
+        throw new Error("Invalid email or password");
+      }
+
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) {
+        res.status(401);
+        throw new Error("Invalid email or password");
+      }
+
+      const token = generateToken(user._id);
+
+      return res.status(200).json({
+        success: true,
+        message: "Logged in successfully (In-Memory Mode)",
+        token,
+        user: {
+          _id: user._id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          title: user.title,
+          level: user.level,
+          xp: user.xp,
+          streak: user.streak,
+          targetGoal: user.targetGoal,
+          avatar: user.avatar,
+        },
+      });
     }
-
-    // Match password
-    const isMatch = await user.matchPassword(password);
-    if (!isMatch) {
-      res.status(401);
-      throw new Error("Invalid credentials");
-    }
-
-    // Update last active date
-    user.lastActiveDate = Date.now();
-    await user.save({ validateBeforeSave: false });
-
-    const token = generateToken(user._id);
-
-    res.status(200).json({
-      success: true,
-      message: "Logged in successfully",
-      token,
-      user: {
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        title: user.title,
-        level: user.level,
-        xp: user.xp,
-        streak: user.streak,
-        targetGoal: user.targetGoal,
-        avatar: user.avatar,
-      },
-    });
   } catch (error) {
     next(error);
   }
@@ -125,30 +207,50 @@ export const loginUser = async (req, res, next) => {
  */
 export const getUserProfile = async (req, res, next) => {
   try {
-    const user = await User.findById(req.user._id);
+    if (isDBConnected()) {
+      const user = await User.findById(req.user._id);
+      if (user) {
+        return res.status(200).json({
+          success: true,
+          user: {
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            title: user.title,
+            level: user.level,
+            xp: user.xp,
+            streak: user.streak,
+            targetGoal: user.targetGoal,
+            avatar: user.avatar,
+            lastActiveDate: user.lastActiveDate,
+            createdAt: user.createdAt,
+          },
+        });
+      }
+    }
 
-    if (user) {
-      res.status(200).json({
+    const memUser = memoryUsers.find((u) => u._id === req.user._id);
+    if (memUser) {
+      return res.status(200).json({
         success: true,
         user: {
-          _id: user._id,
-          name: user.name,
-          email: user.email,
-          role: user.role,
-          title: user.title,
-          level: user.level,
-          xp: user.xp,
-          streak: user.streak,
-          targetGoal: user.targetGoal,
-          avatar: user.avatar,
-          lastActiveDate: user.lastActiveDate,
-          createdAt: user.createdAt,
+          _id: memUser._id,
+          name: memUser.name,
+          email: memUser.email,
+          role: memUser.role,
+          title: memUser.title,
+          level: memUser.level,
+          xp: memUser.xp,
+          streak: memUser.streak,
+          targetGoal: memUser.targetGoal,
+          avatar: memUser.avatar,
         },
       });
-    } else {
-      res.status(404);
-      throw new Error("User not found");
     }
+
+    res.status(404);
+    throw new Error("User not found");
   } catch (error) {
     next(error);
   }
@@ -161,55 +263,64 @@ export const getUserProfile = async (req, res, next) => {
  */
 export const updateUserProfile = async (req, res, next) => {
   try {
-    const user = await User.findById(req.user._id).select("+password");
-
-    if (user) {
-      user.name = req.body.name || user.name;
-
-      if (req.body.email && req.body.email.toLowerCase() !== user.email) {
-        const emailExists = await User.findOne({ email: req.body.email.toLowerCase() });
-        if (emailExists && emailExists._id.toString() !== user._id.toString()) {
-          res.status(400);
-          throw new Error("Email is already registered by another account");
+    if (isDBConnected()) {
+      const user = await User.findById(req.user._id).select("+password");
+      if (user) {
+        user.name = req.body.name || user.name;
+        user.targetGoal = req.body.targetGoal || user.targetGoal;
+        if (req.body.password) {
+          user.password = req.body.password;
         }
-        user.email = req.body.email.toLowerCase();
+        const updatedUser = await user.save();
+        const token = generateToken(updatedUser._id);
+        return res.status(200).json({
+          success: true,
+          message: "Profile updated successfully",
+          token,
+          user: {
+            _id: updatedUser._id,
+            name: updatedUser.name,
+            email: updatedUser.email,
+            role: updatedUser.role,
+            title: updatedUser.title,
+            level: updatedUser.level,
+            xp: updatedUser.xp,
+            streak: updatedUser.streak,
+            targetGoal: updatedUser.targetGoal,
+          },
+        });
       }
+    }
 
-      user.targetGoal = req.body.targetGoal || user.targetGoal;
-      user.avatar = req.body.avatar || user.avatar;
-
+    const memUser = memoryUsers.find((u) => u._id === req.user._id);
+    if (memUser) {
+      memUser.name = req.body.name || memUser.name;
+      memUser.targetGoal = req.body.targetGoal || memUser.targetGoal;
       if (req.body.password) {
-        user.password = req.body.password;
+        const salt = await bcrypt.genSalt(10);
+        memUser.password = await bcrypt.hash(req.body.password, salt);
       }
-
-      const updatedUser = await user.save();
-      const token = generateToken(updatedUser._id);
-
-      res.status(200).json({
+      const token = generateToken(memUser._id);
+      return res.status(200).json({
         success: true,
         message: "Profile updated successfully",
         token,
         user: {
-          _id: updatedUser._id,
-          name: updatedUser.name,
-          email: updatedUser.email,
-          role: updatedUser.role,
-          title: updatedUser.title,
-          level: updatedUser.level,
-          xp: updatedUser.xp,
-          streak: updatedUser.streak,
-          targetGoal: user.targetGoal,
-          avatar: user.avatar,
-          isOnboarded: user.isOnboarded || false,
-          interests: user.interests || [],
-          skillLevel: user.skillLevel || "beginner",
-          weeklyHours: user.weeklyHours || 5,
+          _id: memUser._id,
+          name: memUser.name,
+          email: memUser.email,
+          role: memUser.role,
+          title: memUser.title,
+          level: memUser.level,
+          xp: memUser.xp,
+          streak: memUser.streak,
+          targetGoal: memUser.targetGoal,
         },
       });
-    } else {
-      res.status(404);
-      throw new Error("User not found");
     }
+
+    res.status(404);
+    throw new Error("User not found");
   } catch (error) {
     next(error);
   }
@@ -222,42 +333,33 @@ export const updateUserProfile = async (req, res, next) => {
  */
 export const completeOnboarding = async (req, res, next) => {
   try {
-    const user = await User.findById(req.user._id);
+    if (isDBConnected()) {
+      const user = await User.findById(req.user._id);
+      if (user) {
+        user.targetGoal = req.body.targetGoal || user.targetGoal;
+        user.isOnboarded = true;
+        const updatedUser = await user.save();
+        return res.status(200).json({
+          success: true,
+          message: "Onboarding completed successfully",
+          user: updatedUser,
+        });
+      }
+    }
 
-    if (user) {
-      const { targetGoal, skillLevel, interests, weeklyHours } = req.body;
-      user.targetGoal = targetGoal || user.targetGoal;
-      user.skillLevel = skillLevel || user.skillLevel;
-      user.interests = Array.isArray(interests) ? interests : user.interests;
-      user.weeklyHours = weeklyHours || user.weeklyHours;
-      user.isOnboarded = true;
-
-      const updatedUser = await user.save();
-
-      res.status(200).json({
+    const memUser = memoryUsers.find((u) => u._id === req.user._id);
+    if (memUser) {
+      memUser.targetGoal = req.body.targetGoal || memUser.targetGoal;
+      memUser.isOnboarded = true;
+      return res.status(200).json({
         success: true,
         message: "Onboarding completed successfully",
-        user: {
-          _id: updatedUser._id,
-          name: updatedUser.name,
-          email: updatedUser.email,
-          role: updatedUser.role,
-          title: updatedUser.title,
-          level: updatedUser.level,
-          xp: updatedUser.xp,
-          streak: updatedUser.streak,
-          targetGoal: updatedUser.targetGoal,
-          avatar: updatedUser.avatar,
-          isOnboarded: updatedUser.isOnboarded,
-          interests: updatedUser.interests,
-          skillLevel: updatedUser.skillLevel,
-          weeklyHours: updatedUser.weeklyHours,
-        },
+        user: memUser,
       });
-    } else {
-      res.status(404);
-      throw new Error("User not found");
     }
+
+    res.status(404);
+    throw new Error("User not found");
   } catch (error) {
     next(error);
   }

@@ -10,6 +10,8 @@ import progressRoutes from "./routes/progressRoutes.js";
 import plannerRoutes from "./routes/plannerRoutes.js";
 import resourceRoutes from "./routes/resourceRoutes.js";
 import aiRoutes from "./routes/aiRoutes.js";
+import quizRoutes from "./routes/quizRoutes.js";
+import mlRoutes from "./routes/mlRoutes.js";
 
 const app = express();
 
@@ -57,6 +59,7 @@ app.get("/api/health", (req, res) => {
       dashboard: "/api/dashboard",
       roadmaps: "/api/roadmaps",
       progress: "/api/progress",
+      quizzes: "/api/quizzes",
       planner: "/api/planner",
       resources: "/api/resources",
       ai: "/api/ai",
@@ -71,9 +74,11 @@ app.use("/api/auth", authRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/roadmaps", roadmapRoutes);
 app.use("/api/progress", progressRoutes);
+app.use("/api/quizzes", quizRoutes);
 app.use("/api/planner", plannerRoutes);
 app.use("/api/resources", resourceRoutes);
 app.use("/api/ai", aiRoutes);
+app.use("/api/ml", mlRoutes);
 
 
 /**

@@ -140,6 +140,11 @@ export default function OnboardingWizard({ onComplete }) {
 
     try {
       await api.auth.completeOnboarding(onboardingPayload);
+      await api.roadmaps.generate({
+        targetRole: selectedDomain.id,
+        skillLevel,
+        durationWeeks: 8,
+      }).catch(() => {});
     } catch (err) {
       console.warn("Offline onboarding fallback activated:", err.message);
     } finally {

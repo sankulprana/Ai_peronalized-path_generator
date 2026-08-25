@@ -17,7 +17,6 @@ export const navItems = [
   { label: "Resources", icon: BookOpen, path: "/resources" },
   { label: "Doubt Solver", icon: MessageSquare, path: "/doubt-solver" },
   { label: "Progress", icon: TrendingUp, path: "/progress" },
-  { label: "Achievements", icon: Trophy, path: "/achievements" },
 ];
 
 export const user = {
@@ -130,62 +129,633 @@ export const quickActions = [
   },
 ];
 
+export const domainPhases = {
+  "Backend Developer": [
+    {
+      id: "b1",
+      phaseNumber: 1,
+      phase: "PHASE 1",
+      duration: "2 weeks",
+      title: "Web & Network Fundamentals",
+      description: "Master HTTP/HTTPS, REST principles, Git workflows, and asynchronous JS mechanics.",
+      tasks: [
+        { id: "b1_1", title: "HTML5 & CSS3 Core Architecture", xp: 50, type: "theory", estimatedMinutes: 45, completed: false },
+        { id: "b1_2", title: "JavaScript ES6+ & Asynchronous Event Loop", xp: 80, type: "practice", estimatedMinutes: 60, completed: false },
+        { id: "b1_3", title: "Git & GitHub Team Workflows", xp: 40, type: "practice", estimatedMinutes: 30, completed: false },
+        { id: "b1_4", title: "HTTP Protocol, Methods & Status Codes", xp: 60, type: "theory", estimatedMinutes: 45, completed: false },
+      ],
+    },
+    {
+      id: "b2",
+      phaseNumber: 2,
+      phase: "PHASE 2",
+      duration: "3 weeks",
+      title: "Node.js & Express Framework",
+      description: "Build robust backend servers with Express, controllers, routing, and request validation.",
+      tasks: [
+        { id: "b2_1", title: "Node.js Core Modules & Non-blocking I/O", xp: 70, type: "theory", estimatedMinutes: 60, completed: false },
+        { id: "b2_2", title: "Express.js Architecture & Middleware", xp: 90, type: "practice", estimatedMinutes: 75, completed: false },
+        { id: "b2_3", title: "RESTful API Design & Payload Validation", xp: 100, type: "practice", estimatedMinutes: 90, completed: false },
+        { id: "b2_4", title: "Middleware Pipeline & JWT Authentication", xp: 85, type: "project", estimatedMinutes: 90, completed: false },
+      ],
+    },
+    {
+      id: "b3",
+      phaseNumber: 3,
+      phase: "PHASE 3",
+      duration: "3 weeks",
+      title: "Database Engineering (SQL & NoSQL)",
+      description: "Design relational schemas, MongoDB documents, indexing, and ORM pipelines.",
+      tasks: [
+        { id: "b3_1", title: "Relational Modeling with PostgreSQL & SQL", xp: 90, type: "practice", estimatedMinutes: 75, completed: false },
+        { id: "b3_2", title: "NoSQL Modeling with MongoDB & Mongoose", xp: 85, type: "practice", estimatedMinutes: 60, completed: false },
+        { id: "b3_3", title: "Database Indexing & Query Optimization", xp: 75, type: "review", estimatedMinutes: 45, completed: false },
+      ],
+    },
+    {
+      id: "b4",
+      phaseNumber: 4,
+      phase: "PHASE 4",
+      duration: "4 weeks",
+      title: "Advanced Architecture & Cloud Security",
+      description: "Containerize microservices with Docker, add Redis caching, and enforce OWASP security.",
+      tasks: [
+        { id: "b4_1", title: "Docker Containerization & Multi-Stage Builds", xp: 100, type: "practice", estimatedMinutes: 90, completed: false },
+        { id: "b4_2", title: "Redis In-Memory Caching & Session Store", xp: 80, type: "theory", estimatedMinutes: 45, completed: false },
+        { id: "b4_3", title: "GraphQL API Construction & Resolvers", xp: 90, type: "practice", estimatedMinutes: 60, completed: false },
+        { id: "b4_4", title: "API Security, Rate Limiting & OWASP Defense", xp: 70, type: "review", estimatedMinutes: 60, completed: false },
+      ],
+    },
+  ],
+
+  "Frontend Developer": [
+    {
+      id: "f1",
+      phaseNumber: 1,
+      phase: "PHASE 1",
+      duration: "2 weeks",
+      title: "Modern HTML, CSS & Responsive Systems",
+      description: "Build responsive, accessible, pixel-perfect user interfaces with modern CSS and Tailwind.",
+      tasks: [
+        { id: "f1_1", title: "Semantic HTML5 & Web Accessibility (a11y)", xp: 50, type: "theory", estimatedMinutes: 40, completed: false },
+        { id: "f1_2", title: "CSS Flexbox & Responsive Grid Layouts", xp: 60, type: "practice", estimatedMinutes: 60, completed: false },
+        { id: "f1_3", title: "Tailwind CSS Utility Design System", xp: 70, type: "practice", estimatedMinutes: 60, completed: false },
+        { id: "f1_4", title: "Modern JavaScript ES6+, DOM & Fetch API", xp: 80, type: "practice", estimatedMinutes: 50, completed: false },
+      ],
+    },
+    {
+      id: "f2",
+      phaseNumber: 2,
+      phase: "PHASE 2",
+      duration: "3 weeks",
+      title: "React Core & State Architecture",
+      description: "Master React component trees, custom hooks, state lifecycles, and client-side routing.",
+      tasks: [
+        { id: "f2_1", title: "JSX, Component Props & Composition Patterns", xp: 60, type: "theory", estimatedMinutes: 45, completed: false },
+        { id: "f2_2", title: "State Management with useState & useReducer", xp: 85, type: "practice", estimatedMinutes: 60, completed: false },
+        { id: "f2_3", title: "Custom Hooks & useEffect Dependencies", xp: 90, type: "practice", estimatedMinutes: 75, completed: false },
+        { id: "f2_4", title: "Client-Side Routing with React Router v6", xp: 70, type: "practice", estimatedMinutes: 45, completed: false },
+      ],
+    },
+    {
+      id: "f3",
+      phaseNumber: 3,
+      phase: "PHASE 3",
+      duration: "3 weeks",
+      title: "Fullstack React & Next.js Ecosystem",
+      description: "Leverage Next.js App Router, Server Components, SSR/SSG caching, and global state.",
+      tasks: [
+        { id: "f3_1", title: "Global State with Zustand & Redux Toolkit", xp: 95, type: "project", estimatedMinutes: 90, completed: false },
+        { id: "f3_2", title: "Next.js App Router, Server Actions & SSR", xp: 110, type: "project", estimatedMinutes: 120, completed: false },
+        { id: "f3_3", title: "Frontend Performance & Lighthouse Audits", xp: 80, type: "review", estimatedMinutes: 45, completed: false },
+      ],
+    },
+    {
+      id: "f4",
+      phaseNumber: 4,
+      phase: "PHASE 4",
+      duration: "2 weeks",
+      title: "UI Testing, CI/CD & Production Ship",
+      description: "Write unit and e2e tests, optimize bundle sizes, and deploy with continuous integration.",
+      tasks: [
+        { id: "f4_1", title: "Unit Testing with Vitest & RTL", xp: 85, type: "practice", estimatedMinutes: 60, completed: false },
+        { id: "f4_2", title: "End-to-End Testing with Playwright", xp: 90, type: "practice", estimatedMinutes: 75, completed: false },
+        { id: "f4_3", title: "CI/CD Deployment & Web Vitals Optimization", xp: 75, type: "project", estimatedMinutes: 60, completed: false },
+      ],
+    },
+  ],
+
+  "Fullstack Engineer": [
+    {
+      id: "fs1",
+      phaseNumber: 1,
+      phase: "PHASE 1",
+      duration: "3 weeks",
+      title: "Frontend Foundations & Modern React",
+      description: "Master TypeScript, component composition, and responsive client layouts.",
+      tasks: [
+        { id: "fs1_1", title: "TypeScript Core Types & Generics for React", xp: 70, type: "theory", estimatedMinutes: 50, completed: false },
+        { id: "fs1_2", title: "React Custom Hooks & Tailwind UI Patterns", xp: 85, type: "practice", estimatedMinutes: 70, completed: false },
+        { id: "fs1_3", title: "Client Asynchronous State & React Query", xp: 80, type: "practice", estimatedMinutes: 60, completed: false },
+      ],
+    },
+    {
+      id: "fs2",
+      phaseNumber: 2,
+      phase: "PHASE 2",
+      duration: "3 weeks",
+      title: "Backend API Engineering & Auth Systems",
+      description: "Build robust REST APIs, JWT authentication with refresh tokens, and relational models.",
+      tasks: [
+        { id: "fs2_1", title: "Express.js REST Architecture & Routing Pipelines", xp: 90, type: "practice", estimatedMinutes: 75, completed: false },
+        { id: "fs2_2", title: "Secure User Auth with JWT & Refresh Tokens", xp: 95, type: "project", estimatedMinutes: 90, completed: false },
+        { id: "fs2_3", title: "PostgreSQL Database Schema & Prisma ORM", xp: 90, type: "practice", estimatedMinutes: 75, completed: false },
+      ],
+    },
+    {
+      id: "fs3",
+      phaseNumber: 3,
+      phase: "PHASE 3",
+      duration: "3 weeks",
+      title: "Fullstack Synchronization & WebSockets",
+      description: "Implement real-time bidirectional messaging, optimistic UI, and Redis caching.",
+      tasks: [
+        { id: "fs3_1", title: "End-to-End Fullstack Data Synchronization", xp: 100, type: "project", estimatedMinutes: 100, completed: false },
+        { id: "fs3_2", title: "Real-time Communication with WebSockets", xp: 85, type: "practice", estimatedMinutes: 60, completed: false },
+        { id: "fs3_3", title: "Redis Caching & Session Storage", xp: 80, type: "theory", estimatedMinutes: 45, completed: false },
+      ],
+    },
+    {
+      id: "fs4",
+      phaseNumber: 4,
+      phase: "PHASE 4",
+      duration: "3 weeks",
+      title: "DevOps, Containerization & Production Cloud",
+      description: "Dockerize fullstack services, set up GitHub Actions CI/CD, and deploy on AWS.",
+      tasks: [
+        { id: "fs4_1", title: "Docker Containerization for Fullstack Stacks", xp: 100, type: "practice", estimatedMinutes: 90, completed: false },
+        { id: "fs4_2", title: "GitHub Actions CI/CD Automation", xp: 85, type: "practice", estimatedMinutes: 60, completed: false },
+        { id: "fs4_3", title: "Production Cloud Deployment & Monitoring", xp: 110, type: "project", estimatedMinutes: 120, completed: false },
+      ],
+    },
+  ],
+
+  "AI Engineer": [
+    {
+      id: "ai1",
+      phaseNumber: 1,
+      phase: "PHASE 1",
+      duration: "2 weeks",
+      title: "Python, Math & Data Engineering",
+      description: "Master Python data structures, Linear Algebra, NumPy vectorization, and Pandas dataframes.",
+      tasks: [
+        { id: "ai1_1", title: "Python Advanced Syntax, OOP & Functional Paradigms", xp: 60, type: "theory", estimatedMinutes: 45, completed: false },
+        { id: "ai1_2", title: "NumPy Matrix Computations & Vectorization", xp: 80, type: "practice", estimatedMinutes: 60, completed: false },
+        { id: "ai1_3", title: "Pandas Data Cleaning & Feature Engineering", xp: 85, type: "practice", estimatedMinutes: 70, completed: false },
+        { id: "ai1_4", title: "Applied Mathematics: Calculus & Linear Algebra", xp: 70, type: "theory", estimatedMinutes: 50, completed: false },
+      ],
+    },
+    {
+      id: "ai2",
+      phaseNumber: 2,
+      phase: "PHASE 2",
+      duration: "3 weeks",
+      title: "Machine Learning Core (Scikit-Learn)",
+      description: "Build supervised and unsupervised ML models, loss functions, and evaluation metrics.",
+      tasks: [
+        { id: "ai2_1", title: "Supervised Learning: Regression, Trees & SVMs", xp: 85, type: "practice", estimatedMinutes: 75, completed: false },
+        { id: "ai2_2", title: "Unsupervised Clustering (K-Means, PCA)", xp: 80, type: "practice", estimatedMinutes: 60, completed: false },
+        { id: "ai2_3", title: "Cross-Validation, Hyperparameter Tuning & ROC/AUC", xp: 75, type: "review", estimatedMinutes: 45, completed: false },
+        { id: "ai2_4", title: "Building an End-to-End ML Prediction Pipeline", xp: 100, type: "project", estimatedMinutes: 90, completed: false },
+      ],
+    },
+    {
+      id: "ai3",
+      phaseNumber: 3,
+      phase: "PHASE 3",
+      duration: "3 weeks",
+      title: "Deep Learning & Neural Networks (PyTorch)",
+      description: "Design convolutional, recurrent, and transformer architectures in PyTorch.",
+      tasks: [
+        { id: "ai3_1", title: "Neural Network Forward/Backward Pass & PyTorch Tensors", xp: 90, type: "theory", estimatedMinutes: 60, completed: false },
+        { id: "ai3_2", title: "Convolutional Neural Networks (CNNs) for Vision", xp: 95, type: "practice", estimatedMinutes: 80, completed: false },
+        { id: "ai3_3", title: "Transformer Architecture & Self-Attention Mechanisms", xp: 100, type: "theory", estimatedMinutes: 90, completed: false },
+      ],
+    },
+    {
+      id: "ai4",
+      phaseNumber: 4,
+      phase: "PHASE 4",
+      duration: "4 weeks",
+      title: "LLMs, LangChain, RAG & AI Agent Workflows",
+      description: "Deploy Large Language Models, Vector Databases, Retrieval-Augmented Generation, and AI APIs.",
+      tasks: [
+        { id: "ai4_1", title: "OpenAI, Gemini & Anthropic API Orchestration", xp: 90, type: "practice", estimatedMinutes: 60, completed: false },
+        { id: "ai4_2", title: "Vector Embeddings & Pinecone/Chroma Vector DBs", xp: 95, type: "practice", estimatedMinutes: 75, completed: false },
+        { id: "ai4_3", title: "Retrieval-Augmented Generation (RAG) with LangChain", xp: 110, type: "project", estimatedMinutes: 120, completed: false },
+        { id: "ai4_4", title: "Autonomous AI Agent Workflows & Tool Calling", xp: 100, type: "project", estimatedMinutes: 90, completed: false },
+      ],
+    },
+  ],
+
+  "Mobile Developer": [
+    {
+      id: "m1",
+      phaseNumber: 1,
+      phase: "PHASE 1",
+      duration: "2 weeks",
+      title: "Mobile Architecture & React Native Core",
+      description: "Build cross-platform mobile UI components, styling, and navigation.",
+      tasks: [
+        { id: "m1_1", title: "React Native Core Components & StyleSheet API", xp: 60, type: "theory", estimatedMinutes: 45, completed: false },
+        { id: "m1_2", title: "Flexbox Layout for iOS & Android Screen Form Factors", xp: 75, type: "practice", estimatedMinutes: 60, completed: false },
+        { id: "m1_3", title: "Stack & Bottom Tab Navigation with React Navigation", xp: 80, type: "practice", estimatedMinutes: 60, completed: false },
+      ],
+    },
+    {
+      id: "m2",
+      phaseNumber: 2,
+      phase: "PHASE 2",
+      duration: "3 weeks",
+      title: "State, Offline Storage & Native Device APIs",
+      description: "Integrate device cameras, GPS location, push notifications, and offline caching.",
+      tasks: [
+        { id: "m2_1", title: "AsyncStorage & SQLite Local Offline Persistence", xp: 85, type: "practice", estimatedMinutes: 60, completed: false },
+        { id: "m2_2", title: "Native Sensors, Camera & Geolocation APIs", xp: 90, type: "practice", estimatedMinutes: 75, completed: false },
+        { id: "m2_3", title: "Push Notifications with Firebase Cloud Messaging", xp: 80, type: "practice", estimatedMinutes: 60, completed: false },
+      ],
+    },
+    {
+      id: "m3",
+      phaseNumber: 3,
+      phase: "PHASE 3",
+      duration: "3 weeks",
+      title: "Backend Sync, Biometric Auth & Security",
+      description: "Connect mobile apps to REST/GraphQL backends with biometric security.",
+      tasks: [
+        { id: "m3_1", title: "Biometric Authentication (FaceID / Fingerprint)", xp: 90, type: "project", estimatedMinutes: 75, completed: false },
+        { id: "m3_2", title: "Optimistic UI Updates & Offline-first Syncing", xp: 95, type: "project", estimatedMinutes: 90, completed: false },
+        { id: "m3_3", title: "Mobile Profiling & Memory Leak Optimization", xp: 75, type: "review", estimatedMinutes: 45, completed: false },
+      ],
+    },
+    {
+      id: "m4",
+      phaseNumber: 4,
+      phase: "PHASE 4",
+      duration: "2 weeks",
+      title: "App Store Publishing & Fastlane CI/CD",
+      description: "Prepare production release builds for Apple App Store and Google Play Store.",
+      tasks: [
+        { id: "m4_1", title: "App Signing, Keystores & Provisioning Profiles", xp: 85, type: "practice", estimatedMinutes: 60, completed: false },
+        { id: "m4_2", title: "Fastlane Mobile CI/CD Automation", xp: 95, type: "practice", estimatedMinutes: 75, completed: false },
+        { id: "m4_3", title: "Publishing to Apple App Store & Google Play", xp: 100, type: "project", estimatedMinutes: 90, completed: false },
+      ],
+    },
+  ],
+
+  "DevOps Specialist": [
+    {
+      id: "d1",
+      phaseNumber: 1,
+      phase: "PHASE 1",
+      duration: "2 weeks",
+      title: "Linux Systems, Shell & Networking",
+      description: "Master Linux system administration, Bash automation, and TCP/IP networking.",
+      tasks: [
+        { id: "d1_1", title: "Linux CLI Mastery, Permissions & Systemd", xp: 60, type: "theory", estimatedMinutes: 45, completed: false },
+        { id: "d1_2", title: "Bash Shell Scripting & Automation Pipelines", xp: 80, type: "practice", estimatedMinutes: 60, completed: false },
+        { id: "d1_3", title: "Networking Protocols: DNS, TLS/SSL, Load Balancing", xp: 70, type: "theory", estimatedMinutes: 50, completed: false },
+      ],
+    },
+    {
+      id: "d2",
+      phaseNumber: 2,
+      phase: "PHASE 2",
+      duration: "3 weeks",
+      title: "Docker Containerization & Image Optimization",
+      description: "Create lightweight, secure Docker containers and multi-container Compose stacks.",
+      tasks: [
+        { id: "d2_1", title: "Dockerfile Optimization & Alpine Base Images", xp: 85, type: "practice", estimatedMinutes: 60, completed: false },
+        { id: "d2_2", title: "Multi-container Networking with Docker Compose", xp: 90, type: "practice", estimatedMinutes: 75, completed: false },
+        { id: "d2_3", title: "Container Security Auditing & Vulnerability Scans", xp: 75, type: "review", estimatedMinutes: 45, completed: false },
+      ],
+    },
+    {
+      id: "d3",
+      phaseNumber: 3,
+      phase: "PHASE 3",
+      duration: "3 weeks",
+      title: "Kubernetes Orchestration & Helm Charts",
+      description: "Deploy and manage resilient Kubernetes clusters, pods, services, and ingress.",
+      tasks: [
+        { id: "d3_1", title: "Kubernetes Architecture (Pods, Deployments, Services)", xp: 100, type: "practice", estimatedMinutes: 90, completed: false },
+        { id: "d3_2", title: "ConfigMaps, Secrets & Ingress Controller Routing", xp: 95, type: "practice", estimatedMinutes: 80, completed: false },
+        { id: "d3_3", title: "Package Management with Helm Charts", xp: 90, type: "practice", estimatedMinutes: 60, completed: false },
+      ],
+    },
+    {
+      id: "d4",
+      phaseNumber: 4,
+      phase: "PHASE 4",
+      duration: "4 weeks",
+      title: "Infrastructure as Code & CI/CD Pipelines",
+      description: "Automate cloud infrastructure with Terraform and continuous delivery pipelines.",
+      tasks: [
+        { id: "d4_1", title: "Terraform Infrastructure as Code (IaC) on AWS", xp: 110, type: "project", estimatedMinutes: 100, completed: false },
+        { id: "d4_2", title: "GitHub Actions & GitLab CI/CD Automation", xp: 95, type: "practice", estimatedMinutes: 75, completed: false },
+        { id: "d4_3", title: "Observability: Prometheus, Grafana & ELK Stack", xp: 85, type: "review", estimatedMinutes: 60, completed: false },
+      ],
+    },
+  ],
+
+  "Cybersecurity": [
+    {
+      id: "c1",
+      phaseNumber: 1,
+      phase: "PHASE 1",
+      duration: "2 weeks",
+      title: "Security Foundations & Cryptography",
+      description: "Master network security, packet analysis, ciphers, and public key cryptography.",
+      tasks: [
+        { id: "c1_1", title: "TCP/IP Packet Analysis with Wireshark", xp: 70, type: "practice", estimatedMinutes: 60, completed: false },
+        { id: "c1_2", title: "Symmetric & Asymmetric Cryptography (AES, RSA, ECC)", xp: 80, type: "theory", estimatedMinutes: 60, completed: false },
+        { id: "c1_3", title: "Authentication, PKI & TLS/SSL Handshakes", xp: 75, type: "theory", estimatedMinutes: 50, completed: false },
+      ],
+    },
+    {
+      id: "c2",
+      phaseNumber: 2,
+      phase: "PHASE 2",
+      duration: "3 weeks",
+      title: "Web Application Security & OWASP Top 10",
+      description: "Identify and patch critical vulnerabilities like SQLi, XSS, CSRF, and SSRF.",
+      tasks: [
+        { id: "c2_1", title: "SQL Injection & Cross-Site Scripting (XSS)", xp: 90, type: "practice", estimatedMinutes: 75, completed: false },
+        { id: "c2_2", title: "Cross-Site Request Forgery (CSRF) & CORS Headers", xp: 80, type: "practice", estimatedMinutes: 60, completed: false },
+        { id: "c2_3", title: "Burp Suite Web Penetration Testing Suite", xp: 100, type: "project", estimatedMinutes: 90, completed: false },
+      ],
+    },
+    {
+      id: "c3",
+      phaseNumber: 3,
+      phase: "PHASE 3",
+      duration: "3 weeks",
+      title: "System & Cloud Infrastructure Defense",
+      description: "Harden Linux/Windows servers, configure firewalls, and secure cloud workloads.",
+      tasks: [
+        { id: "c3_1", title: "Linux Server Hardening & IPTables Firewalls", xp: 90, type: "practice", estimatedMinutes: 75, completed: false },
+        { id: "c3_2", title: "Cloud Security: AWS IAM, VPCs & Security Groups", xp: 95, type: "practice", estimatedMinutes: 80, completed: false },
+        { id: "c3_3", title: "Vulnerability Scanning with Nmap & OpenVAS", xp: 85, type: "practice", estimatedMinutes: 60, completed: false },
+      ],
+    },
+    {
+      id: "c4",
+      phaseNumber: 4,
+      phase: "PHASE 4",
+      duration: "3 weeks",
+      title: "Incident Response & Ethical Hacking",
+      description: "Perform penetration testing, forensic log analysis, and threat hunting.",
+      tasks: [
+        { id: "c4_1", title: "Metasploit Framework & Privilege Escalation", xp: 100, type: "project", estimatedMinutes: 90, completed: false },
+        { id: "c4_2", title: "SIEM Log Analysis with Splunk & Incident Response", xp: 90, type: "practice", estimatedMinutes: 75, completed: false },
+        { id: "c4_3", title: "Ethical Hacking Capstone & Security Audit Report", xp: 110, type: "project", estimatedMinutes: 120, completed: false },
+      ],
+    },
+  ],
+};
+
+domainPhases["AI & Data Science"] = domainPhases["AI Engineer"];
+domainPhases["Machine Learning Engineer"] = domainPhases["AI Engineer"];
+domainPhases["DevOps & Cloud"] = domainPhases["DevOps Specialist"];
+domainPhases["Cybersecurity Specialist"] = domainPhases["Cybersecurity"];
+domainPhases["Mobile App Development"] = domainPhases["Mobile Developer"];
+
+/**
+ * Synthesizes a bespoke 4-phase learning path for ANY custom role
+ */
+export const synthesizeCustomRolePhases = (roleName = "Software Engineer", durationWeeks = 8) => {
+  const weeksPerPhase = Math.max(1, Math.floor(durationWeeks / 4));
+  const cleanRole = roleName.trim();
+  const prefix = cleanRole.toLowerCase().replace(/[^a-z0-9]/g, "_").slice(0, 5);
+
+  return [
+    {
+      id: `${prefix}_p1`,
+      phaseNumber: 1,
+      phase: "PHASE 1",
+      duration: `${weeksPerPhase} weeks`,
+      title: `${cleanRole} Core Fundamentals & Tooling`,
+      description: `Master foundational principles, development environment setup, and primary tools for ${cleanRole}.`,
+      tasks: [
+        { id: `${prefix}_1_1`, title: `${cleanRole} Architecture & Core Concepts`, xp: 60, type: "theory", estimatedMinutes: 45, completed: false },
+        { id: `${prefix}_1_2`, title: "Essential Programming & Environment Setup", xp: 75, type: "practice", estimatedMinutes: 60, completed: false },
+        { id: `${prefix}_1_3`, title: `Version Control & Best Practices in ${cleanRole}`, xp: 65, type: "practice", estimatedMinutes: 45, completed: false },
+        { id: `${prefix}_1_4`, title: "Foundational Practical Exercises", xp: 80, type: "practice", estimatedMinutes: 60, completed: false },
+      ],
+    },
+    {
+      id: `${prefix}_p2`,
+      phaseNumber: 2,
+      phase: "PHASE 2",
+      duration: `${weeksPerPhase} weeks`,
+      title: "Applied Techniques & Intermediate Engineering",
+      description: `Build functional modules, handle data flow, error handling, and standard patterns in ${cleanRole}.`,
+      tasks: [
+        { id: `${prefix}_2_1`, title: `Component & Module Design in ${cleanRole}`, xp: 85, type: "theory", estimatedMinutes: 60, completed: false },
+        { id: `${prefix}_2_2`, title: "Implementing Core Features & Data Processing", xp: 90, type: "practice", estimatedMinutes: 75, completed: false },
+        { id: `${prefix}_2_3`, title: "Debugging & Asynchronous Execution", xp: 80, type: "practice", estimatedMinutes: 60, completed: false },
+        { id: `${prefix}_2_4`, title: `Hands-on Project: ${cleanRole} Prototype`, xp: 100, type: "project", estimatedMinutes: 90, completed: false },
+      ],
+    },
+    {
+      id: `${prefix}_p3`,
+      phaseNumber: 3,
+      phase: "PHASE 3",
+      duration: `${weeksPerPhase} weeks`,
+      title: "Advanced Architecture, Performance & Scalability",
+      description: "Implement production-grade architecture, caching, security safeguards, and system scaling.",
+      tasks: [
+        { id: `${prefix}_3_1`, title: "Design Patterns & Clean Code Architecture", xp: 90, type: "theory", estimatedMinutes: 60, completed: false },
+        { id: `${prefix}_3_2`, title: "Performance Profiling & Bottleneck Optimization", xp: 95, type: "practice", estimatedMinutes: 75, completed: false },
+        { id: `${prefix}_3_3`, title: "Security Hardening & Industry Best Practices", xp: 85, type: "review", estimatedMinutes: 60, completed: false },
+        { id: `${prefix}_3_4`, title: "Integration with Cloud & External APIs", xp: 100, type: "practice", estimatedMinutes: 80, completed: false },
+      ],
+    },
+    {
+      id: `${prefix}_p4`,
+      phaseNumber: 4,
+      phase: "PHASE 4",
+      duration: `${weeksPerPhase} weeks`,
+      title: "Production Deployment & Capstone Project",
+      description: `Ship an enterprise-ready ${cleanRole} capstone portfolio project with automated CI/CD and testing.`,
+      tasks: [
+        { id: `${prefix}_4_1`, title: "Automated Testing & Quality Assurance", xp: 85, type: "practice", estimatedMinutes: 60, completed: false },
+        { id: `${prefix}_4_2`, title: "CI/CD Deployment & Cloud Hosting", xp: 95, type: "practice", estimatedMinutes: 75, completed: false },
+        { id: `${prefix}_4_3`, title: `Full-scale ${cleanRole} Capstone Portfolio Project`, xp: 120, type: "project", estimatedMinutes: 120, completed: false },
+      ],
+    },
+  ];
+};
+
+/**
+ * Returns dynamic roadmap metadata and phases tailored to the specified role
+ */
+export const getRoadmapForRole = (targetRole = "Backend Developer", skillLevel = "intermediate", durationWeeks = 8) => {
+  const weeksPerPhase = Math.max(1, Math.round((parseInt(durationWeeks, 10) || 8) / 4));
+  const isBeginner = skillLevel.toLowerCase() === "beginner";
+  const isAdvanced = skillLevel.toLowerCase() === "advanced";
+  const cleanRole = targetRole.trim();
+  const prefix = cleanRole.toLowerCase().replace(/[^a-z0-9]/g, "_").slice(0, 5);
+
+  let phases = [];
+
+  if (isBeginner) {
+    phases = [
+      {
+        id: `${prefix}_p1`,
+        phaseNumber: 1,
+        phase: "PHASE 1",
+        duration: `${weeksPerPhase} ${weeksPerPhase === 1 ? 'week' : 'weeks'}`,
+        title: `${cleanRole} Fundamentals & Setup`,
+        description: `Introduction to foundational concepts, tools, and syntax for ${cleanRole}.`,
+        tasks: [
+          { id: `${prefix}_1_1`, title: `${cleanRole} Environment & Tooling Setup`, xp: 50, type: "theory", estimatedMinutes: 40, completed: false },
+          { id: `${prefix}_1_2`, title: "Variables, Data Types & Basic Logic", xp: 60, type: "practice", estimatedMinutes: 45, completed: false },
+          { id: `${prefix}_1_3`, title: "Git & Version Control Step-by-Step", xp: 45, type: "practice", estimatedMinutes: 30, completed: false },
+          { id: `${prefix}_1_4`, title: "Guided Exercises: First Code Script", xp: 65, type: "practice", estimatedMinutes: 60, completed: false },
+        ],
+      },
+      {
+        id: `${prefix}_p2`,
+        phaseNumber: 2,
+        phase: "PHASE 2",
+        duration: `${weeksPerPhase} ${weeksPerPhase === 1 ? 'week' : 'weeks'}`,
+        title: "Building Blocks & Key Libraries",
+        description: `Learn essential packages, control structures, and simple data processing.`,
+        tasks: [
+          { id: `${prefix}_2_1`, title: "Functions, Scope & Error Handling", xp: 70, type: "theory", estimatedMinutes: 50, completed: false },
+          { id: `${prefix}_2_2`, title: "Working with Arrays, Objects & JSON Data", xp: 75, type: "practice", estimatedMinutes: 60, completed: false },
+          { id: `${prefix}_2_3`, title: "Building Your First Mini-Module", xp: 85, type: "project", estimatedMinutes: 75, completed: false },
+        ],
+      },
+      {
+        id: `${prefix}_p3`,
+        phaseNumber: 3,
+        phase: "PHASE 3",
+        duration: `${weeksPerPhase} ${weeksPerPhase === 1 ? 'week' : 'weeks'}`,
+        title: "Database & API Integration",
+        description: "Connect code modules to databases and external data services.",
+        tasks: [
+          { id: `${prefix}_3_1`, title: "Introduction to Databases & Simple Queries", xp: 75, type: "practice", estimatedMinutes: 60, completed: false },
+          { id: `${prefix}_3_2`, title: "Connecting Application Code to Database", xp: 80, type: "practice", estimatedMinutes: 65, completed: false },
+          { id: `${prefix}_3_3`, title: "Fetching & Processing External API Data", xp: 70, type: "review", estimatedMinutes: 45, completed: false },
+        ],
+      },
+      {
+        id: `${prefix}_p4`,
+        phaseNumber: 4,
+        phase: "PHASE 4",
+        duration: `${weeksPerPhase} ${weeksPerPhase === 1 ? 'week' : 'weeks'}`,
+        title: "Beginner Capstone & Deployment",
+        description: `Package and deploy your completed beginner ${cleanRole} application online.`,
+        tasks: [
+          { id: `${prefix}_4_1`, title: "Code Refactoring & Clean Formatting", xp: 60, type: "review", estimatedMinutes: 45, completed: false },
+          { id: `${prefix}_4_2`, title: `Deploying ${cleanRole} Application Online`, xp: 90, type: "project", estimatedMinutes: 80, completed: false },
+          { id: `${prefix}_4_3`, title: "Portfolio Documentation & GitHub Publish", xp: 80, type: "project", estimatedMinutes: 60, completed: false },
+        ],
+      },
+    ];
+  } else if (isAdvanced) {
+    phases = [
+      {
+        id: `${prefix}_p1`,
+        phaseNumber: 1,
+        phase: "PHASE 1",
+        duration: `${weeksPerPhase} ${weeksPerPhase === 1 ? 'week' : 'weeks'}`,
+        title: `${cleanRole} High-Performance Architecture`,
+        description: `Advanced design patterns, concurrency models, and enterprise structure.`,
+        tasks: [
+          { id: `${prefix}_1_1`, title: "Enterprise System Architecture & DDD", xp: 90, type: "theory", estimatedMinutes: 60, completed: false },
+          { id: `${prefix}_1_2`, title: "Asynchronous Concurrency & Thread Optimization", xp: 100, type: "practice", estimatedMinutes: 80, completed: false },
+          { id: `${prefix}_1_3`, title: "Memory Profiling & Performance Tuning", xp: 95, type: "review", estimatedMinutes: 60, completed: false },
+        ],
+      },
+      {
+        id: `${prefix}_p2`,
+        phaseNumber: 2,
+        phase: "PHASE 2",
+        duration: `${weeksPerPhase} ${weeksPerPhase === 1 ? 'week' : 'weeks'}`,
+        title: "Microservices & Distributed Systems",
+        duration: `${weeksPerPhase} ${weeksPerPhase === 1 ? 'week' : 'weeks'}`,
+        description: "Deconstruct monoliths, build event-driven microservices, and message queues.",
+        tasks: [
+          { id: `${prefix}_2_1`, title: "Event-Driven Messaging with Kafka / RabbitMQ", xp: 110, type: "practice", estimatedMinutes: 90, completed: false },
+          { id: `${prefix}_2_2`, title: "Distributed Caching & Redis Cluster Strategies", xp: 100, type: "practice", estimatedMinutes: 75, completed: false },
+          { id: `${prefix}_2_3`, title: "gRPC & High-Throughput Service Communication", xp: 105, type: "project", estimatedMinutes: 90, completed: false },
+        ],
+      },
+      {
+        id: `${prefix}_p3`,
+        phaseNumber: 3,
+        phase: "PHASE 3",
+        duration: `${weeksPerPhase} ${weeksPerPhase === 1 ? 'week' : 'weeks'}`,
+        title: "Zero-Trust Security & Cloud Hardening",
+        description: "Enforce OAuth2/OIDC, mTLS encryption, rate limiting, and OWASP compliance.",
+        tasks: [
+          { id: `${prefix}_3_1`, title: "OAuth2, OpenID Connect & Token Revocation", xp: 100, type: "theory", estimatedMinutes: 60, completed: false },
+          { id: `${prefix}_3_2`, title: "Cloud Security: VPC Peering, IAM & Vault", xp: 110, type: "practice", estimatedMinutes: 85, completed: false },
+          { id: `${prefix}_3_3`, title: "Penetration Testing & Security Auditing", xp: 95, type: "review", estimatedMinutes: 60, completed: false },
+        ],
+      },
+      {
+        id: `${prefix}_p4`,
+        phaseNumber: 4,
+        phase: "PHASE 4",
+        duration: `${weeksPerPhase} ${weeksPerPhase === 1 ? 'week' : 'weeks'}`,
+        title: "Kubernetes, CI/CD & Production Capstone",
+        description: `Deploy resilient Kubernetes clusters with auto-scaling and Prometheus monitoring.`,
+        tasks: [
+          { id: `${prefix}_4_1`, title: "Kubernetes Cluster Auto-scaling & Ingress", xp: 120, type: "project", estimatedMinutes: 100, completed: false },
+          { id: `${prefix}_4_2`, title: "Prometheus & Grafana Observability Pipelines", xp: 95, type: "practice", estimatedMinutes: 70, completed: false },
+          { id: `${prefix}_4_3`, title: `Enterprise ${cleanRole} Capstone Architecture`, xp: 130, type: "project", estimatedMinutes: 120, completed: false },
+        ],
+      },
+    ];
+  } else {
+    // Intermediate (Default)
+    const basePhases = domainPhases[targetRole];
+    if (basePhases && basePhases.length > 0) {
+      phases = basePhases.map((p) => ({
+        ...p,
+        duration: `${weeksPerPhase} ${weeksPerPhase === 1 ? 'week' : 'weeks'}`,
+      }));
+    } else {
+      phases = synthesizeCustomRolePhases(targetRole, durationWeeks);
+    }
+  }
+
+  const totalTopics = phases.reduce((acc, p) => acc + (p.tasks?.length || 0), 0);
+  const completedTopics = phases.reduce((acc, p) => acc + (p.tasks?.filter((t) => t.completed).length || 0), 0);
+
+  return {
+    title: `Random Forest Predicted ${skillLevel.toUpperCase()} ${cleanRole} Roadmap`,
+    goalLabel: cleanRole,
+    difficulty: skillLevel,
+    durationWeeks: parseInt(durationWeeks, 10) || 8,
+    topicsDone: completedTopics,
+    topicsTotal: totalTopics,
+    phases,
+  };
+};
+
 export const roadmapMeta = {
-  title: "Learning Roadmap",
+  title: "Personalized Backend Developer Roadmap",
   goalLabel: "Backend Developer",
-  topicsDone: 2,
+  topicsDone: 0,
   topicsTotal: 15,
 };
 
-export const roadmapPhases = [
-  {
-    id: 1,
-    phase: "PHASE 1",
-    duration: "2 weeks",
-    title: "Web Fundamentals",
-    tasks: [
-      { id: 1, title: "HTML & CSS Basics", xp: 50, completed: true },
-      { id: 2, title: "JavaScript Essentials", xp: 80, completed: true },
-      { id: 3, title: "Git & Version Control", xp: 40, completed: false },
-    ],
-  },
-  {
-    id: 2,
-    phase: "PHASE 2",
-    duration: "3 weeks",
-    title: "Node.js & Express",
-    tasks: [
-      { id: 1, title: "Node.js Runtime", xp: 70, completed: false },
-      { id: 2, title: "Express.js Framework", xp: 90, completed: false },
-      { id: 3, title: "REST API Design", xp: 100, completed: false },
-      { id: 4, title: "Middleware & Authentication", xp: 80, completed: false },
-    ],
-  },
-  {
-    id: 3,
-    phase: "PHASE 3",
-    duration: "3 weeks",
-    title: "Databases",
-    tasks: [
-      { id: 1, title: "SQL with PostgreSQL", xp: 90, completed: false },
-      { id: 2, title: "NoSQL with MongoDB", xp: 80, completed: false },
-      { id: 3, title: "ORMs — Prisma & Sequelize", xp: 70, completed: false },
-    ],
-  },
-  {
-    id: 4,
-    phase: "PHASE 4",
-    duration: "4 weeks",
-    title: "Advanced Backend",
-    tasks: [
-      { id: 1, title: "Docker & Containers", xp: 100, completed: false },
-      { id: 2, title: "GraphQL APIs", xp: 90, completed: false },
-      { id: 3, title: "Redis & Caching", xp: 80, completed: false },
-      { id: 4, title: "WebSockets & Real-time", xp: 85, completed: false },
-      { id: 5, title: "Security Best Practices", xp: 70, completed: false },
-    ],
-  },
-];
+export const roadmapPhases = domainPhases["Backend Developer"];
 
 export const weeklyXP = [
   { week: "W1", value: 22 },

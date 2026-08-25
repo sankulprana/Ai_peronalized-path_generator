@@ -1,5 +1,7 @@
-import { Menu, Flame, Zap, RotateCcw } from "lucide-react";
+import { Menu, Flame, Zap, RotateCcw, LogIn, LogOut } from "lucide-react";
+import { Link } from "react-router-dom";
 import { useHeaderData } from "../context/HeaderContext";
+import { useAuth } from "../context/AuthContext";
 
 export default function Topbar({ onMenuClick }) {
   const {
@@ -9,6 +11,7 @@ export default function Topbar({ onMenuClick }) {
     xp = 1465,
     openGoalModal,
   } = useHeaderData();
+  const { user: authUser, logout } = useAuth();
 
   return (
     <header className="sticky top-0 z-10 flex h-[73px] items-center justify-between border-b border-gray-100 bg-white px-4 sm:px-6">
@@ -39,13 +42,37 @@ export default function Topbar({ onMenuClick }) {
           <span>{xp}</span>
           <span className="font-medium text-gray-400">XP</span>
         </div>
+
         <button
           onClick={openGoalModal}
-          className="flex items-center gap-1.5 rounded-full bg-violet-50 px-4 py-2 text-sm font-semibold text-violet-600 hover:bg-violet-100 transition-all active:scale-95"
+          className="flex items-center gap-1.5 rounded-full bg-violet-50 px-4 py-2 text-sm font-semibold text-violet-600 hover:bg-violet-100 transition-all active:scale-95 text-xs sm:text-sm"
         >
           <RotateCcw className="h-4 w-4" />
           <span className="hidden sm:inline">Change Goal</span>
         </button>
+
+        {authUser ? (
+          <div className="flex items-center gap-2 border-l border-gray-100 pl-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-violet-600 text-xs font-bold text-white shadow-xs">
+              {authUser.name ? authUser.name.charAt(0).toUpperCase() : "A"}
+            </div>
+            <button
+              onClick={logout}
+              title="Sign Out"
+              className="p-1.5 text-gray-400 hover:text-rose-600 transition-colors"
+            >
+              <LogOut className="h-4 w-4" />
+            </button>
+          </div>
+        ) : (
+          <Link
+            to="/login"
+            className="flex items-center gap-1.5 rounded-full bg-violet-600 px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-violet-700 transition-all"
+          >
+            <LogIn className="h-3.5 w-3.5" />
+            <span>Sign In</span>
+          </Link>
+        )}
       </div>
     </header>
   );

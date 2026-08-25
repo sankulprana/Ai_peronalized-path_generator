@@ -9,8 +9,11 @@ const SUGGESTED_ROLES = [
   "Frontend Developer",
   "Fullstack Engineer",
   "AI Engineer",
-  "DevOps Specialist",
   "Mobile Developer",
+  "DevOps Specialist",
+  "Cybersecurity",
+  "Data Engineer",
+  "Cloud Architect",
 ];
 
 export default function GoalGeneratorModal({ isOpen, onClose }) {

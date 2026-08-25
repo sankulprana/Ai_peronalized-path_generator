@@ -41,6 +41,28 @@ export const protect = async (req, res, next) => {
 };
 
 /**
+ * Optional auth middleware - Attaches user if token is provided, but doesn't block if missing
+ */
+export const optionalAuth = async (req, res, next) => {
+  let token;
+
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer")
+  ) {
+    try {
+      token = req.headers.authorization.split(" ")[1];
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || "default_secret_key");
+      req.user = await User.findById(decoded.id).select("-password");
+    } catch (error) {
+      // Ignore token failure for optional routes
+    }
+  }
+
+  next();
+};
+
+/**
  * Admin role authorization middleware
  */
 export const admin = (req, res, next) => {
@@ -51,3 +73,4 @@ export const admin = (req, res, next) => {
     next(new Error("Forbidden, admin access required"));
   }
 };
+

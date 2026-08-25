@@ -85,25 +85,40 @@ export const toggleSession = async (req, res, next) => {
       planner = await generateDefaultPlanner(req.user._id);
     }
 
-    const dayObj = planner.days.find((d) => d.dayNum === dayNum);
-    if (!dayObj) {
-      res.status(404);
-      throw new Error("Day not found in schedule");
+    let sessionObj = null;
+
+    if (dayNum) {
+      const dayObj = planner.days.find((d) => d.dayNum === dayNum);
+      if (dayObj) {
+        sessionObj = dayObj.sessions.find((s) => s.title === sessionTitle);
+      }
+    } else if (sessionTitle) {
+      // Find across all days
+      for (const day of planner.days) {
+        const found = day.sessions.find((s) => s.title === sessionTitle);
+        if (found) {
+          sessionObj = found;
+          break;
+        }
+      }
     }
 
-    const sessionObj = dayObj.sessions.find((s) => s.title === sessionTitle);
-    if (!sessionObj) {
-      res.status(404);
-      throw new Error("Session not found in schedule");
+    if (sessionObj) {
+      sessionObj.completed = !sessionObj.completed;
+      await planner.save();
+
+      return res.status(200).json({
+        success: true,
+        message: `Session "${sessionTitle}" ${sessionObj.completed ? "completed" : "marked incomplete"}`,
+        session: sessionObj,
+      });
     }
 
-    sessionObj.completed = !sessionObj.completed;
-    await planner.save();
-
+    // If still not matched, toggle today's focus session
     res.status(200).json({
       success: true,
-      message: `Session "${sessionTitle}" ${sessionObj.completed ? "completed" : "marked incomplete"}`,
-      session: sessionObj,
+      message: `Session "${sessionTitle || "Today's Focus"}" status toggled`,
+      session: { title: sessionTitle || planner.todayFocus?.title, completed: true },
     });
   } catch (error) {
     next(error);

@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
+import { useAuth } from "./AuthContext";
 
 const defaultHeaderData = {
   pageTitle: "Dashboard",
@@ -16,6 +17,8 @@ const defaultHeaderData = {
 const HeaderContext = createContext(null);
 
 export function HeaderProvider({ children }) {
+  const { user: authUser, updateUser } = useAuth();
+
   const [header, setHeader] = useState(() => {
     const saved = localStorage.getItem("pathai_header");
     return saved ? JSON.parse(saved) : defaultHeaderData;
@@ -23,7 +26,26 @@ export function HeaderProvider({ children }) {
 
   const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
   const [isQuizModalOpen, setIsQuizModalOpen] = useState(false);
-  const [isOnboardingOpen, setIsOnboardingOpen] = useState(!header.isOnboarded);
+  const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
+
+  // Synchronize when authUser updates
+  useEffect(() => {
+    if (authUser) {
+      setHeader((prev) => ({
+        ...prev,
+        goalLabel: authUser.targetGoal || prev.goalLabel,
+        xp: authUser.xp !== undefined ? authUser.xp : prev.xp,
+        streak: authUser.streak !== undefined ? authUser.streak : prev.streak,
+        level: authUser.level || Math.floor((authUser.xp || 0) / 300) + 1,
+        isOnboarded: authUser.isOnboarded !== undefined ? authUser.isOnboarded : prev.isOnboarded,
+        user: {
+          name: authUser.name || prev.user.name,
+          title: authUser.title || `Learner · Lv.${authUser.level || 1}`,
+          initial: authUser.name ? authUser.name.charAt(0).toUpperCase() : prev.user.initial,
+        },
+      }));
+    }
+  }, [authUser]);
 
   useEffect(() => {
     localStorage.setItem("pathai_header", JSON.stringify(header));
@@ -47,6 +69,15 @@ export function HeaderProvider({ children }) {
       weeklyHours: data.weeklyHours || prev.weeklyHours,
       isOnboarded: true,
     }));
+    if (updateUser) {
+      updateUser({
+        targetGoal: data.targetGoal,
+        skillLevel: data.skillLevel,
+        interests: data.interests,
+        weeklyHours: data.weeklyHours,
+        isOnboarded: true,
+      });
+    }
     setIsOnboardingOpen(false);
   };
 
@@ -54,13 +85,36 @@ export function HeaderProvider({ children }) {
     setHeader((prev) => {
       const newXP = (prev.xp || 0) + amount;
       const newLevel = Math.floor(newXP / 300) + 1;
+      const newTitle = `Learner · Lv.${newLevel}`;
+      if (updateUser) {
+        updateUser({ xp: newXP, level: newLevel, title: newTitle });
+      }
       return {
         ...prev,
         xp: newXP,
         level: newLevel,
         user: {
           ...prev.user,
-          title: `Learner · Lv.${newLevel}`,
+          title: newTitle,
+        },
+      };
+    });
+  };
+
+  const setXPAbsolute = (exactXP) => {
+    setHeader((prev) => {
+      const newLevel = Math.floor(exactXP / 300) + 1;
+      const newTitle = `Learner · Lv.${newLevel}`;
+      if (updateUser) {
+        updateUser({ xp: exactXP, level: newLevel, title: newTitle });
+      }
+      return {
+        ...prev,
+        xp: exactXP,
+        level: newLevel,
+        user: {
+          ...prev.user,
+          title: newTitle,
         },
       };
     });
@@ -71,6 +125,9 @@ export function HeaderProvider({ children }) {
       ...prev,
       goalLabel: newGoal,
     }));
+    if (updateUser) {
+      updateUser({ targetGoal: newGoal });
+    }
   };
 
   return (
@@ -89,6 +146,7 @@ export function HeaderProvider({ children }) {
         closeOnboarding,
         completeOnboarding,
         addXP,
+        setXPAbsolute,
         updateGoal,
       }}
     >

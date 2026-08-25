@@ -1,8 +1,26 @@
+import { useState, useEffect } from "react";
 import { Zap, Flame, CheckCircle2, RotateCcw } from "lucide-react";
 import { useHeaderData } from "../context/HeaderContext";
+import { api } from "../services/api";
 
 export default function GoalCard() {
   const { xp = 0, streak = 0, goalLabel = "Backend Developer", openGoalModal } = useHeaderData();
+  const [topicsStats, setTopicsStats] = useState({ done: 0, total: 12 });
+
+  useEffect(() => {
+    api.roadmaps
+      .getAll()
+      .then((res) => {
+        if (res.roadmaps && res.roadmaps.length > 0) {
+          const current = res.roadmaps.find((r) => r.isCurrent) || res.roadmaps[0];
+          setTopicsStats({
+            done: current.topicsCompleted || 0,
+            total: current.topicsTotal || 12,
+          });
+        }
+      })
+      .catch(() => {});
+  }, [goalLabel]);
 
   const level = Math.floor(xp / 300) + 1;
   const currentLevelMinXP = (level - 1) * 300;
@@ -13,7 +31,7 @@ export default function GoalCard() {
   const stats = [
     { label: "Total XP", value: `${xp}` },
     { label: "Day Streak", value: `${streak}` },
-    { label: "Topics Done", value: "0/12" },
+    { label: "Topics Done", value: `${topicsStats.done}/${topicsStats.total}` },
   ];
 
   return (

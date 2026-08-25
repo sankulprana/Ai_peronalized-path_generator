@@ -1,35 +1,37 @@
 import mongoose from "mongoose";
 
+let isConnected = false;
+
 /**
  * Connect to MongoDB instance using Mongoose
  */
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(process.env.MONGO_URI, {
-      autoIndex: process.env.NODE_ENV !== "production", // Build indexes in dev mode
+    const mongoUri = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/pathai";
+    const conn = await mongoose.connect(mongoUri, {
+      autoIndex: process.env.NODE_ENV !== "production",
+      serverSelectionTimeoutMS: 3000, // Timeout fast after 3 seconds if DB is offline
     });
 
+    isConnected = true;
     console.log(`🍃 MongoDB Connected: ${conn.connection.host} (${conn.connection.name})`);
 
-    // Event Listeners for DB Connection Monitoring
     mongoose.connection.on("error", (err) => {
-      console.error(`MongoDB Connection Runtime Error: ${err}`);
+      console.error(`MongoDB Runtime Error: ${err.message}`);
+      isConnected = false;
     });
 
     mongoose.connection.on("disconnected", () => {
-      console.warn("MongoDB Disconnected. Attempting reconnection...");
-    });
-
-    // Graceful Shutdown Handler
-    process.on("SIGINT", async () => {
-      await mongoose.connection.close();
-      console.log("MongoDB Connection Closed due to application termination.");
-      process.exit(0);
+      console.warn("MongoDB Disconnected. Application running in memory-resilient mode.");
+      isConnected = false;
     });
   } catch (error) {
-    console.error(`❌ MongoDB Connection Error: ${error.message}`);
-    process.exit(1);
+    isConnected = false;
+    console.warn(`⚠️ MongoDB Warning: Could not connect to ${process.env.MONGO_URI || "127.0.0.1:27017"}.`);
+    console.warn(`🚀 PathAI Express Backend is running in Memory-Resilient Mode on Port ${process.env.PORT || 5000}.`);
   }
 };
+
+export const getDBStatus = () => isConnected;
 
 export default connectDB;

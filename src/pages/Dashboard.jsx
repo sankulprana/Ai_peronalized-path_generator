@@ -28,6 +28,8 @@ export default function Dashboard() {
     closeQuizModal,
   } = useHeaderData();
   const [stats, setStats] = useState(fallbackStats);
+  const [weeklyXPData, setWeeklyXPData] = useState(null);
+  const [activeRoadmapTasks, setActiveRoadmapTasks] = useState(null);
 
   usePageHeader({
     pageTitle: "Dashboard",
@@ -40,11 +42,21 @@ export default function Dashboard() {
       .then((res) => {
         if (res.stats) {
           setStats([
-            { label: "Active Goals", value: `${res.stats.activeGoals || 1}`, icon: "star" },
+            { label: "Active Goals", value: `${res.stats.activeGoals !== undefined ? res.stats.activeGoals : 1}`, icon: "star" },
             { label: "Completed", value: `${res.stats.completedMilestones || 0}`, icon: "check" },
             { label: "Current Streak", value: `${res.stats.streakDays || streak || 0} days`, icon: "flame" },
             { label: "Total XP", value: `${res.stats.userXP || xp || 0} XP`, icon: "bolt" },
           ]);
+        } else if (res.topStats) {
+          setStats(res.topStats);
+        }
+
+        if (res.weeklyXP || res.dashboard?.weeklyXP) {
+          setWeeklyXPData(res.weeklyXP || res.dashboard?.weeklyXP);
+        }
+
+        if (res.roadmapItems || res.dashboard?.roadmapItems) {
+          setActiveRoadmapTasks(res.roadmapItems || res.dashboard?.roadmapItems);
         }
       })
       .catch((err) => {
@@ -61,19 +73,19 @@ export default function Dashboard() {
           <StatCard
             key={stat.label}
             {...stat}
-            value={stat.label === "Total XP" ? `${xp || 0} XP` : stat.value}
+            value={stat.label === "Total XP" || stat.label === "Total XP Earned" ? `${xp || 0} XP` : stat.value}
           />
         ))}
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">
-          <RoadmapList />
+          <RoadmapList roadmapItems={activeRoadmapTasks} />
         </div>
         <QuickActions />
       </div>
 
-      <WeeklyXPChart />
+      <WeeklyXPChart data={weeklyXPData} />
 
       {/* Interactive Modals */}
       <GoalGeneratorModal isOpen={isGoalModalOpen} onClose={closeGoalModal} />

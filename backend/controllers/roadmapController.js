@@ -11,7 +11,7 @@ export const generateRoadmap = async (req, res, next) => {
   try {
     const { targetRole, skillLevel, durationWeeks } = req.body;
 
-    const role = targetRole || req.user.targetGoal || "Backend Developer";
+    const role = targetRole || req.user?.targetGoal || "Backend Developer";
 
     // Call AI roadmap generator service
     const generatedData = await generateAIRoadmap({
@@ -20,28 +20,52 @@ export const generateRoadmap = async (req, res, next) => {
       durationWeeks: durationWeeks || 8,
     });
 
-    // Set all existing user roadmaps to isCurrent: false
-    await Roadmap.updateMany({ user: req.user._id }, { isCurrent: false });
+    if (req.user?._id) {
+      // Set all existing user roadmaps to isCurrent: false
+      await Roadmap.updateMany({ user: req.user._id }, { isCurrent: false });
 
-    // Create new Roadmap document
-    const roadmap = new Roadmap({
-      user: req.user._id,
-      title: generatedData.title,
-      targetRole: generatedData.targetRole,
-      difficulty: generatedData.difficulty,
-      phases: generatedData.phases,
-      isCurrent: true,
-    });
+      // Create new Roadmap document
+      const roadmap = new Roadmap({
+        user: req.user._id,
+        title: generatedData.title,
+        targetRole: generatedData.targetRole,
+        difficulty: generatedData.difficulty,
+        phases: generatedData.phases,
+        isCurrent: true,
+      });
 
-    await roadmap.save();
+      await roadmap.save();
 
-    // Update user target goal
-    await User.findByIdAndUpdate(req.user._id, { targetGoal: role });
+      // Update user target goal
+      await User.findByIdAndUpdate(req.user._id, { targetGoal: role });
 
-    res.status(201).json({
+      return res.status(201).json({
+        success: true,
+        message: "AI Roadmap generated successfully",
+        roadmap,
+      });
+    }
+
+    // Guest response (instant client-consumable AI roadmap)
+    const totalTopics = generatedData.phases?.reduce(
+      (acc, p) => acc + (p.tasks?.length || 0),
+      0
+    ) || 12;
+
+    return res.status(200).json({
       success: true,
       message: "AI Roadmap generated successfully",
-      roadmap,
+      roadmap: {
+        _id: "guest_" + Date.now(),
+        title: generatedData.title,
+        targetRole: generatedData.targetRole,
+        difficulty: generatedData.difficulty,
+        phases: generatedData.phases,
+        topicsCompleted: 0,
+        topicsTotal: totalTopics,
+        progressPercent: 0,
+        isCurrent: true,
+      },
     });
   } catch (error) {
     next(error);
@@ -49,13 +73,26 @@ export const generateRoadmap = async (req, res, next) => {
 };
 
 /**
- * @desc    Get all roadmaps for logged-in user
+ * @desc    Get all roadmaps for logged-in user or by role query
  * @route   GET /api/roadmaps
- * @access  Private
+ * @access  Public / Private
  */
 export const getUserRoadmaps = async (req, res, next) => {
   try {
-    const roadmaps = await Roadmap.find({ user: req.user._id }).sort({
+    if (!req.user?._id) {
+      return res.status(200).json({
+        success: true,
+        count: 0,
+        roadmaps: [],
+      });
+    }
+
+    const filter = { user: req.user._id };
+    if (req.query.role) {
+      filter.targetRole = req.query.role;
+    }
+
+    const roadmaps = await Roadmap.find(filter).sort({
       createdAt: -1,
     });
 

@@ -2,35 +2,96 @@ import { useState, useEffect } from "react";
 import { ArrowRight, CheckCircle2, Circle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useHeaderData } from "../context/HeaderContext";
-import { domainTopics } from "../data/dummyData";
+import { getRoadmapForRole } from "../data/dummyData";
+import { api } from "../services/api";
 
-export default function RoadmapList() {
+export default function RoadmapList({ roadmapItems: customItems, activeRoadmapId }) {
   const navigate = useNavigate();
-  const { addXP, goalLabel } = useHeaderData();
+  const { addXP, goalLabel = "Backend Developer" } = useHeaderData();
 
   const getInitialItems = (goal) => {
-    return domainTopics[goal] || domainTopics["Backend Developer"];
+    const roadmap = getRoadmapForRole(goal);
+    const tasks = [];
+    for (const phase of roadmap.phases || []) {
+      for (const task of phase.tasks || []) {
+        tasks.push({
+          id: task._id || task.id,
+          title: task.title,
+          xp: task.xp,
+          completed: task.completed || false,
+        });
+        if (tasks.length >= 5) break;
+      }
+      if (tasks.length >= 5) break;
+    }
+    return tasks;
   };
 
-  const [items, setItems] = useState(() => getInitialItems(goalLabel));
+  const [items, setItems] = useState(() => customItems || getInitialItems(goalLabel));
+  const [currentRoadmapId, setCurrentRoadmapId] = useState(activeRoadmapId || null);
 
   useEffect(() => {
-    setItems(getInitialItems(goalLabel));
-  }, [goalLabel]);
+    if (customItems && customItems.length > 0) {
+      setItems(customItems);
+      return;
+    }
 
-  const toggleItem = (itemId) => {
+    // Try fetching active roadmap tasks from backend
+    api.roadmaps
+      .getAll()
+      .then((res) => {
+        if (res.roadmaps && res.roadmaps.length > 0) {
+          const current = res.roadmaps.find((r) => r.isCurrent) || res.roadmaps[0];
+          setCurrentRoadmapId(current._id);
+          const tasks = [];
+          for (const phase of current.phases || []) {
+            for (const task of phase.tasks || []) {
+              tasks.push({
+                id: task._id || task.id,
+                title: task.title,
+                xp: task.xp,
+                completed: task.completed,
+              });
+              if (tasks.length >= 5) break;
+            }
+            if (tasks.length >= 5) break;
+          }
+          if (tasks.length > 0) {
+            setItems(tasks);
+          }
+        } else {
+          setItems(getInitialItems(goalLabel));
+        }
+      })
+      .catch(() => {
+        setItems(getInitialItems(goalLabel));
+      });
+  }, [goalLabel, customItems]);
+
+  const toggleItem = async (itemId) => {
+    const targetItem = items.find((it) => it.id === itemId || it._id === itemId);
+    const nextCompleted = !targetItem?.completed;
+
     setItems((prev) =>
       prev.map((item) => {
-        if (item.id === itemId) {
-          const nextCompleted = !item.completed;
-          if (nextCompleted) {
-            addXP(item.xp);
-          }
+        if (item.id === itemId || item._id === itemId) {
           return { ...item, completed: nextCompleted };
         }
         return item;
       })
     );
+
+    if (nextCompleted && targetItem) {
+      addXP(targetItem.xp || 50);
+    }
+
+    if (currentRoadmapId) {
+      try {
+        await api.roadmaps.toggleTask(currentRoadmapId, itemId);
+      } catch (err) {
+        console.warn("Backend task toggle fallback:", err.message);
+      }
+    }
   };
 
   return (

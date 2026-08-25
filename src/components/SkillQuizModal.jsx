@@ -1,8 +1,9 @@
-import { useState } from "react";
-import { Sparkles, X, CheckCircle2, Award } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Sparkles, X, CheckCircle2, Award, Loader2 } from "lucide-react";
 import { useHeaderData } from "../context/HeaderContext";
+import { api } from "../services/api";
 
-const QUESTIONS = [
+const FALLBACK_QUESTIONS = [
   {
     id: 1,
     question: "What is the primary function of HTTP Middleware in web development?",
@@ -34,14 +35,32 @@ const QUESTIONS = [
 ];
 
 export default function SkillQuizModal({ isOpen, onClose }) {
+  const { addXP, setXPAbsolute, goalLabel = "Backend Developer" } = useHeaderData();
+  const [questions, setQuestions] = useState(FALLBACK_QUESTIONS);
   const [currentIdx, setCurrentIdx] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState({});
   const [isCompleted, setIsCompleted] = useState(false);
-  const { addXP } = useHeaderData();
+  const [scoreResult, setScoreResult] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      api.quizzes
+        .getAssessment(goalLabel)
+        .then((res) => {
+          if (res.quiz?.questions && res.quiz.questions.length > 0) {
+            setQuestions(res.quiz.questions);
+          }
+        })
+        .catch(() => {
+          setQuestions(FALLBACK_QUESTIONS);
+        });
+    }
+  }, [isOpen, goalLabel]);
 
   if (!isOpen) return null;
 
-  const currentQ = QUESTIONS[currentIdx];
+  const currentQ = questions[currentIdx] || FALLBACK_QUESTIONS[0];
 
   const handleOptionSelect = (optionIdx) => {
     setSelectedAnswers((prev) => ({
@@ -50,19 +69,41 @@ export default function SkillQuizModal({ isOpen, onClose }) {
     }));
   };
 
-  const handleNext = () => {
-    if (currentIdx < QUESTIONS.length - 1) {
+  const handleNext = async () => {
+    if (currentIdx < questions.length - 1) {
       setCurrentIdx((prev) => prev + 1);
     } else {
-      setIsCompleted(true);
-      addXP(100);
+      setIsSubmitting(true);
+      const answersArray = questions.map((q, idx) => ({
+        questionId: q._id || q.id,
+        questionIndex: idx,
+        selectedIndex: selectedAnswers[idx] !== undefined ? selectedAnswers[idx] : 0,
+      }));
+
+      try {
+        const res = await api.quizzes.submit(answersArray, goalLabel);
+        setScoreResult(res.score !== undefined ? res.score : calculateScore());
+        if (res.userXP) {
+          setXPAbsolute(res.userXP);
+        } else {
+          addXP(res.earnedXP || 100);
+        }
+      } catch (err) {
+        console.warn("Quiz submission fallback active:", err.message);
+        setScoreResult(calculateScore());
+        addXP(100);
+      } finally {
+        setIsSubmitting(false);
+        setIsCompleted(true);
+      }
     }
   };
 
   const calculateScore = () => {
     let score = 0;
-    QUESTIONS.forEach((q, idx) => {
-      if (selectedAnswers[idx] === q.answer) {
+    questions.forEach((q, idx) => {
+      const correct = q.correctOptionIndex !== undefined ? q.correctOptionIndex : q.answer;
+      if (selectedAnswers[idx] === correct) {
         score += 1;
       }
     });
@@ -73,6 +114,7 @@ export default function SkillQuizModal({ isOpen, onClose }) {
     setCurrentIdx(0);
     setSelectedAnswers({});
     setIsCompleted(false);
+    setScoreResult(null);
     onClose();
   };
 
@@ -97,7 +139,7 @@ export default function SkillQuizModal({ isOpen, onClose }) {
                   Skill Assessment Quiz
                 </h3>
                 <p className="text-xs text-gray-500">
-                  Question {currentIdx + 1} of {QUESTIONS.length}
+                  Question {currentIdx + 1} of {questions.length}
                 </p>
               </div>
             </div>
@@ -136,10 +178,11 @@ export default function SkillQuizModal({ isOpen, onClose }) {
               <button
                 type="button"
                 onClick={handleNext}
-                disabled={selectedAnswers[currentIdx] === undefined}
-                className="rounded-xl bg-violet-600 px-6 py-2.5 text-sm font-semibold text-white shadow-md hover:bg-violet-700 disabled:opacity-40 transition-all active:scale-98"
+                disabled={selectedAnswers[currentIdx] === undefined || isSubmitting}
+                className="flex items-center gap-2 rounded-xl bg-violet-600 px-6 py-2.5 text-sm font-semibold text-white shadow-md hover:bg-violet-700 disabled:opacity-40 transition-all active:scale-98"
               >
-                {currentIdx < QUESTIONS.length - 1 ? "Next Question" : "Submit Quiz"}
+                {isSubmitting && <Loader2 className="h-4 w-4 animate-spin text-white" />}
+                {currentIdx < questions.length - 1 ? "Next Question" : isSubmitting ? "Submitting..." : "Submit Quiz"}
               </button>
             </div>
           </div>
@@ -151,7 +194,7 @@ export default function SkillQuizModal({ isOpen, onClose }) {
 
             <h3 className="text-2xl font-extrabold text-gray-900">Quiz Completed!</h3>
             <p className="text-sm text-gray-600">
-              You scored <span className="font-bold text-violet-600">{calculateScore()}</span> out of {QUESTIONS.length} questions correctly.
+              You scored <span className="font-bold text-violet-600">{scoreResult !== null ? scoreResult : calculateScore()}</span> out of {questions.length} questions correctly.
             </p>
 
             <div className="inline-block rounded-2xl bg-amber-50 px-6 py-3 border border-amber-200 text-amber-700 font-bold text-sm">

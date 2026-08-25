@@ -6,33 +6,30 @@ import {
   toggleTaskCompletion,
   deleteRoadmap,
 } from "../controllers/roadmapController.js";
-import { protect } from "../middleware/authMiddleware.js";
+import { protect, optionalAuth } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
-
-// All roadmap routes are protected (Requires JWT Bearer token)
-router.use(protect);
 
 /**
  * @route   POST /api/roadmaps/generate
  * @desc    Generate a new AI-powered personalized learning roadmap
- * @access  Private
+ * @access  Public / Private
  */
-router.post("/generate", generateRoadmap);
+router.post("/generate", optionalAuth, generateRoadmap);
 
 /**
  * @route   GET /api/roadmaps
  * @desc    Get all saved roadmaps for the logged-in user
- * @access  Private
+ * @access  Public / Private
  */
-router.get("/", getUserRoadmaps);
+router.get("/", optionalAuth, getUserRoadmaps);
 
 /**
  * @route   GET /api/roadmaps/:id
  * @desc    Get detailed roadmap by ID
- * @access  Private
+ * @access  Public / Private
  */
-router.get("/:id", getRoadmapById);
+router.get("/:id", optionalAuth, getRoadmapById);
 
 /**
  * @route   PATCH /api/roadmaps/:id/tasks/:taskId

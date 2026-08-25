@@ -1,13 +1,15 @@
 import { useState, useEffect } from "react";
-import { usePageHeader } from "../context/HeaderContext";
+import { usePageHeader, useHeaderData } from "../context/HeaderContext";
 import { studyPlannerData as fallbackPlanner } from "../data/dummyData";
 import { Calendar, Clock, PlayCircle, CheckCircle2, Sparkles } from "lucide-react";
 import { api } from "../services/api";
 
 export default function StudyPlanner() {
+  const { goalLabel = "Backend Developer", addXP } = useHeaderData();
+
   usePageHeader({
     pageTitle: "Study Planner",
-    goalLabel: "Backend Developer",
+    goalLabel: goalLabel || "Backend Developer",
   });
 
   const [sessionStarted, setSessionStarted] = useState(false);
@@ -51,8 +53,14 @@ export default function StudyPlanner() {
   const handleStartSession = async () => {
     const nextState = !sessionStarted;
     setSessionStarted(nextState);
+    if (nextState) {
+      addXP(plannerData.todayFocus?.xpReward || 50);
+    }
     try {
-      await api.planner.toggleSession({ sessionTitle: plannerData.todayFocus.title });
+      await api.planner.toggleSession({
+        sessionTitle: plannerData.todayFocus?.title,
+      });
+      await api.progress.logDailyActivity();
     } catch (err) {
       console.warn("Session toggle offline fallback:", err.message);
     }
