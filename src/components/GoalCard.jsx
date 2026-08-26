@@ -1,32 +1,38 @@
 import { useState, useEffect } from "react";
 import { Zap, Flame, CheckCircle2, RotateCcw } from "lucide-react";
 import { useHeaderData } from "../context/HeaderContext";
+import { getRoadmapForRole } from "../data/dummyData";
 import { api } from "../services/api";
 
 export default function GoalCard() {
   const { xp = 0, streak = 0, goalLabel = "Backend Developer", openGoalModal } = useHeaderData();
-  const [topicsStats, setTopicsStats] = useState({ done: 0, total: 12 });
+  const [topicsStats, setTopicsStats] = useState(() => {
+    const local = getRoadmapForRole(goalLabel);
+    return { done: local.topicsDone || 0, total: local.topicsTotal || 12 };
+  });
 
   useEffect(() => {
+    const local = getRoadmapForRole(goalLabel);
+    setTopicsStats({ done: local.topicsDone || 0, total: local.topicsTotal || 12 });
+
     api.roadmaps
       .getAll()
       .then((res) => {
         if (res.roadmaps && res.roadmaps.length > 0) {
-          const current = res.roadmaps.find((r) => r.isCurrent) || res.roadmaps[0];
+          const current = res.roadmaps.find((r) => r.isCurrent || r.targetRole?.toLowerCase() === goalLabel.toLowerCase()) || res.roadmaps[0];
           setTopicsStats({
-            done: current.topicsCompleted || 0,
-            total: current.topicsTotal || 12,
+            done: current.topicsCompleted !== undefined ? current.topicsCompleted : local.topicsDone || 0,
+            total: current.topicsTotal || local.topicsTotal || 12,
           });
         }
       })
       .catch(() => {});
-  }, [goalLabel]);
+  }, [goalLabel, xp]);
 
   const level = Math.floor(xp / 300) + 1;
-  const currentLevelMinXP = (level - 1) * 300;
-  const nextLevelXP = level * 300;
-  const xpInCurrentLevel = xp - currentLevelMinXP;
-  const progressPercent = Math.min(100, Math.round((xpInCurrentLevel / 300) * 100));
+  const xpInCurrentLevel = xp % 300;
+  const progressPercent = Math.min(100, Math.max(0, Math.round((xpInCurrentLevel / 300) * 100)));
+  const xpNeededForNext = 300 - xpInCurrentLevel;
 
   const stats = [
     { label: "Total XP", value: `${xp}` },
@@ -70,7 +76,7 @@ export default function GoalCard() {
               />
             </div>
             <p className="mt-2 text-xs text-slate-400">
-              Next Level: {nextLevelXP - xp} XP needed
+              Next Level: {xpNeededForNext} XP needed
             </p>
           </div>
         </div>

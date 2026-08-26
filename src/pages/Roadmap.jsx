@@ -165,8 +165,12 @@ export default function Roadmap() {
       return { ...prev, topicsDone: newDone };
     });
 
-    if (nextCompleted && toggledTask) {
-      addXP(toggledTask.xp || 60);
+    if (toggledTask) {
+      if (nextCompleted) {
+        addXP(toggledTask.xp || 60);
+      } else {
+        addXP(-(toggledTask.xp || 60));
+      }
     }
 
     if (!roadmapId || roadmapId.toString().startsWith("guest_")) return;

@@ -81,8 +81,12 @@ export default function RoadmapList({ roadmapItems: customItems, activeRoadmapId
       })
     );
 
-    if (nextCompleted && targetItem) {
-      addXP(targetItem.xp || 50);
+    if (targetItem) {
+      if (nextCompleted) {
+        addXP(targetItem.xp || 50);
+      } else {
+        addXP(-(targetItem.xp || 50));
+      }
     }
 
     if (currentRoadmapId) {

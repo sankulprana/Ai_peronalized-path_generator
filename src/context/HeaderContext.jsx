@@ -83,7 +83,7 @@ export function HeaderProvider({ children }) {
 
   const addXP = (amount) => {
     setHeader((prev) => {
-      const newXP = (prev.xp || 0) + amount;
+      const newXP = Math.max(0, (prev.xp || 0) + amount);
       const newLevel = Math.floor(newXP / 300) + 1;
       const newTitle = `Learner · Lv.${newLevel}`;
       if (updateUser) {
