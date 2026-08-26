@@ -31,8 +31,13 @@ export default function RoadmapList({ roadmapItems: customItems, activeRoadmapId
   const [currentRoadmapId, setCurrentRoadmapId] = useState(activeRoadmapId || null);
 
   useEffect(() => {
+    const savedIds = new Set(JSON.parse(localStorage.getItem("pathai_completed_tasks") || "[]"));
+
     if (customItems && customItems.length > 0) {
-      setItems(customItems);
+      setItems(customItems.map(t => ({
+        ...t,
+        completed: t.completed || savedIds.has((t.id || t._id)?.toString()),
+      })));
       return;
     }
 
@@ -46,11 +51,12 @@ export default function RoadmapList({ roadmapItems: customItems, activeRoadmapId
           const tasks = [];
           for (const phase of current.phases || []) {
             for (const task of phase.tasks || []) {
+              const taskId = (task._id || task.id)?.toString();
               tasks.push({
-                id: task._id || task.id,
+                id: taskId,
                 title: task.title,
                 xp: task.xp,
-                completed: task.completed,
+                completed: task.completed || (taskId && savedIds.has(taskId)),
               });
               if (tasks.length >= 5) break;
             }

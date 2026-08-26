@@ -5,7 +5,7 @@ import { getRoadmapForRole } from "../data/dummyData";
 import { api } from "../services/api";
 
 export default function GoalCard() {
-  const { xp = 0, streak = 0, goalLabel = "Backend Developer", openGoalModal } = useHeaderData();
+  const { xp = 0, streak = 0, goalLabel = "Backend Developer", openGoalModal, setXPAbsolute } = useHeaderData();
   const [topicsStats, setTopicsStats] = useState(() => {
     const local = getRoadmapForRole(goalLabel);
     return { done: local.topicsDone || 0, total: local.topicsTotal || 12 };
@@ -14,6 +14,10 @@ export default function GoalCard() {
   useEffect(() => {
     const local = getRoadmapForRole(goalLabel);
     setTopicsStats({ done: local.topicsDone || 0, total: local.topicsTotal || 12 });
+
+    if (setXPAbsolute) {
+      setXPAbsolute(local.earnedXP || 0);
+    }
 
     api.roadmaps
       .getAll()
@@ -27,7 +31,7 @@ export default function GoalCard() {
         }
       })
       .catch(() => {});
-  }, [goalLabel, xp]);
+  }, [goalLabel]);
 
   const activePathDone = topicsStats.done || 0;
   const activePathTotal = topicsStats.total || 12;

@@ -749,7 +749,9 @@ export const getRoadmapForRole = (targetRole = "Backend Developer", skillLevel =
   }));
 
   const totalTopics = updatedPhases.reduce((acc, p) => acc + (p.tasks?.length || 0), 0);
-  const completedTopics = updatedPhases.reduce((acc, p) => acc + (p.tasks?.filter((t) => t.completed).length || 0), 0);
+  const completedTasks = updatedPhases.flatMap((p) => p.tasks || []).filter((t) => t.completed);
+  const completedTopics = completedTasks.length;
+  const earnedXP = completedTasks.reduce((sum, t) => sum + (t.xp || 50), 0);
 
   return {
     title: `Random Forest Predicted ${skillLevel.toUpperCase()} ${cleanRole} Roadmap`,
@@ -758,6 +760,7 @@ export const getRoadmapForRole = (targetRole = "Backend Developer", skillLevel =
     durationWeeks: parseInt(durationWeeks, 10) || 8,
     topicsDone: completedTopics,
     topicsTotal: totalTopics,
+    earnedXP,
     phases: updatedPhases,
   };
 };
