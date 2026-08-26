@@ -124,9 +124,15 @@ export function HeaderProvider({ children }) {
     setHeader((prev) => ({
       ...prev,
       goalLabel: newGoal,
+      xp: 0,
+      level: 1,
+      user: {
+        ...prev.user,
+        title: "Learner · Lv.1",
+      },
     }));
     if (updateUser) {
-      updateUser({ targetGoal: newGoal });
+      updateUser({ targetGoal: newGoal, xp: 0, level: 1 });
     }
   };
 

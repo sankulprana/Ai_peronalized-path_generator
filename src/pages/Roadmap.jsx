@@ -57,6 +57,9 @@ export default function Roadmap() {
       durationWeeks: localData.durationWeeks || 8,
     });
     setPhases(localData.phases);
+    if (localData.topicsDone === 0) {
+      setXPAbsolute(0);
+    }
 
     // 2. Fetch saved roadmaps or request backend AI generation
     try {
