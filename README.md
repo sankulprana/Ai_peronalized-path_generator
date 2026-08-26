@@ -16,6 +16,7 @@
   <br />
 
   <a href="#-quick-start"><b>Quick Start</b></a> •
+  <a href="#-live-demo"><b>Live Demo</b></a> •
   <a href="#-key-features"><b>Key Features</b></a> •
   <a href="#-architecture"><b>Architecture</b></a> •
   <a href="#-ml-engine"><b>ML Engine</b></a> •
@@ -29,6 +30,7 @@
 ## 📌 Table of Contents
 
 - [✨ Overview](#-overview)
+- [🌐 Live Demo](#-live-demo)
 - [🌟 Key Features](#-key-features)
 - [🏗️ System Architecture](#️-system-architecture)
 - [🌲 Machine Learning Engine (Random Forest)](#-machine-learning-engine-random-forest)
@@ -44,6 +46,15 @@
 **PathAI** is a full-stack MERN application equipped with a custom-built **Random Forest Machine Learning Engine** and **Google Gemini Generative AI** (`gemini-1.5-flash`). It automatically generates structured, 4-phase learning curricula tailored to a user's target career role (*Backend Developer, Frontend Developer, Fullstack, AI Engineer, Mobile, DevOps, Cybersecurity, or any Custom Role*), skill level (*Beginner, Intermediate, Advanced*), and duration (*4, 8, or 12 weeks*).
 
 > **Highlights:** Real-time XP & Level progression synchronization, interactive Pomodoro study planner, AI doubt solver, skill quizzes, and resilient offline memory fallback modes.
+
+---
+
+## 🌐 Live Demo
+
+- **Frontend:** [ai-peronalized-path-generator-hkz3.vercel.app](https://ai-peronalized-path-generator-hkz3.vercel.app/login)
+- **Backend API:** [pathai-backend-cwty.onrender.com](https://pathai-backend-cwty.onrender.com)
+
+The React frontend is deployed on Vercel and communicates with the Express API hosted on Render.
 
 ---
 
