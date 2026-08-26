@@ -734,8 +734,22 @@ export const getRoadmapForRole = (targetRole = "Backend Developer", skillLevel =
     }
   }
 
-  const totalTopics = phases.reduce((acc, p) => acc + (p.tasks?.length || 0), 0);
-  const completedTopics = phases.reduce((acc, p) => acc + (p.tasks?.filter((t) => t.completed).length || 0), 0);
+  const completedTaskIds = JSON.parse(localStorage.getItem("pathai_completed_tasks") || "[]");
+
+  const updatedPhases = phases.map((p) => ({
+    ...p,
+    tasks: (p.tasks || []).map((t) => {
+      const taskId = t.id || t._id;
+      const isDone = t.completed || (taskId && completedTaskIds.includes(taskId.toString()));
+      return {
+        ...t,
+        completed: isDone,
+      };
+    }),
+  }));
+
+  const totalTopics = updatedPhases.reduce((acc, p) => acc + (p.tasks?.length || 0), 0);
+  const completedTopics = updatedPhases.reduce((acc, p) => acc + (p.tasks?.filter((t) => t.completed).length || 0), 0);
 
   return {
     title: `Random Forest Predicted ${skillLevel.toUpperCase()} ${cleanRole} Roadmap`,
@@ -744,7 +758,7 @@ export const getRoadmapForRole = (targetRole = "Backend Developer", skillLevel =
     durationWeeks: parseInt(durationWeeks, 10) || 8,
     topicsDone: completedTopics,
     topicsTotal: totalTopics,
-    phases,
+    phases: updatedPhases,
   };
 };
 

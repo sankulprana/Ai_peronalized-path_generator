@@ -81,6 +81,18 @@ export default function RoadmapList({ roadmapItems: customItems, activeRoadmapId
       })
     );
 
+    // Persist completed task ID locally
+    const savedIds = new Set(JSON.parse(localStorage.getItem("pathai_completed_tasks") || "[]"));
+    const idStr = (itemId || targetItem?.id || targetItem?._id)?.toString();
+    if (idStr) {
+      if (nextCompleted) {
+        savedIds.add(idStr);
+      } else {
+        savedIds.delete(idStr);
+      }
+      localStorage.setItem("pathai_completed_tasks", JSON.stringify(Array.from(savedIds)));
+    }
+
     if (targetItem) {
       if (nextCompleted) {
         addXP(targetItem.xp || 50);

@@ -168,6 +168,18 @@ export default function Roadmap() {
       return { ...prev, topicsDone: newDone };
     });
 
+    // Persist task ID in localStorage
+    const savedIds = new Set(JSON.parse(localStorage.getItem("pathai_completed_tasks") || "[]"));
+    const idStr = taskId?.toString();
+    if (idStr) {
+      if (nextCompleted) {
+        savedIds.add(idStr);
+      } else {
+        savedIds.delete(idStr);
+      }
+      localStorage.setItem("pathai_completed_tasks", JSON.stringify(Array.from(savedIds)));
+    }
+
     if (toggledTask) {
       if (nextCompleted) {
         addXP(toggledTask.xp || 60);
