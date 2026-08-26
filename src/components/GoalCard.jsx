@@ -32,16 +32,14 @@ export default function GoalCard() {
   const activePathDone = topicsStats.done || 0;
   const activePathTotal = topicsStats.total || 12;
 
-  // Active path earned XP and progress percentage
-  const activePathXP = activePathDone === 0 ? 0 : xp;
-  const level = activePathXP > 0 ? Math.floor(activePathXP / 300) + 1 : 1;
-  const progressPercent = activePathDone === 0
-    ? 0
-    : Math.min(100, Math.max(0, Math.round(((activePathXP % 300) / 300) * 100)));
-  const xpNeededForNext = activePathDone === 0 ? 300 : (300 - (activePathXP % 300));
+  // Level progress directly driven by earned XP
+  const level = Math.floor((xp || 0) / 300) + 1;
+  const xpInCurrentLevel = (xp || 0) % 300;
+  const progressPercent = Math.min(100, Math.max(0, Math.round((xpInCurrentLevel / 300) * 100)));
+  const xpNeededForNext = 300 - xpInCurrentLevel;
 
   const stats = [
-    { label: "Total XP", value: `${activePathXP}` },
+    { label: "Total XP", value: `${xp || 0}` },
     { label: "Day Streak", value: `${streak}` },
     { label: "Topics Done", value: `${activePathDone}/${activePathTotal}` },
   ];
