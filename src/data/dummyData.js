@@ -740,7 +740,12 @@ export const getRoadmapForRole = (targetRole = "Backend Developer", skillLevel =
     ...p,
     tasks: (p.tasks || []).map((t) => {
       const taskId = t.id || t._id;
-      const isDone = t.completed || (taskId && completedTaskIds.includes(taskId.toString()));
+      const taskTitle = t.title;
+      const isDone = Boolean(
+        t.completed ||
+        (taskId && completedTaskIds.includes(taskId.toString())) ||
+        (taskTitle && completedTaskIds.includes(taskTitle))
+      );
       return {
         ...t,
         completed: isDone,

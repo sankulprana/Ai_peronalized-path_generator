@@ -36,7 +36,7 @@ export default function RoadmapList({ roadmapItems: customItems, activeRoadmapId
     if (customItems && customItems.length > 0) {
       setItems(customItems.map(t => ({
         ...t,
-        completed: t.completed || savedIds.has((t.id || t._id)?.toString()),
+        completed: Boolean(t.completed || savedIds.has((t.id || t._id)?.toString()) || (t.title && savedIds.has(t.title))),
       })));
       return;
     }
@@ -52,11 +52,13 @@ export default function RoadmapList({ roadmapItems: customItems, activeRoadmapId
           for (const phase of current.phases || []) {
             for (const task of phase.tasks || []) {
               const taskId = (task._id || task.id)?.toString();
+              const taskTitle = task.title;
+              const isDone = Boolean(task.completed || (taskId && savedIds.has(taskId)) || (taskTitle && savedIds.has(taskTitle)));
               tasks.push({
-                id: taskId,
-                title: task.title,
+                id: taskId || taskTitle,
+                title: taskTitle,
                 xp: task.xp,
-                completed: task.completed || (taskId && savedIds.has(taskId)),
+                completed: isDone,
               });
               if (tasks.length >= 5) break;
             }
@@ -75,29 +77,30 @@ export default function RoadmapList({ roadmapItems: customItems, activeRoadmapId
   }, [goalLabel, customItems]);
 
   const toggleItem = async (itemId) => {
-    const targetItem = items.find((it) => it.id === itemId || it._id === itemId);
+    const targetItem = items.find((it) => it.id === itemId || it._id === itemId || it.title === itemId);
     const nextCompleted = !targetItem?.completed;
 
     setItems((prev) =>
       prev.map((item) => {
-        if (item.id === itemId || item._id === itemId) {
+        if (item.id === itemId || item._id === itemId || item.title === itemId) {
           return { ...item, completed: nextCompleted };
         }
         return item;
       })
     );
 
-    // Persist completed task ID locally
+    // Persist completed task ID and Title locally
     const savedIds = new Set(JSON.parse(localStorage.getItem("pathai_completed_tasks") || "[]"));
     const idStr = (itemId || targetItem?.id || targetItem?._id)?.toString();
-    if (idStr) {
-      if (nextCompleted) {
-        savedIds.add(idStr);
-      } else {
-        savedIds.delete(idStr);
-      }
-      localStorage.setItem("pathai_completed_tasks", JSON.stringify(Array.from(savedIds)));
+    const titleStr = targetItem?.title;
+    if (nextCompleted) {
+      if (idStr) savedIds.add(idStr);
+      if (titleStr) savedIds.add(titleStr);
+    } else {
+      if (idStr) savedIds.delete(idStr);
+      if (titleStr) savedIds.delete(titleStr);
     }
+    localStorage.setItem("pathai_completed_tasks", JSON.stringify(Array.from(savedIds)));
 
     if (targetItem) {
       if (nextCompleted) {
