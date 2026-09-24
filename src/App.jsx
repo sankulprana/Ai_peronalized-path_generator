@@ -12,6 +12,7 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import { HeaderProvider } from "./context/HeaderContext";
 import { AuthProvider } from "./context/AuthContext";
+import AnalyticsTracker from "./components/AnalyticsTracker";
 
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -19,6 +20,7 @@ export default function App() {
   return (
     <AuthProvider>
       <HeaderProvider>
+        <AnalyticsTracker />
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
